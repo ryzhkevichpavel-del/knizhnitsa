@@ -1,0 +1,5 @@
+pywebview
+pythonnet
+pyinstaller
+Pillow
+python-docx
