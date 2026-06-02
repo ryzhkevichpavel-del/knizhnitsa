@@ -92,8 +92,8 @@
   .nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;font-size:14px;cursor:pointer;
     color:var(--ink);transition:.12s;position:relative;min-height:44px}
   .nav-item:hover{background:var(--accent-soft)}
-  .nav-item[draggable="true"]{cursor:grab}
-  .nav-item[draggable="true"]:active{cursor:grabbing}
+  .chapter-item{cursor:grab}
+  .chapter-item:active{cursor:grabbing}
   .nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
   .nav-item .num{color:var(--muted);font-size:12px;min-width:16px;text-align:right}
   .nav-item.active .num{color:var(--accent)}
@@ -105,8 +105,10 @@
   .nav-actions button{width:23px;height:23px;border:none;background:transparent;color:var(--muted);padding:0;border-radius:7px;
     display:flex;align-items:center;justify-content:center;cursor:pointer}
   .nav-actions button:hover{color:var(--accent);background:var(--panel)}
-  .nav-item.dragging{opacity:.55}
-  .nav-item.drop-over{outline:2px solid var(--accent);outline-offset:2px;background:var(--accent-soft)}
+  .chapter-list{position:relative}
+  .chapter-list.sorting .chapter-item{transition:transform .16s ease,background .12s,border-color .12s}
+  .chapter-item{touch-action:none}
+  .chapter-item.dragging{z-index:5;background:var(--panel);box-shadow:var(--shadow);transition:none}
   .side-empty{color:var(--muted);font-size:13px;padding:8px 11px;font-style:italic;opacity:.8}
 
   .main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
@@ -474,38 +476,68 @@ function moveChapter(id,dir,ev){
   if(j<0||j>=b.chapters.length) return;
   [b.chapters[i],b.chapters[j]]=[b.chapters[j],b.chapters[i]]; save(); renderSidebar(); if(route.view==="plan") renderMain();
 }
-let draggedChapterId=null;
+let chapterDrag=null, suppressChapterClick=false;
+function openChapterFromSidebar(ev,id){
+  if(suppressChapterClick){ ev.preventDefault(); ev.stopPropagation(); return; }
+  selectItem("chapter",id);
+}
 function startChapterDrag(ev,id){
-  if(ev.target.closest("button")){ ev.preventDefault(); return; }
-  draggedChapterId=id;
-  ev.dataTransfer.effectAllowed="move";
-  ev.currentTarget.classList.add("dragging");
+  if(ev.button!==0||ev.target.closest("button")) return;
+  const list=document.getElementById("chapterList"),el=ev.currentTarget,b=curBook();
+  const index=b.chapters.findIndex(c=>c.id===id);
+  if(!list||index<0) return;
+  const items=[...list.querySelectorAll(".chapter-item")];
+  const listRect=list.getBoundingClientRect(),rect=el.getBoundingClientRect();
+  chapterDrag={id,index,targetIndex:index,startY:ev.clientY,lastY:ev.clientY,list,el,items,
+    itemH:rect.height,topLimit:listRect.top-rect.top,bottomLimit:listRect.bottom-rect.bottom,moved:false};
+  el.setPointerCapture(ev.pointerId);
+  el.addEventListener("pointermove",moveChapterDrag);
+  el.addEventListener("pointerup",finishChapterDrag,{once:true});
+  el.addEventListener("pointercancel",cancelChapterDrag,{once:true});
 }
-function endChapterDrag(ev){
-  ev.currentTarget.classList.remove("dragging");
-  document.querySelectorAll(".nav-item.drop-over").forEach(x=>x.classList.remove("drop-over"));
-  draggedChapterId=null;
+function moveChapterDrag(ev){
+  if(!chapterDrag) return;
+  const d=chapterDrag,raw=ev.clientY-d.startY;
+  const dy=Math.max(d.topLimit,Math.min(d.bottomLimit,raw));
+  if(Math.abs(dy)>3) d.moved=true;
+  d.lastY=ev.clientY;
+  d.list.classList.add("sorting");
+  d.el.classList.add("dragging");
+  d.el.style.transform=`translateY(${dy}px)`;
+  const next=Math.max(0,Math.min(d.items.length-1,Math.round((d.index*d.itemH+dy)/d.itemH)));
+  d.targetIndex=next;
+  d.items.forEach((item,i)=>{
+    if(item===d.el) return;
+    let shift=0;
+    if(next>d.index&&i>d.index&&i<=next) shift=-d.itemH;
+    if(next<d.index&&i>=next&&i<d.index) shift=d.itemH;
+    item.style.transform=shift?`translateY(${shift}px)`:"";
+  });
 }
-function dragOverChapter(ev,id){
-  if(!draggedChapterId||draggedChapterId===id) return;
-  ev.preventDefault();
-  ev.currentTarget.classList.add("drop-over");
-  ev.dataTransfer.dropEffect="move";
+function finishChapterDrag(ev){
+  if(!chapterDrag) return;
+  const d=chapterDrag;
+  d.el.removeEventListener("pointermove",moveChapterDrag);
+  cleanupChapterDragStyles();
+  if(!d.moved){ chapterDrag=null; return; }
+  suppressChapterClick=true; setTimeout(()=>suppressChapterClick=false,0);
+  if(d.targetIndex!==d.index){
+    const b=curBook();
+    const [moved]=b.chapters.splice(d.index,1);
+    b.chapters.splice(d.targetIndex,0,moved);
+    b.updatedAt=now(); save();
+  }
+  chapterDrag=null;
+  renderSidebar(); if(route.view==="plan") renderMain();
 }
-function leaveChapterDrop(ev){ ev.currentTarget.classList.remove("drop-over"); }
-function dropChapterOn(ev,targetId){
-  ev.preventDefault();
-  ev.currentTarget.classList.remove("drop-over");
-  if(!draggedChapterId||draggedChapterId===targetId) return;
-  const b=curBook(),from=b.chapters.findIndex(c=>c.id===draggedChapterId),to=b.chapters.findIndex(c=>c.id===targetId);
-  if(from<0||to<0) return;
-  const rect=ev.currentTarget.getBoundingClientRect();
-  const placeAfter=ev.clientY>rect.top+rect.height/2;
-  const [moved]=b.chapters.splice(from,1);
-  let insertAt=placeAfter?to+1:to;
-  if(from<insertAt) insertAt--;
-  b.chapters.splice(insertAt,0,moved);
-  b.updatedAt=now(); save(); renderSidebar(); if(route.view==="plan") renderMain();
+function cancelChapterDrag(ev){
+  if(chapterDrag){ chapterDrag.el.removeEventListener("pointermove",moveChapterDrag); }
+  cleanupChapterDragStyles(); chapterDrag=null;
+}
+function cleanupChapterDragStyles(){
+  if(!chapterDrag) return;
+  chapterDrag.list.classList.remove("sorting");
+  chapterDrag.items.forEach(item=>{ item.classList.remove("dragging"); item.style.transform=""; });
 }
 
 /* ============ ПЕРСОНАЖИ ============ */
@@ -639,9 +671,8 @@ function renderSidebar(){
   const b=curBook(); if(!b) return goHome();
   const chItems=b.chapters.length?b.chapters.map((c,i)=>{
     const active=route.view==="chapter"&&route.itemId===c.id?"active":"";
-    return `<div class="nav-item ${active}" draggable="true" onclick="selectItem('chapter','${c.id}')"
-      ondragstart="startChapterDrag(event,'${c.id}')" ondragend="endChapterDrag(event)"
-      ondragover="dragOverChapter(event,'${c.id}')" ondragleave="leaveChapterDrop(event)" ondrop="dropChapterOn(event,'${c.id}')">
+    return `<div class="nav-item chapter-item ${active}" data-chapter-id="${c.id}" onclick="openChapterFromSidebar(event,'${c.id}')"
+      onpointerdown="startChapterDrag(event,'${c.id}')">
       <span class="num">${i+1}</span><span class="label">${escapeHtml(c.title||"Без названия")}</span>
       <span class="nav-actions">
         <button title="Переименовать" onclick="renameChapter('${c.id}',event)">${icon('edit',14)}</button>
@@ -665,7 +696,7 @@ function renderSidebar(){
     <div class="side-group"><div class="side-head"><span>Книга</span></div>
       <div class="nav-item ${route.view==='plan'?'active':''}" onclick="openPlan()">${icon('list',16)}<span class="label">План</span></div>
     </div>
-    <div class="side-group"><div class="side-head"><span>Главы</span><span class="add" title="Добавить главу" onclick="addChapter()">${icon('plus',16)}</span></div>${chItems}</div>
+    <div class="side-group"><div class="side-head"><span>Главы</span><span class="add" title="Добавить главу" onclick="addChapter()">${icon('plus',16)}</span></div><div class="chapter-list" id="chapterList">${chItems}</div></div>
     <div class="side-group"><div class="side-head"><span>Персонажи</span><span class="add" title="Добавить персонажа" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>
     <div class="side-group"><div class="side-head"><span>Мир и лор</span><span class="add" title="Добавить заметку" onclick="addLore()">${icon('plus',16)}</span></div>${loreItems}</div>`;
 }
