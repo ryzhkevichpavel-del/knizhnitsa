@@ -238,10 +238,46 @@
   .trash-title{font-weight:650;line-height:18px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .trash-sub{font-size:12px;color:var(--muted);margin-top:5px}
   .trash-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .map-wrap{max-width:none;padding:22px 28px 58px}
+  .map-pagehead{margin-bottom:14px}
+  .map-pagehead h1{font-size:24px;line-height:1.15;margin:0;letter-spacing:0}
+  .map-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .zoom-pill{min-width:58px;text-align:center;color:var(--muted);font-size:13px;font-weight:650}
+  .map-board{position:relative;height:calc(100vh - 158px);min-height:640px;border:1px solid var(--line);border-radius:18px;background:
+    radial-gradient(circle at 50% 45%,var(--accent-soft),transparent 44%),var(--paper);overflow:hidden;margin-top:0}
+  .map-canvas{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .16s ease}
+  .map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .map-line{stroke-width:3.2;opacity:.82;stroke-linecap:round}
+  .map-node{position:absolute;width:138px;min-height:86px;transform:translate(-50%,-50%);border:1px solid var(--line);
+    background:var(--panel);border-radius:16px;box-shadow:var(--shadow);padding:12px;display:flex;align-items:center;gap:10px;
+    cursor:grab;transition:transform .14s,border-color .14s,box-shadow .14s;touch-action:none;user-select:none}
+  .map-node:hover{transform:translate(-50%,-50%) scale(1.035);border-color:var(--accent)}
+  .map-node.dragging{cursor:grabbing;z-index:5;transition:none;border-color:var(--accent);
+    box-shadow:0 18px 46px rgba(20,24,38,.18);transform:translate(-50%,-50%) scale(1.04)}
+  .map-avatar{width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;
+    align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+  .map-avatar img{width:100%;height:100%;object-fit:cover}
+  .map-name{font-weight:700;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
+    -webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .map-role{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .link-list{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+  .link-card{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:14px;
+    padding:12px 14px}
+  .link-main{flex:1;min-width:0}
+  .link-title{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .link-note{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rel-badge{min-width:92px;text-align:center;border:1px solid color-mix(in srgb,var(--thread-color),#fff 58%);
+    border-radius:999px;padding:6px 10px;color:var(--thread-color);background:color-mix(in srgb,var(--thread-color),transparent 88%);
+    font-size:12px;font-weight:750;white-space:nowrap}
+  .thread-sample{width:58px;height:14px;flex-shrink:0;display:flex;align-items:center}
+  .thread-sample svg{width:58px;height:14px;overflow:visible}
   @media (max-width: 980px){
     .plan-fields{grid-template-columns:1fr}
     .plan-card-head{align-items:flex-start;flex-wrap:wrap}
     .plan-title{min-width:220px}
+    .map-wrap{padding:18px 16px 46px}
+    .map-board{height:calc(100vh - 152px);min-height:560px}
+    .map-node{width:120px}
   }
 
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);
@@ -278,6 +314,7 @@ const ICONS={
   book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
   plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
   trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  minus:'<line x1="5" y1="12" x2="19" y2="12"/>',
   up:'<polyline points="18 15 12 9 6 15"/>',
   down:'<polyline points="6 9 12 15 18 9"/>',
   back:'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
@@ -311,6 +348,20 @@ const DEFAULT_ACCENT="#3f4ea3";
 const DEFAULT_ROLES=["Главный герой","Протагонист","Антагонист","Второстепенный персонаж","Эпизодический персонаж","Наставник","Союзник","Соперник","Любовная линия","Рассказчик","Резонёр"];
 const PLAN_STATUSES=["Задумка","Черновик","Готово","Переписать"];
 const LORE_TYPES=["Заметка","Место","Организация","Событие","Термин","Предмет","Правило мира"];
+const RELATION_TYPES=["Союз","Дружба","Семья","Любовь","Конфликт","Вражда","Тайна","Наставник","Долг","Другое"];
+const RELATION_STYLES={
+  "Союз":{color:"#2f7f6b",dash:"",width:3.4},
+  "Дружба":{color:"#2a7fb8",dash:"2 5",width:3.2},
+  "Семья":{color:"#8a6f2a",dash:"",width:4.6},
+  "Любовь":{color:"#c6476b",dash:"",width:3.8},
+  "Конфликт":{color:"#d66a2d",dash:"10 7",width:3.4},
+  "Вражда":{color:"#c83232",dash:"5 5",width:3.7},
+  "Тайна":{color:"#6d58b8",dash:"1 7",width:4},
+  "Наставник":{color:"#4f6fa8",dash:"14 5 3 5",width:3.2},
+  "Долг":{color:"#6f7a32",dash:"8 4",width:3.2},
+  "Другое":{color:"#667085",dash:"4 5",width:3}
+};
+const MAP_MIN_ZOOM=.65, MAP_MAX_ZOOM=2.2, MAP_ZOOM_STEP=.15;
 
 /* ============ ДАННЫЕ ============ */
 const WORDS_PER_PAGE=280, CHARS_PER_SHEET=40000, MAX_VERSIONS=60;
@@ -376,8 +427,10 @@ function ensureData(){
   state.books.forEach(b=>{
     b.chapters=Array.isArray(b.chapters)?b.chapters:[];
     b.characters=Array.isArray(b.characters)?b.characters:[];
+    b.characterLinks=Array.isArray(b.characterLinks)?b.characterLinks:[];
     b.lore=Array.isArray(b.lore)?b.lore:[];
     b.chapters.forEach(normalizeChapter);
+    b.characterLinks.forEach(normalizeCharacterLink);
     b.lore.forEach(normalizeLore);
   });
 }
@@ -396,6 +449,14 @@ function normalizeLore(item){
   if(item.details===undefined) item.details="";
   if(item.links===undefined) item.links="";
   return item;
+}
+function normalizeCharacterLink(link){
+  if(!link.id) link.id=uid();
+  if(!link.from) link.from="";
+  if(!link.to) link.to="";
+  if(!link.type) link.type="Связь";
+  if(link.note===undefined) link.note="";
+  return link;
 }
 function trashCount(){ ensureData(); return state.trash.books.length+state.trash.chapters.length+state.trash.characters.length+state.trash.lore.length; }
 
@@ -423,13 +484,14 @@ function openBook(id){
 function selectItem(view,itemId){ snapshotCurrent(); route.view=view; route.itemId=itemId; route.charMode="view"; render(); }
 function openOverview(){ snapshotCurrent(); route.view="overview"; route.itemId=null; render(); }
 function openPlan(){ snapshotCurrent(); route.view="plan"; route.itemId=null; route.charMode="view"; render(); }
+function openCharacterMap(){ snapshotCurrent(); route.view="characterMap"; route.itemId=null; route.charMode="view"; render(); }
 
 /* ============ КНИГИ ============ */
 async function newBook(){
   const title=await openInput({title:"Новая книга",label:"Название книги",placeholder:"Например: Тень над городом",ok:"Создать"});
   if(title===null) return;
   const b={id:uid(),title:(title.trim()||"Без названия"),createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],lore:[]};
+    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],characterLinks:[],characterMapZoom:1,lore:[]};
   state.books.unshift(b); save(); openBook(b.id);
 }
 async function deleteBook(id,ev){
@@ -571,6 +633,200 @@ function birthYear(b,c){
   return null;
 }
 
+/* ---- карта персонажей ---- */
+function renderCharacterMap(main,b){
+  ensureData();
+  b.characterMapZoom=clampMapZoom(b.characterMapZoom||1);
+  if(!b.characters.length){
+    main.innerHTML=`<div class="wrap map-wrap">
+      <div class="pagehead"><h1>Карта персонажей</h1></div>
+      <div class="placeholder"><div class="pic">${icon('map',56)}</div>
+        <div>Сначала добавь персонажей, а потом связывай их на карте.</div>
+        <button class="btn primary" onclick="addCharacter()">${icon('plus',16)} Добавить персонажа</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const pos=characterMapPositions(b),links=validCharacterLinks(b);
+  const zoomPct=Math.round(b.characterMapZoom*100);
+  const nodes=b.characters.map(c=>{
+    const p=pos[c.id],avatar=c.photo?`<img src="${c.photo}">`:icon('user',20);
+    return `<div class="map-node" data-character-id="${c.id}" style="left:${p.x}%;top:${p.y}%"
+      onclick="openMapCharacter(event,'${c.id}')" onpointerdown="startMapNodeDrag(event,'${c.id}')">
+      <span class="map-avatar">${avatar}</span>
+      <span style="min-width:0"><span class="map-name">${escapeHtml(c.name||"Без имени")}</span>
+        <span class="map-role">${escapeHtml(c.role||"Без роли")}</span></span>
+    </div>`;
+  }).join("");
+  const lines=links.map(link=>mapLinkSvg(link,pos)).join("");
+  const linkRows=links.length?links.map(link=>renderCharacterLinkCard(b,link)).join(""):`<div class="section">
+    <p class="empty-note">Связей пока нет. Нажми «Новая связь», чтобы соединить персонажей.</p>
+  </div>`;
+  main.innerHTML=`<div class="wrap map-wrap">
+    <div class="pagehead map-pagehead">
+      <h1>Карта персонажей</h1>
+      <div class="map-tools">
+        <button class="btn small icon" title="Отдалить" onclick="setCharacterMapZoom(-1)">${icon('minus',16)}</button>
+        <span class="zoom-pill">${zoomPct}%</span>
+        <button class="btn small icon" title="Приблизить" onclick="setCharacterMapZoom(1)">${icon('plus',16)}</button>
+        <button class="btn small ghost" onclick="resetCharacterMapZoom()">100%</button>
+        ${b.characters.length>1?`<button class="btn primary" onclick="openAddCharacterLink()">${icon('plus',16)} Новая связь</button>`:""}
+      </div>
+    </div>
+    <div class="map-board" id="characterMapBoard" onwheel="onCharacterMapWheel(event)">
+      <div class="map-canvas" id="characterMapCanvas" style="transform:scale(${b.characterMapZoom})">
+        <svg class="map-svg" id="characterMapSvg" viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>
+        ${nodes}
+      </div>
+    </div>
+    <div class="link-list">${linkRows}</div>
+  </div>`;
+}
+function clampMapZoom(v){ v=Number(v)||1; return Math.max(MAP_MIN_ZOOM,Math.min(MAP_MAX_ZOOM,v)); }
+function setCharacterMapZoom(dir){
+  const b=curBook(); if(!b) return;
+  b.characterMapZoom=clampMapZoom((b.characterMapZoom||1)+(dir*MAP_ZOOM_STEP));
+  b.updatedAt=now(); save(); renderMain();
+}
+function resetCharacterMapZoom(){
+  const b=curBook(); if(!b) return;
+  b.characterMapZoom=1; b.updatedAt=now(); save(); renderMain();
+}
+function onCharacterMapWheel(ev){
+  ev.preventDefault();
+  setCharacterMapZoom(ev.deltaY<0?1:-1);
+}
+function characterMapPositions(b){
+  const res={},chars=b.characters||[],count=Math.max(chars.length,1);
+  chars.forEach((c,i)=>{
+    const savedX=Number(c.mapX),savedY=Number(c.mapY);
+    if(Number.isFinite(savedX)&&Number.isFinite(savedY)){
+      res[c.id]={x:clampMap(savedX,8,92),y:clampMap(savedY,12,88)};
+    }else if(count===1){
+      res[c.id]={x:50,y:48};
+    }else{
+      const angle=-Math.PI/2+(Math.PI*2*i/count);
+      res[c.id]={x:50+38*Math.cos(angle),y:50+34*Math.sin(angle)};
+    }
+  });
+  return res;
+}
+function clampMap(v,min,max){ return Math.max(min,Math.min(max,v)); }
+function validCharacterLinks(b){
+  const ids=new Set((b.characters||[]).map(c=>c.id));
+  return (b.characterLinks||[]).map(normalizeCharacterLink).filter(l=>ids.has(l.from)&&ids.has(l.to)&&l.from!==l.to);
+}
+function mapLinkSvg(link,pos){
+  const a=pos[link.from],b=pos[link.to]; if(!a||!b) return "";
+  const st=relationStyle(link.type);
+  return `<g data-link-id="${link.id}">
+    <line id="mapLine${link.id}" class="map-line" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"
+      style="stroke:${st.color};stroke-width:${st.width};${st.dash?`stroke-dasharray:${st.dash};`:''}"></line>
+  </g>`;
+}
+function renderCharacterLinkCard(b,link){
+  const from=characterName(b,link.from),to=characterName(b,link.to);
+  const st=relationStyle(link.type);
+  return `<div class="link-card" style="--thread-color:${st.color}">
+    <span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
+      stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" ${st.dash?`stroke-dasharray="${st.dash}"`:''}></line></svg></span>
+    <span class="rel-badge">${escapeHtml(link.type||"Связь")}</span>
+    <div class="link-main">
+      <div class="link-title">${escapeHtml(from)} — ${escapeHtml(to)}</div>
+      <div class="link-note">${escapeHtml(link.note||"Без заметки")}</div>
+    </div>
+    <button class="btn small ghost" title="Удалить связь" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
+  </div>`;
+}
+function characterName(b,id){
+  const c=(b.characters||[]).find(x=>x.id===id);
+  return c?(c.name||"Без имени"):"Персонаж";
+}
+function relationStyle(type){ return RELATION_STYLES[type]||RELATION_STYLES["Другое"]; }
+function openMapCharacter(ev,id){
+  if(suppressMapClick){ ev.preventDefault(); ev.stopPropagation(); return; }
+  selectItem("character",id);
+}
+let mapDrag=null,suppressMapClick=false;
+function startMapNodeDrag(ev,id){
+  if((ev.button!==undefined&&ev.button!==0)||ev.target.closest("button")) return;
+  const b=curBook(),c=b&&b.characters.find(x=>x.id===id),board=document.getElementById("characterMapBoard");
+  if(!c||!board) return;
+  const el=ev.currentTarget,rect=board.getBoundingClientRect();
+  mapDrag={id,book:b,char:c,el,rect,moved:false,startX:ev.clientX,startY:ev.clientY};
+  el.setPointerCapture(ev.pointerId);
+  el.classList.add("dragging");
+  el.addEventListener("pointermove",moveMapNodeDrag);
+  el.addEventListener("pointerup",finishMapNodeDrag,{once:true});
+  el.addEventListener("pointercancel",cancelMapNodeDrag,{once:true});
+}
+function moveMapNodeDrag(ev){
+  if(!mapDrag) return;
+  const d=mapDrag,zoom=clampMapZoom(d.book.characterMapZoom||1);
+  if(Math.hypot(ev.clientX-d.startX,ev.clientY-d.startY)>4) d.moved=true;
+  const rawX=((ev.clientX-d.rect.left)/d.rect.width)*100;
+  const rawY=((ev.clientY-d.rect.top)/d.rect.height)*100;
+  const x=clampMap(50+(rawX-50)/zoom,8,92);
+  const y=clampMap(50+(rawY-50)/zoom,12,88);
+  d.char.mapX=Number(x.toFixed(2)); d.char.mapY=Number(y.toFixed(2));
+  d.el.style.left=d.char.mapX+"%"; d.el.style.top=d.char.mapY+"%";
+  updateCharacterMapLines();
+}
+function finishMapNodeDrag(ev){
+  if(!mapDrag) return;
+  mapDrag.el.removeEventListener("pointermove",moveMapNodeDrag);
+  mapDrag.el.classList.remove("dragging");
+  if(mapDrag.moved){
+    suppressMapClick=true; setTimeout(()=>suppressMapClick=false,0);
+    mapDrag.book.updatedAt=now(); save();
+  }
+  mapDrag=null;
+}
+function cancelMapNodeDrag(ev){
+  if(mapDrag){
+    mapDrag.el.removeEventListener("pointermove",moveMapNodeDrag);
+    mapDrag.el.classList.remove("dragging");
+  }
+  mapDrag=null;
+}
+function updateCharacterMapLines(){
+  const b=curBook(); if(!b) return;
+  const pos=characterMapPositions(b);
+  validCharacterLinks(b).forEach(link=>{
+    const a=pos[link.from],c=pos[link.to],line=document.getElementById("mapLine"+link.id);
+    if(!a||!c||!line) return;
+    line.setAttribute("x1",a.x); line.setAttribute("y1",a.y); line.setAttribute("x2",c.x); line.setAttribute("y2",c.y);
+  });
+}
+function openAddCharacterLink(){
+  const b=curBook(); if(!b||b.characters.length<2){ openInfo("Нужны персонажи","Для связи нужны хотя бы два персонажа."); return; }
+  const opts=b.characters.map(c=>`<option value="${escapeAttr(c.id)}">${escapeHtml(c.name||"Без имени")}</option>`).join("");
+  const typeOpts=RELATION_TYPES.map(t=>`<option>${escapeHtml(t)}</option>`).join("");
+  modal(`<h3>Новая связь</h3><div class="mpad fld-stack">
+    <div class="fld"><label>Первый персонаж</label><select id="linkFrom">${opts}</select></div>
+    <div class="fld"><label>Второй персонаж</label><select id="linkTo">${opts}</select></div>
+    <div class="fld"><label>Тип связи</label><select id="linkType">${typeOpts}</select></div>
+    <div class="fld"><label>Заметка</label><textarea id="linkNote" placeholder="Например: скрытая вражда, давний долг, семейная тайна..."></textarea></div>
+  </div><div class="mfoot"><button class="btn" id="mCancel">Отмена</button><button class="btn primary" id="mOk">Добавить</button></div>`);
+  if(b.characters[1]) document.getElementById("linkTo").value=b.characters[1].id;
+  const done=()=>closeModal();
+  document.getElementById("mCancel").onclick=done;
+  document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
+  document.getElementById("mOk").onclick=()=>{
+    const from=document.getElementById("linkFrom").value,to=document.getElementById("linkTo").value;
+    if(from===to){ toast("Выбери двух разных персонажей"); return; }
+    b.characterLinks=b.characterLinks||[];
+    b.characterLinks.push(normalizeCharacterLink({id:uid(),from,to,type:document.getElementById("linkType").value,note:document.getElementById("linkNote").value.trim()}));
+    b.updatedAt=now(); save(); closeModal(); renderMain(); toast("Связь добавлена");
+  };
+}
+async function deleteCharacterLink(id){
+  const b=curBook(); if(!b) return;
+  const link=(b.characterLinks||[]).find(x=>x.id===id); if(!link) return;
+  if(!await openConfirm({title:"Удалить связь?",message:"Персонажи останутся на месте, удалится только линия между ними.",ok:"Удалить",danger:false})) return;
+  b.characterLinks=b.characterLinks.filter(x=>x.id!==id); b.updatedAt=now(); save(); renderMain();
+}
+
 /* ============ МИР И ЛОР ============ */
 async function addLore(){
   const b=curBook(); if(!b) return;
@@ -695,6 +951,7 @@ function renderSidebar(){
     </div>
     <div class="side-group"><div class="side-head"><span>Книга</span></div>
       <div class="nav-item ${route.view==='plan'?'active':''}" onclick="openPlan()">${icon('list',16)}<span class="label">План</span></div>
+      <div class="nav-item ${route.view==='characterMap'?'active':''}" onclick="openCharacterMap()">${icon('map',16)}<span class="label">Карта персонажей</span></div>
     </div>
     <div class="side-group"><div class="side-head"><span>Главы</span><span class="add" title="Добавить главу" onclick="addChapter()">${icon('plus',16)}</span></div><div class="chapter-list" id="chapterList">${chItems}</div></div>
     <div class="side-group"><div class="side-head"><span>Персонажи</span><span class="add" title="Добавить персонажа" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>
@@ -704,6 +961,7 @@ function renderMain(){
   const b=curBook(),main=document.getElementById("main");
   if(route.view==="chapter") return renderChapterEditor(main,b);
   if(route.view==="character") return route.charMode==="edit"?renderCharacterEdit(main,b):renderCharacterView(main,b);
+  if(route.view==="characterMap") return renderCharacterMap(main,b);
   if(route.view==="lore") return route.charMode==="edit"?renderLoreEdit(main,b):renderLoreView(main,b);
   if(route.view==="plan") return renderPlan(main,b);
   if(route.view==="overview") return renderOverview(main,b);
@@ -1191,6 +1449,10 @@ function collectSearchItems(){
     (b.characters||[]).forEach(c=>items.push({
       bookId:b.id,view:"character",itemId:c.id,kind:"Персонаж",title:c.name||"Без имени",bookTitle,
       text:[c.name,c.role,c.age,c.appearance,c.personality,c.background,c.goals,c.relationships,c.notes].filter(Boolean).join("\n")
+    }));
+    validCharacterLinks(b).forEach(link=>items.push({
+      bookId:b.id,view:"characterMap",itemId:"",kind:"Связь",title:`${characterName(b,link.from)} — ${characterName(b,link.to)}`,bookTitle,
+      text:[characterName(b,link.from),characterName(b,link.to),link.type,link.note].filter(Boolean).join("\n")
     }));
     (b.lore||[]).forEach(item=>items.push({
       bookId:b.id,view:"lore",itemId:item.id,kind:item.type||"Лор",title:item.title||"Без названия",bookTitle,
