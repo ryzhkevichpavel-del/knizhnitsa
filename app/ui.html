@@ -238,31 +238,55 @@
   .trash-title{font-weight:650;line-height:18px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .trash-sub{font-size:12px;color:var(--muted);margin-top:5px}
   .trash-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
-  .map-wrap{max-width:none;padding:22px 28px 58px}
+  .map-wrap{max-width:none;padding:22px 28px 46px}
   .map-pagehead{margin-bottom:14px}
   .map-pagehead h1{font-size:24px;line-height:1.15;margin:0;letter-spacing:0}
   .map-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .zoom-pill{min-width:58px;text-align:center;color:var(--muted);font-size:13px;font-weight:650}
-  .map-board{position:relative;height:calc(100vh - 158px);min-height:640px;border:1px solid var(--line);border-radius:18px;background:
-    radial-gradient(circle at 50% 45%,var(--accent-soft),transparent 44%),var(--paper);overflow:hidden;margin-top:0}
-  .map-canvas{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .16s ease}
+  .map-studio{display:grid;grid-template-columns:minmax(560px,1fr) 312px;gap:14px;align-items:stretch}
+  .map-board{position:relative;height:calc(100vh - 148px);min-height:650px;border:1px solid var(--line);border-radius:16px;
+    background:
+      radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--muted),transparent 82%) 1px,transparent 1.5px),
+      linear-gradient(180deg,color-mix(in srgb,var(--panel),var(--bg) 20%),var(--paper));
+    background-size:26px 26px,100% 100%;overflow:hidden;margin-top:0;cursor:grab;touch-action:none}
+  .map-board.panning{cursor:grabbing}
+  .map-canvas{position:absolute;left:0;top:0;width:calc(100% / var(--map-world-scale,1));
+    height:calc(100% / var(--map-world-scale,1));transform:translate(var(--map-pan-x,0px),var(--map-pan-y,0px)) scale(var(--map-zoom,1));
+    transform-origin:0 0;transition:transform .16s ease}
+  .map-board.panning .map-canvas,.map-node.dragging{transition:none}
   .map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  .map-line{stroke-width:3.2;opacity:.82;stroke-linecap:round}
-  .map-node{position:absolute;width:138px;min-height:86px;transform:translate(-50%,-50%);border:1px solid var(--line);
-    background:var(--panel);border-radius:16px;box-shadow:var(--shadow);padding:12px;display:flex;align-items:center;gap:10px;
+  .map-line{fill:none;stroke-width:1.9;opacity:.9;stroke-linecap:round;vector-effect:non-scaling-stroke}
+  .map-line-shadow{fill:none;stroke:rgba(0,0,0,.12);stroke-width:5;opacity:.26;stroke-linecap:round;vector-effect:non-scaling-stroke}
+  .map-node{position:absolute;width:156px;min-height:72px;transform:translate(-50%,-50%);border:1px solid var(--line);
+    background:color-mix(in srgb,var(--panel),transparent 4%);border-radius:14px;box-shadow:0 8px 24px rgba(20,24,38,.10);
+    padding:10px 11px;display:flex;align-items:center;gap:10px;
     cursor:grab;transition:transform .14s,border-color .14s,box-shadow .14s;touch-action:none;user-select:none}
   .map-node:hover{transform:translate(-50%,-50%) scale(1.035);border-color:var(--accent)}
   .map-node.dragging{cursor:grabbing;z-index:5;transition:none;border-color:var(--accent);
     box-shadow:0 18px 46px rgba(20,24,38,.18);transform:translate(-50%,-50%) scale(1.04)}
-  .map-avatar{width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;
+  .map-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;
     align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
   .map-avatar img{width:100%;height:100%;object-fit:cover}
   .map-name{font-weight:700;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
     -webkit-line-clamp:2;-webkit-box-orient:vertical}
   .map-role{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .link-list{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+  .map-panel{height:calc(100vh - 148px);min-height:650px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
+    overflow:hidden;display:flex;flex-direction:column}
+  .map-panel-section{padding:14px;border-bottom:1px solid var(--line)}
+  .map-panel-section:last-child{border-bottom:none}
+  .map-panel-title{font-size:12px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+  .legend-grid{display:flex;flex-direction:column;gap:8px}
+  .legend-row{display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center;font-size:12px;color:var(--ink);min-height:22px}
+  .legend-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .link-list{display:flex;flex-direction:column;gap:9px;overflow-y:auto;padding:14px;min-height:0}
   .link-card{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:14px;
     padding:12px 14px}
+  .map-panel .link-card{background:var(--paper);padding:11px 12px;display:grid;grid-template-columns:58px minmax(0,1fr) 30px 30px;
+    grid-template-rows:auto auto;align-items:center;gap:7px 8px}
+  .map-panel .thread-sample{grid-column:1;grid-row:1}
+  .map-panel .rel-badge{grid-column:2;grid-row:1;justify-self:start;min-width:76px}
+  .map-panel .link-main{grid-column:1 / 3;grid-row:2}
+  .map-panel .link-card button{padding:6px;width:28px;height:28px;justify-content:center}
   .link-main{flex:1;min-width:0}
   .link-title{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .link-note{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -271,12 +295,19 @@
     font-size:12px;font-weight:750;white-space:nowrap}
   .thread-sample{width:58px;height:14px;flex-shrink:0;display:flex;align-items:center}
   .thread-sample svg{width:58px;height:14px;overflow:visible}
+  [data-theme="dark"] .map-board{background:
+      radial-gradient(circle at 1px 1px,rgba(150,158,178,.18) 1px,transparent 1.5px),
+      linear-gradient(180deg,#1b1b1f,#18181b)}
+  [data-theme="dark"] .map-node{background:rgba(32,32,35,.96);box-shadow:0 10px 30px rgba(0,0,0,.28)}
+  [data-theme="dark"] .map-line-shadow{stroke:rgba(0,0,0,.42);opacity:.34}
   @media (max-width: 980px){
     .plan-fields{grid-template-columns:1fr}
     .plan-card-head{align-items:flex-start;flex-wrap:wrap}
     .plan-title{min-width:220px}
     .map-wrap{padding:18px 16px 46px}
-    .map-board{height:calc(100vh - 152px);min-height:560px}
+    .map-studio{grid-template-columns:1fr}
+    .map-board,.map-panel{height:auto;min-height:560px}
+    .map-panel{min-height:0}
     .map-node{width:120px}
   }
 
@@ -350,17 +381,34 @@ const PLAN_STATUSES=["Задумка","Черновик","Готово","Пер�
 const LORE_TYPES=["Заметка","Место","Организация","Событие","Термин","Предмет","Правило мира"];
 const RELATION_TYPES=["Союз","Дружба","Семья","Любовь","Конфликт","Вражда","Тайна","Наставник","Долг","Другое"];
 const RELATION_STYLES={
-  "Союз":{color:"#2f7f6b",dash:"",width:3.4},
-  "Дружба":{color:"#2a7fb8",dash:"2 5",width:3.2},
-  "Семья":{color:"#8a6f2a",dash:"",width:4.6},
-  "Любовь":{color:"#c6476b",dash:"",width:3.8},
-  "Конфликт":{color:"#d66a2d",dash:"10 7",width:3.4},
-  "Вражда":{color:"#c83232",dash:"5 5",width:3.7},
-  "Тайна":{color:"#6d58b8",dash:"1 7",width:4},
-  "Наставник":{color:"#4f6fa8",dash:"14 5 3 5",width:3.2},
-  "Долг":{color:"#6f7a32",dash:"8 4",width:3.2},
-  "Другое":{color:"#667085",dash:"4 5",width:3}
+  "Союз":{color:"#2f8f79",pattern:"solid"},
+  "Дружба":{color:"#2f75b8",pattern:"soft"},
+  "Семья":{color:"#9b7a2e",pattern:"solid"},
+  "Любовь":{color:"#c94d72",pattern:"solid"},
+  "Конфликт":{color:"#d26b32",pattern:"dash"},
+  "Вражда":{color:"#c83c3c",pattern:"dash"},
+  "Тайна":{color:"#7b61c7",pattern:"dot"},
+  "Наставник":{color:"#4e6fa7",pattern:"chain"},
+  "Долг":{color:"#788633",pattern:"soft"},
+  "Другое":{color:"#667085",pattern:"dash"}
 };
+const THREAD_PATTERNS={
+  solid:{name:"Сплошная",dash:"",width:1.9},
+  dash:{name:"Пунктир",dash:"8 7",width:1.9},
+  dot:{name:"Точки",dash:"1 6",width:2.2},
+  soft:{name:"Мягкая",dash:"13 6",width:1.8},
+  chain:{name:"Штрих-точка",dash:"13 5 2 5",width:1.9}
+};
+const THREAD_COLORS=[
+  {name:"Зелёная",value:"#2f8f79"},
+  {name:"Синяя",value:"#2f75b8"},
+  {name:"Золотая",value:"#9b7a2e"},
+  {name:"Розовая",value:"#c94d72"},
+  {name:"Оранжевая",value:"#d26b32"},
+  {name:"Красная",value:"#c83c3c"},
+  {name:"Фиолетовая",value:"#7b61c7"},
+  {name:"Серая",value:"#667085"}
+];
 const MAP_MIN_ZOOM=.65, MAP_MAX_ZOOM=2.2, MAP_ZOOM_STEP=.15;
 
 /* ============ ДАННЫЕ ============ */
@@ -456,6 +504,9 @@ function normalizeCharacterLink(link){
   if(!link.to) link.to="";
   if(!link.type) link.type="Связь";
   if(link.note===undefined) link.note="";
+  const st=RELATION_STYLES[link.type]||RELATION_STYLES["Другое"];
+  if(!link.color) link.color=st.color;
+  if(!link.pattern) link.pattern=st.pattern;
   return link;
 }
 function trashCount(){ ensureData(); return state.trash.books.length+state.trash.chapters.length+state.trash.characters.length+state.trash.lore.length; }
@@ -637,6 +688,7 @@ function birthYear(b,c){
 function renderCharacterMap(main,b){
   ensureData();
   b.characterMapZoom=clampMapZoom(b.characterMapZoom||1);
+  if(b.characterMapZoom<=1){ b.characterMapPanX=0; b.characterMapPanY=0; }
   if(!b.characters.length){
     main.innerHTML=`<div class="wrap map-wrap">
       <div class="pagehead"><h1>Карта персонажей</h1></div>
@@ -649,6 +701,8 @@ function renderCharacterMap(main,b){
   }
   const pos=characterMapPositions(b),links=validCharacterLinks(b);
   const zoomPct=Math.round(b.characterMapZoom*100);
+  const worldScale=mapWorldScale(b.characterMapZoom);
+  const panX=Number(b.characterMapPanX)||0,panY=Number(b.characterMapPanY)||0;
   const nodes=b.characters.map(c=>{
     const p=pos[c.id],avatar=c.photo?`<img src="${c.photo}">`:icon('user',20);
     return `<div class="map-node" data-character-id="${c.id}" style="left:${p.x}%;top:${p.y}%"
@@ -659,8 +713,8 @@ function renderCharacterMap(main,b){
     </div>`;
   }).join("");
   const lines=links.map(link=>mapLinkSvg(link,pos)).join("");
-  const linkRows=links.length?links.map(link=>renderCharacterLinkCard(b,link)).join(""):`<div class="section">
-    <p class="empty-note">Связей пока нет. Нажми «Новая связь», чтобы соединить персонажей.</p>
+  const linkRows=links.length?links.map(link=>renderCharacterLinkCard(b,link)).join(""):`<div class="section" style="margin:0">
+    <p class="empty-note">Связей пока нет.</p>
   </div>`;
   main.innerHTML=`<div class="wrap map-wrap">
     <div class="pagehead map-pagehead">
@@ -673,24 +727,37 @@ function renderCharacterMap(main,b){
         ${b.characters.length>1?`<button class="btn primary" onclick="openAddCharacterLink()">${icon('plus',16)} Новая связь</button>`:""}
       </div>
     </div>
-    <div class="map-board" id="characterMapBoard" onwheel="onCharacterMapWheel(event)">
-      <div class="map-canvas" id="characterMapCanvas" style="transform:scale(${b.characterMapZoom})">
-        <svg class="map-svg" id="characterMapSvg" viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>
-        ${nodes}
+    <div class="map-studio">
+      <div class="map-board" id="characterMapBoard" onwheel="onCharacterMapWheel(event)" onpointerdown="startMapPan(event)">
+        <div class="map-canvas" id="characterMapCanvas" style="--map-zoom:${b.characterMapZoom};--map-world-scale:${worldScale};--map-pan-x:${panX}px;--map-pan-y:${panY}px">
+          <svg class="map-svg" id="characterMapSvg" viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>
+          ${nodes}
+        </div>
+      </div>
+      <div class="map-panel">
+        <div class="map-panel-section">
+          <div class="map-panel-title">Условные обозначения</div>
+          <div class="legend-grid">${renderMapLegend(b)}</div>
+        </div>
+        <div class="map-panel-section" style="padding-bottom:0;border-bottom:none">
+          <div class="map-panel-title">Связи</div>
+        </div>
+        <div class="link-list">${linkRows}</div>
       </div>
     </div>
-    <div class="link-list">${linkRows}</div>
   </div>`;
 }
 function clampMapZoom(v){ v=Number(v)||1; return Math.max(MAP_MIN_ZOOM,Math.min(MAP_MAX_ZOOM,v)); }
+function mapWorldScale(zoom){ return Math.min(1,clampMapZoom(zoom)); }
 function setCharacterMapZoom(dir){
   const b=curBook(); if(!b) return;
   b.characterMapZoom=clampMapZoom((b.characterMapZoom||1)+(dir*MAP_ZOOM_STEP));
+  if(b.characterMapZoom<=1){ b.characterMapPanX=0; b.characterMapPanY=0; }
   b.updatedAt=now(); save(); renderMain();
 }
 function resetCharacterMapZoom(){
   const b=curBook(); if(!b) return;
-  b.characterMapZoom=1; b.updatedAt=now(); save(); renderMain();
+  b.characterMapZoom=1; b.characterMapPanX=0; b.characterMapPanY=0; b.updatedAt=now(); save(); renderMain();
 }
 function onCharacterMapWheel(ev){
   ev.preventDefault();
@@ -701,7 +768,7 @@ function characterMapPositions(b){
   chars.forEach((c,i)=>{
     const savedX=Number(c.mapX),savedY=Number(c.mapY);
     if(Number.isFinite(savedX)&&Number.isFinite(savedY)){
-      res[c.id]={x:clampMap(savedX,8,92),y:clampMap(savedY,12,88)};
+      res[c.id]={x:clampMap(savedX,0,100),y:clampMap(savedY,0,100)};
     }else if(count===1){
       res[c.id]={x:50,y:48};
     }else{
@@ -718,15 +785,23 @@ function validCharacterLinks(b){
 }
 function mapLinkSvg(link,pos){
   const a=pos[link.from],b=pos[link.to]; if(!a||!b) return "";
-  const st=relationStyle(link.type);
+  const st=relationStyle(link),path=mapCurvePath(a,b);
   return `<g data-link-id="${link.id}">
-    <line id="mapLine${link.id}" class="map-line" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"
-      style="stroke:${st.color};stroke-width:${st.width};${st.dash?`stroke-dasharray:${st.dash};`:''}"></line>
+    <path id="mapShadow${link.id}" class="map-line-shadow" d="${path}"></path>
+    <path id="mapLine${link.id}" class="map-line" d="${path}"
+      style="stroke:${st.color};stroke-width:${st.width};${st.dash?`stroke-dasharray:${st.dash};`:''}"></path>
   </g>`;
+}
+function mapCurvePath(a,b){
+  const dx=b.x-a.x,dy=b.y-a.y,dist=Math.max(1,Math.hypot(dx,dy));
+  const bend=Math.min(8,dist*.12);
+  const nx=-dy/dist,ny=dx/dist;
+  const mx=(a.x+b.x)/2+nx*bend,my=(a.y+b.y)/2+ny*bend;
+  return `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`;
 }
 function renderCharacterLinkCard(b,link){
   const from=characterName(b,link.from),to=characterName(b,link.to);
-  const st=relationStyle(link.type);
+  const st=relationStyle(link);
   return `<div class="link-card" style="--thread-color:${st.color}">
     <span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
       stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" ${st.dash?`stroke-dasharray="${st.dash}"`:''}></line></svg></span>
@@ -735,6 +810,7 @@ function renderCharacterLinkCard(b,link){
       <div class="link-title">${escapeHtml(from)} — ${escapeHtml(to)}</div>
       <div class="link-note">${escapeHtml(link.note||"Без заметки")}</div>
     </div>
+    <button class="btn small ghost" title="Настроить связь" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
     <button class="btn small ghost" title="Удалить связь" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
   </div>`;
 }
@@ -742,18 +818,93 @@ function characterName(b,id){
   const c=(b.characters||[]).find(x=>x.id===id);
   return c?(c.name||"Без имени"):"Персонаж";
 }
-function relationStyle(type){ return RELATION_STYLES[type]||RELATION_STYLES["Другое"]; }
+function relationStyle(linkOrType){
+  const link=typeof linkOrType==="string"?{type:linkOrType}:linkOrType;
+  const base=RELATION_STYLES[link.type]||RELATION_STYLES["Другое"];
+  const pattern=THREAD_PATTERNS[link.pattern||base.pattern]||THREAD_PATTERNS.solid;
+  return {color:link.color||base.color,dash:pattern.dash,width:pattern.width,pattern:link.pattern||base.pattern};
+}
+function threadSample(st){
+  return `<span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
+    stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" ${st.dash?`stroke-dasharray="${st.dash}"`:''}></line></svg></span>`;
+}
+function renderMapLegend(b){
+  const seen=new Map();
+  validCharacterLinks(b).forEach(link=>{
+    const key=(link.type||"Связь")+"|"+(link.color||"")+"|"+(link.pattern||"");
+    if(!seen.has(key)) seen.set(key,link);
+  });
+  const rows=[...seen.values()];
+  if(!rows.length) rows.push(...["Союз","Конфликт","Тайна"].map(t=>({type:t,...RELATION_STYLES[t]})));
+  return rows.map(link=>{
+    const st=relationStyle(link);
+    return `<div class="legend-row" style="--thread-color:${st.color}">${threadSample(st)}<span class="legend-name">${escapeHtml(link.type||"Связь")}</span></div>`;
+  }).join("");
+}
 function openMapCharacter(ev,id){
   if(suppressMapClick){ ev.preventDefault(); ev.stopPropagation(); return; }
   selectItem("character",id);
 }
-let mapDrag=null,suppressMapClick=false;
+let mapDrag=null,mapPan=null,suppressMapClick=false;
+function clampMapPan(value,visibleSize,zoom,worldScale){
+  const contentSize=visibleSize*(zoom/worldScale);
+  if(contentSize<=visibleSize) return 0;
+  return clampMap(value,visibleSize-contentSize,0);
+}
+function applyMapPan(){
+  if(!mapPan) return;
+  const canvas=document.getElementById("characterMapCanvas");
+  if(canvas){
+    canvas.style.setProperty("--map-pan-x",mapPan.book.characterMapPanX+"px");
+    canvas.style.setProperty("--map-pan-y",mapPan.book.characterMapPanY+"px");
+  }
+}
+function startMapPan(ev){
+  if((ev.button!==undefined&&ev.button!==0)||ev.target.closest(".map-node")||ev.target.closest("button")) return;
+  const b=curBook(),board=document.getElementById("characterMapBoard");
+  if(!b||!board||clampMapZoom(b.characterMapZoom||1)<=1) return;
+  const rect=board.getBoundingClientRect(),zoom=clampMapZoom(b.characterMapZoom||1),worldScale=mapWorldScale(zoom);
+  mapPan={book:b,board,rect,zoom,worldScale,startX:ev.clientX,startY:ev.clientY,
+    startPanX:Number(b.characterMapPanX)||0,startPanY:Number(b.characterMapPanY)||0,moved:false};
+  board.setPointerCapture(ev.pointerId);
+  board.classList.add("panning");
+  board.addEventListener("pointermove",moveMapPan);
+  board.addEventListener("pointerup",finishMapPan,{once:true});
+  board.addEventListener("pointercancel",cancelMapPan,{once:true});
+}
+function moveMapPan(ev){
+  if(!mapPan) return;
+  const d=mapPan,dx=ev.clientX-d.startX,dy=ev.clientY-d.startY;
+  if(Math.hypot(dx,dy)>4) d.moved=true;
+  d.book.characterMapPanX=Number(clampMapPan(d.startPanX+dx,d.rect.width,d.zoom,d.worldScale).toFixed(1));
+  d.book.characterMapPanY=Number(clampMapPan(d.startPanY+dy,d.rect.height,d.zoom,d.worldScale).toFixed(1));
+  applyMapPan();
+}
+function finishMapPan(ev){
+  if(!mapPan) return;
+  mapPan.board.removeEventListener("pointermove",moveMapPan);
+  mapPan.board.classList.remove("panning");
+  if(mapPan.moved){
+    suppressMapClick=true; setTimeout(()=>suppressMapClick=false,0);
+    mapPan.book.updatedAt=now(); save();
+  }
+  mapPan=null;
+}
+function cancelMapPan(ev){
+  if(mapPan){
+    mapPan.board.removeEventListener("pointermove",moveMapPan);
+    mapPan.board.classList.remove("panning");
+  }
+  mapPan=null;
+}
 function startMapNodeDrag(ev,id){
   if((ev.button!==undefined&&ev.button!==0)||ev.target.closest("button")) return;
   const b=curBook(),c=b&&b.characters.find(x=>x.id===id),board=document.getElementById("characterMapBoard");
   if(!c||!board) return;
   const el=ev.currentTarget,rect=board.getBoundingClientRect();
-  mapDrag={id,book:b,char:c,el,rect,moved:false,startX:ev.clientX,startY:ev.clientY};
+  const zoom=clampMapZoom(b.characterMapZoom||1),worldScale=mapWorldScale(zoom);
+  mapDrag={id,book:b,char:c,el,rect,zoom,worldScale,panX:Number(b.characterMapPanX)||0,panY:Number(b.characterMapPanY)||0,
+    moved:false,startX:ev.clientX,startY:ev.clientY};
   el.setPointerCapture(ev.pointerId);
   el.classList.add("dragging");
   el.addEventListener("pointermove",moveMapNodeDrag);
@@ -762,12 +913,12 @@ function startMapNodeDrag(ev,id){
 }
 function moveMapNodeDrag(ev){
   if(!mapDrag) return;
-  const d=mapDrag,zoom=clampMapZoom(d.book.characterMapZoom||1);
+  const d=mapDrag;
   if(Math.hypot(ev.clientX-d.startX,ev.clientY-d.startY)>4) d.moved=true;
-  const rawX=((ev.clientX-d.rect.left)/d.rect.width)*100;
-  const rawY=((ev.clientY-d.rect.top)/d.rect.height)*100;
-  const x=clampMap(50+(rawX-50)/zoom,8,92);
-  const y=clampMap(50+(rawY-50)/zoom,12,88);
+  const rawX=((ev.clientX-d.rect.left-d.panX)*d.worldScale/(d.zoom*d.rect.width))*100;
+  const rawY=((ev.clientY-d.rect.top-d.panY)*d.worldScale/(d.zoom*d.rect.height))*100;
+  const x=clampMap(rawX,0,100);
+  const y=clampMap(rawY,0,100);
   d.char.mapX=Number(x.toFixed(2)); d.char.mapY=Number(y.toFixed(2));
   d.el.style.left=d.char.mapX+"%"; d.el.style.top=d.char.mapY+"%";
   updateCharacterMapLines();
@@ -793,31 +944,58 @@ function updateCharacterMapLines(){
   const b=curBook(); if(!b) return;
   const pos=characterMapPositions(b);
   validCharacterLinks(b).forEach(link=>{
-    const a=pos[link.from],c=pos[link.to],line=document.getElementById("mapLine"+link.id);
+    const a=pos[link.from],c=pos[link.to],line=document.getElementById("mapLine"+link.id),shadow=document.getElementById("mapShadow"+link.id);
     if(!a||!c||!line) return;
-    line.setAttribute("x1",a.x); line.setAttribute("y1",a.y); line.setAttribute("x2",c.x); line.setAttribute("y2",c.y);
+    const path=mapCurvePath(a,c);
+    line.setAttribute("d",path);
+    if(shadow) shadow.setAttribute("d",path);
   });
 }
-function openAddCharacterLink(){
+function openAddCharacterLink(editId){
   const b=curBook(); if(!b||b.characters.length<2){ openInfo("Нужны персонажи","Для связи нужны хотя бы два персонажа."); return; }
+  const editing=(b.characterLinks||[]).find(x=>x.id===editId);
+  if(editing) normalizeCharacterLink(editing);
   const opts=b.characters.map(c=>`<option value="${escapeAttr(c.id)}">${escapeHtml(c.name||"Без имени")}</option>`).join("");
   const typeOpts=RELATION_TYPES.map(t=>`<option>${escapeHtml(t)}</option>`).join("");
-  modal(`<h3>Новая связь</h3><div class="mpad fld-stack">
+  const colorOpts=THREAD_COLORS.map(c=>`<option value="${escapeAttr(c.value)}">${escapeHtml(c.name)}</option>`).join("");
+  const patternOpts=Object.entries(THREAD_PATTERNS).map(([k,p])=>`<option value="${escapeAttr(k)}">${escapeHtml(p.name)}</option>`).join("");
+  modal(`<h3>${editing?"Настроить связь":"Новая связь"}</h3><div class="mpad fld-stack">
     <div class="fld"><label>Первый персонаж</label><select id="linkFrom">${opts}</select></div>
     <div class="fld"><label>Второй персонаж</label><select id="linkTo">${opts}</select></div>
-    <div class="fld"><label>Тип связи</label><select id="linkType">${typeOpts}</select></div>
+    <div class="fld-grid">
+      <div class="fld"><label>Смысл связи</label><select id="linkType">${typeOpts}</select></div>
+      <div class="fld"><label>Цвет нити</label><select id="linkColor">${colorOpts}</select></div>
+    </div>
+    <div class="fld"><label>Тип нити</label><select id="linkPattern">${patternOpts}</select></div>
     <div class="fld"><label>Заметка</label><textarea id="linkNote" placeholder="Например: скрытая вражда, давний долг, семейная тайна..."></textarea></div>
-  </div><div class="mfoot"><button class="btn" id="mCancel">Отмена</button><button class="btn primary" id="mOk">Добавить</button></div>`);
-  if(b.characters[1]) document.getElementById("linkTo").value=b.characters[1].id;
+  </div><div class="mfoot"><button class="btn" id="mCancel">Отмена</button><button class="btn primary" id="mOk">${editing?"Сохранить":"Добавить"}</button></div>`);
+  if(editing){
+    document.getElementById("linkFrom").value=editing.from;
+    document.getElementById("linkTo").value=editing.to;
+    document.getElementById("linkType").value=editing.type;
+    document.getElementById("linkColor").value=editing.color;
+    document.getElementById("linkPattern").value=editing.pattern;
+    document.getElementById("linkNote").value=editing.note||"";
+  }else if(b.characters[1]) document.getElementById("linkTo").value=b.characters[1].id;
+  const syncStyle=()=>{
+    const st=RELATION_STYLES[document.getElementById("linkType").value]||RELATION_STYLES["Другое"];
+    document.getElementById("linkColor").value=st.color;
+    document.getElementById("linkPattern").value=st.pattern;
+  };
+  if(!editing) syncStyle();
+  document.getElementById("linkType").onchange=syncStyle;
   const done=()=>closeModal();
   document.getElementById("mCancel").onclick=done;
   document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
   document.getElementById("mOk").onclick=()=>{
     const from=document.getElementById("linkFrom").value,to=document.getElementById("linkTo").value;
     if(from===to){ toast("Выбери двух разных персонажей"); return; }
-    b.characterLinks=b.characterLinks||[];
-    b.characterLinks.push(normalizeCharacterLink({id:uid(),from,to,type:document.getElementById("linkType").value,note:document.getElementById("linkNote").value.trim()}));
-    b.updatedAt=now(); save(); closeModal(); renderMain(); toast("Связь добавлена");
+    const data=normalizeCharacterLink({id:editing?editing.id:uid(),from,to,type:document.getElementById("linkType").value,
+      color:document.getElementById("linkColor").value,pattern:document.getElementById("linkPattern").value,
+      note:document.getElementById("linkNote").value.trim()});
+    if(editing) Object.assign(editing,data);
+    else { b.characterLinks=b.characterLinks||[]; b.characterLinks.push(data); }
+    b.updatedAt=now(); save(); closeModal(); renderMain(); toast(editing?"Связь обновлена":"Связь добавлена");
   };
 }
 async function deleteCharacterLink(id){
