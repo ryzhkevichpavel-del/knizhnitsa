@@ -282,6 +282,7 @@ const ICONS={
   eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   search:'<circle cx="11" cy="11" r="7"/><line x1="16.65" y1="16.65" x2="21" y2="21"/>',
+  map:'<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>',
   download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
   upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
   x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
@@ -302,6 +303,7 @@ const ACCENTS=[
 const DEFAULT_ACCENT="#3f4ea3";
 const DEFAULT_ROLES=["Главный герой","Протагонист","Антагонист","Второстепенный персонаж","Эпизодический персонаж","Наставник","Союзник","Соперник","Любовная линия","Рассказчик","Резонёр"];
 const PLAN_STATUSES=["Задумка","Черновик","Готово","Переписать"];
+const LORE_TYPES=["Заметка","Место","Организация","Событие","Термин","Предмет","Правило мира"];
 
 /* ============ ДАННЫЕ ============ */
 const WORDS_PER_PAGE=280, CHARS_PER_SHEET=40000, MAX_VERSIONS=60;
@@ -363,10 +365,13 @@ function ensureData(){
   state.trash.books=Array.isArray(state.trash.books)?state.trash.books:[];
   state.trash.chapters=Array.isArray(state.trash.chapters)?state.trash.chapters:[];
   state.trash.characters=Array.isArray(state.trash.characters)?state.trash.characters:[];
+  state.trash.lore=Array.isArray(state.trash.lore)?state.trash.lore:[];
   state.books.forEach(b=>{
     b.chapters=Array.isArray(b.chapters)?b.chapters:[];
     b.characters=Array.isArray(b.characters)?b.characters:[];
+    b.lore=Array.isArray(b.lore)?b.lore:[];
     b.chapters.forEach(normalizeChapter);
+    b.lore.forEach(normalizeLore);
   });
 }
 function normalizeChapter(ch){
@@ -377,7 +382,15 @@ function normalizeChapter(ch){
   return ch;
 }
 function cloneData(v){ return JSON.parse(JSON.stringify(v)); }
-function trashCount(){ ensureData(); return state.trash.books.length+state.trash.chapters.length+state.trash.characters.length; }
+function normalizeLore(item){
+  if(!item.type) item.type="Заметка";
+  if(item.title===undefined) item.title="";
+  if(item.summary===undefined) item.summary="";
+  if(item.details===undefined) item.details="";
+  if(item.links===undefined) item.links="";
+  return item;
+}
+function trashCount(){ ensureData(); return state.trash.books.length+state.trash.chapters.length+state.trash.characters.length+state.trash.lore.length; }
 
 /* ============ ТЕМА И ЦВЕТ ============ */
 function withAlpha(hex,a){ const n=hex.replace("#",""); const r=parseInt(n.slice(0,2),16),g=parseInt(n.slice(2,4),16),b=parseInt(n.slice(4,6),16); return `rgba(${r},${g},${b},${a})`; }
@@ -409,7 +422,7 @@ async function newBook(){
   const title=await openInput({title:"Новая книга",label:"Название книги",placeholder:"Например: Тень над городом",ok:"Создать"});
   if(title===null) return;
   const b={id:uid(),title:(title.trim()||"Без названия"),createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[]};
+    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],lore:[]};
   state.books.unshift(b); save(); openBook(b.id);
 }
 async function deleteBook(id,ev){
@@ -479,6 +492,26 @@ function birthYear(b,c){
   if(!isNaN(y)&&!isNaN(a)) return y-a;
   return null;
 }
+
+/* ============ МИР И ЛОР ============ */
+async function addLore(){
+  const b=curBook(); if(!b) return;
+  const title=await openInput({title:"Новая заметка мира",label:"Название",placeholder:"например: Северный порт",ok:"Создать"});
+  if(title===null) return;
+  const item={id:uid(),type:"Заметка",title:title.trim()||"Без названия",summary:"",details:"",links:"",createdAt:now(),updatedAt:now()};
+  b.lore=b.lore||[]; b.lore.unshift(item); b.updatedAt=now(); save();
+  route.view="lore"; route.itemId=item.id; route.charMode="edit"; render();
+}
+async function deleteLore(id){
+  const b=curBook(); const item=(b.lore||[]).find(x=>x.id===id); if(!item) return;
+  if(!await openConfirm({title:"Переместить заметку в корзину?",message:`«${item.title||"Без названия"}» можно будет вернуть в эту книгу.`,ok:"В корзину",danger:false})) return;
+  ensureData();
+  state.trash.lore.unshift({id:uid(),deletedAt:now(),bookId:b.id,bookTitle:b.title,data:cloneData(item)});
+  b.lore=b.lore.filter(x=>x.id!==id); b.updatedAt=now(); save(); toast("Заметка перемещена в корзину");
+  route.view="overview"; route.itemId=null; render();
+}
+function editLore(){ route.charMode="edit"; renderMain(); }
+function doneLore(){ route.charMode="view"; renderMain(); renderSidebar(); }
 
 /* ============ ИСТОРИЯ ВЕРСИЙ ============ */
 function snapshotChapter(ch,manual){
@@ -570,6 +603,10 @@ function renderSidebar(){
     const av=c.photo?`<img class="avatar" src="${c.photo}">`:`<span class="avatar">${icon('user',14)}</span>`;
     return `<div class="nav-item ${active}" onclick="selectItem('character','${c.id}')">${av}<span class="label">${escapeHtml(c.name||"Без имени")}</span></div>`;
   }).join(""):`<div class="side-empty">Персонажей пока нет</div>`;
+  const loreItems=(b.lore||[]).length?b.lore.map(item=>{
+    const active=route.view==="lore"&&route.itemId===item.id?"active":"";
+    return `<div class="nav-item ${active}" onclick="selectItem('lore','${item.id}')">${icon('map',15)}<span class="label">${escapeHtml(item.title||"Без названия")}</span></div>`;
+  }).join(""):`<div class="side-empty">Заметок пока нет</div>`;
   document.getElementById("sidebar").innerHTML=`
     <div class="side-book ${route.view==='overview'?'active':''}" onclick="openOverview()">
       <span class="bk-mark">${icon('book',17)}</span>
@@ -579,12 +616,14 @@ function renderSidebar(){
       <div class="nav-item ${route.view==='plan'?'active':''}" onclick="openPlan()">${icon('list',16)}<span class="label">План</span></div>
     </div>
     <div class="side-group"><div class="side-head"><span>Главы</span><span class="add" title="Добавить главу" onclick="addChapter()">${icon('plus',16)}</span></div>${chItems}</div>
-    <div class="side-group"><div class="side-head"><span>Персонажи</span><span class="add" title="Добавить персонажа" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>`;
+    <div class="side-group"><div class="side-head"><span>Персонажи</span><span class="add" title="Добавить персонажа" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>
+    <div class="side-group"><div class="side-head"><span>Мир и лор</span><span class="add" title="Добавить заметку" onclick="addLore()">${icon('plus',16)}</span></div>${loreItems}</div>`;
 }
 function renderMain(){
   const b=curBook(),main=document.getElementById("main");
   if(route.view==="chapter") return renderChapterEditor(main,b);
   if(route.view==="character") return route.charMode==="edit"?renderCharacterEdit(main,b):renderCharacterView(main,b);
+  if(route.view==="lore") return route.charMode==="edit"?renderLoreEdit(main,b):renderLoreView(main,b);
   if(route.view==="plan") return renderPlan(main,b);
   if(route.view==="overview") return renderOverview(main,b);
   main.innerHTML=`<div class="placeholder"><div class="pic">${icon('book',56)}</div>
@@ -752,6 +791,64 @@ function autoGrow(el){ el.style.height="auto"; el.style.height=(el.scrollHeight+
 let savedToastT=null;
 function flagSavedToast(){ /* тихое автосохранение, без визуального шума */ }
 
+/* ---- мир и лор ---- */
+function renderLoreView(main,b){
+  const item=(b.lore||[]).find(x=>x.id===route.itemId);
+  if(!item){ route.view="overview"; return renderMain(); }
+  normalizeLore(item);
+  const sec=(title,val)=>val&&val.trim()?`<div class="section"><h4>${title}</h4><p>${escapeHtml(val)}</p></div>`:"";
+  const hasText=[item.summary,item.details,item.links].some(v=>v&&v.trim());
+  main.innerHTML=`<div class="wrap">
+    <div class="pagehead">
+      <div></div>
+      <button class="btn" onclick="editLore()">${icon('edit',16)} Редактировать</button>
+    </div>
+    <div class="profile-top">
+      <div class="portrait empty" style="width:126px;aspect-ratio:1">${icon('map',46)}</div>
+      <div class="profile-id">
+        <h1 class="pname">${escapeHtml(item.title||"Без названия")}</h1>
+        <span class="badge">${escapeHtml(item.type||"Заметка")}</span>
+      </div>
+    </div>
+    ${sec("Коротко",item.summary)}
+    ${sec("Подробности",item.details)}
+    ${sec("Связи",item.links)}
+    ${!hasText?`<div class="section"><p class="empty-note">Заметка пока пустая. Нажми «Редактировать», чтобы заполнить.</p></div>`:""}
+  </div>`;
+}
+function renderLoreEdit(main,b){
+  const item=(b.lore||[]).find(x=>x.id===route.itemId);
+  if(!item){ route.view="overview"; return renderMain(); }
+  normalizeLore(item);
+  main.innerHTML=`<div class="wrap">
+    <div class="pagehead">
+      <button class="btn ghost" onclick="doneLore()">${icon('back',16)} Готово</button>
+      <button class="btn ghost small" onclick="deleteLore('${item.id}')">${icon('trash',16)} Удалить</button>
+    </div>
+    <div class="profile-top">
+      <div class="portrait empty" style="width:126px;aspect-ratio:1">${icon('map',46)}</div>
+      <div class="profile-id" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
+        <div class="fld"><label>Название</label><input id="loreTitle" value="${escapeAttr(item.title)}" placeholder="Название места, события, термина..."></div>
+        <div class="fld"><label>Тип</label><select id="loreType">${LORE_TYPES.map(t=>`<option ${item.type===t?'selected':''}>${t}</option>`).join("")}</select></div>
+      </div>
+    </div>
+    <div class="fld-stack" style="margin-top:24px">
+      ${taField("loreSummary","Коротко",item.summary,"Суть в двух-трёх фразах...")}
+      ${taField("loreDetails","Подробности",item.details,"История, правила, детали, важные факты...")}
+      ${taField("loreLinks","Связи",item.links,"С какими персонажами, главами, местами или событиями связано...")}
+    </div>
+  </div>`;
+  const bind=(id,field,reflect)=>{ const el=document.getElementById(id); if(!el) return;
+    if(el.tagName==="TEXTAREA"){ autoGrow(el); el.addEventListener("input",()=>autoGrow(el)); }
+    el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{ item[field]=el.value; item.updatedAt=now(); b.updatedAt=now(); save(); if(reflect){renderSidebar();renderTopbar();} });
+  };
+  bind("loreTitle","title",true);
+  bind("loreType","type",false);
+  bind("loreSummary","summary",false);
+  bind("loreDetails","details",false);
+  bind("loreLinks","links",false);
+}
+
 /* ---- план книги ---- */
 function renderPlan(main,b){
   b.chapters.forEach(normalizeChapter);
@@ -823,6 +920,7 @@ function renderOverview(main,b){
     <div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn primary" onclick="addChapter()">${icon('plus',16)} Новая глава</button>
       <button class="btn" onclick="openPlan()">${icon('list',16)} План</button>
+      <button class="btn" onclick="addLore()">${icon('map',16)} Заметка мира</button>
       <button class="btn" onclick="openExport()">${icon('download',16)} Экспорт</button>
       <button class="btn" onclick="openPreview()">${icon('eye',16)} Как в книге</button>
     </div>
@@ -886,7 +984,8 @@ function openTrash(){
   const rows=[
     ...state.trash.books.map((x,i)=>trashRow("books",i,"Книга",x.data.title||"Без названия","Со всеми главами и персонажами",x.deletedAt)),
     ...state.trash.chapters.map((x,i)=>trashRow("chapters",i,"Глава",x.data.title||"Без названия",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt)),
-    ...state.trash.characters.map((x,i)=>trashRow("characters",i,"Персонаж",x.data.name||"Без имени",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt))
+    ...state.trash.characters.map((x,i)=>trashRow("characters",i,"Персонаж",x.data.name||"Без имени",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt)),
+    ...state.trash.lore.map((x,i)=>trashRow("lore",i,x.data.type||"Лор",x.data.title||"Без названия",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt))
   ].join("");
   const total=trashCount();
   modal(`<h3>Корзина</h3>
@@ -921,7 +1020,7 @@ function ensureUniqueItemId(list,item){
 }
 function fallbackBookForTrash(title){
   const b={id:uid(),title:title||"Восстановленная книга",createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[]};
+    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],lore:[]};
   state.books.unshift(b);
   return b;
 }
@@ -942,6 +1041,12 @@ function restoreTrash(type,idx){
     const c=ensureUniqueItemId(b.characters,cloneData(item.data));
     b.characters.push(c); b.updatedAt=now();
   }
+  if(type==="lore"){
+    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||"Восстановленная книга");
+    b.lore=Array.isArray(b.lore)?b.lore:[];
+    const lore=ensureUniqueItemId(b.lore,normalizeLore(cloneData(item.data)));
+    b.lore.unshift(lore); b.updatedAt=now();
+  }
   state.trash[type].splice(idx,1);
   save(); toast("Восстановлено"); openTrash(); render();
 }
@@ -953,7 +1058,7 @@ async function purgeTrash(type,idx){
 }
 async function emptyTrash(){
   if(!await openConfirm({title:"Очистить корзину?",message:"Все элементы в корзине будут удалены окончательно.",ok:"Очистить",danger:true})) return;
-  state.trash={books:[],chapters:[],characters:[]}; save(); openTrash(); renderTopbar();
+  state.trash={books:[],chapters:[],characters:[],lore:[]}; save(); openTrash(); renderTopbar();
 }
 
 /* ============ ПОИСК ============ */
@@ -1005,6 +1110,10 @@ function collectSearchItems(){
     (b.characters||[]).forEach(c=>items.push({
       bookId:b.id,view:"character",itemId:c.id,kind:"Персонаж",title:c.name||"Без имени",bookTitle,
       text:[c.name,c.role,c.age,c.appearance,c.personality,c.background,c.goals,c.relationships,c.notes].filter(Boolean).join("\n")
+    }));
+    (b.lore||[]).forEach(item=>items.push({
+      bookId:b.id,view:"lore",itemId:item.id,kind:item.type||"Лор",title:item.title||"Без названия",bookTitle,
+      text:[item.title,item.type,item.summary,item.details,item.links].filter(Boolean).join("\n")
     }));
   });
   return items;
