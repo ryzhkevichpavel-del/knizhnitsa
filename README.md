@@ -32,11 +32,31 @@
 ```powershell
 cd app
 python -m pip install -r requirements.txt
-python -m PyInstaller --noconfirm .\Книжница.spec
+python -m PyInstaller --noconfirm --clean .\Книжница.spec
 ```
 
-Готовый файл появится в:
+Готовая программа (onedir — запускается мгновенно, без распаковки) появится в:
 
 ```text
-app\dist\Книжница.exe
+app\dist\Книжница\Книжница.exe
 ```
+
+## Установщик
+
+Нужен [Inno Setup 6](https://jrsoftware.org/isdl.php). Сборка установщика:
+
+```powershell
+cd app
+& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer.iss
+```
+
+Готовый установщик появится в:
+
+```text
+app\dist\installer\Книжница-Setup.exe
+```
+
+Он ставит программу для текущего пользователя (без пароля администратора),
+создаёт ярлыки в меню Пуск и на рабочем столе, добавляет запись в
+«Установка и удаление программ» и закрывает запущенную копию перед обновлением.
+Книги при удалении не трогаются — они лежат в `%APPDATA%\Книжница`.
