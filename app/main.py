@@ -36,6 +36,7 @@ def data_dir():
 
 DATA_FILE = os.path.join(data_dir(), "library.json")
 BACKUP_DIR = os.path.join(data_dir(), "Резервные копии")
+WINDOW_STATE_FILE = os.path.join(data_dir(), "window.json")
 
 
 def resource(name):
@@ -241,16 +242,61 @@ def prepare_html(html, settings):
     return html.replace("</head>", initial + style + "</head>", 1)
 
 
+def load_window_state():
+    try:
+        with open(WINDOW_STATE_FILE, "r", encoding="utf-8") as f:
+            s = json.load(f)
+        w = int(s.get("width", 0))
+        h = int(s.get("height", 0))
+        if w < 940 or h < 620:          # не меньше min_size
+            return None
+        state = {"width": w, "height": h}
+        if isinstance(s.get("x"), int) and isinstance(s.get("y"), int):
+            state["x"] = s["x"]
+            state["y"] = s["y"]
+        state["maximized"] = bool(s.get("maximized"))
+        return state
+    except Exception:
+        return None
+
+
+def save_window_state():
+    if window is None:
+        return
+    try:
+        state = {
+            "width": int(window.width),
+            "height": int(window.height),
+            "x": int(window.x),
+            "y": int(window.y),
+        }
+        tmp = WINDOW_STATE_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(state, f)
+        os.replace(tmp, WINDOW_STATE_FILE)
+    except Exception:
+        pass
+
+
 def acquire_single_instance():
     global instance_mutex
     try:
-        instance_mutex = ctypes.windll.kernel32.CreateMutexW(None, False, MUTEX_NAME)
-        if ctypes.windll.kernel32.GetLastError() != 183:
+        ERROR_ALREADY_EXISTS = 183
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.CreateMutexW.restype = ctypes.c_void_p
+        kernel32.CreateMutexW.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_wchar_p]
+        instance_mutex = kernel32.CreateMutexW(None, False, MUTEX_NAME)
+        # use_last_error → берём код ошибки сразу, ctypes не затирает его
+        if ctypes.get_last_error() != ERROR_ALREADY_EXISTS:
             return True
-        hwnd = ctypes.windll.user32.FindWindowW(None, APP_NAME)
+        # второй экземпляр: показываем уже открытое окно и выходим
+        user32 = ctypes.windll.user32
+        user32.FindWindowW.restype = ctypes.c_void_p
+        user32.FindWindowW.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p]
+        hwnd = user32.FindWindowW(None, APP_NAME)
         if hwnd:
-            ctypes.windll.user32.ShowWindow(hwnd, 9)
-            ctypes.windll.user32.SetForegroundWindow(hwnd)
+            user32.ShowWindow(ctypes.c_void_p(hwnd), 9)   # SW_RESTORE
+            user32.SetForegroundWindow(ctypes.c_void_p(hwnd))
         return False
     except Exception:
         return True
@@ -460,15 +506,29 @@ def main():
     settings = load_initial_settings()
     with open(resource("ui.html"), "r", encoding="utf-8") as f:
         html = prepare_html(f.read(), settings)
-    window = webview.create_window(
-        APP_NAME,
+
+    state = load_window_state()
+    win_kwargs = dict(
         html=html,
         js_api=Api(),
-        width=1240,
-        height=860,
+        width=(state or {}).get("width", 1240),
+        height=(state or {}).get("height", 860),
         min_size=(940, 620),
         background_color="#161618" if settings["theme"] == "dark" else "#f6f6f4",
     )
+    if state and "x" in state and "y" in state:
+        win_kwargs["x"] = state["x"]
+        win_kwargs["y"] = state["y"]
+
+    window = webview.create_window(APP_NAME, **win_kwargs)
+
+    if state and state.get("maximized"):
+        window.events.shown += lambda: window.maximize()
+    # запоминаем размер/позицию окна, чтобы открываться там же
+    window.events.resized += lambda *a: save_window_state()
+    window.events.moved += lambda *a: save_window_state()
+    window.events.closing += save_window_state
+
     webview.start()
 
 
