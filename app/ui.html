@@ -145,6 +145,15 @@
     display:flex;align-items:center;justify-content:center;color:var(--muted)}
   .portrait img{width:100%;height:auto;display:block}
   .portrait.empty{aspect-ratio:4/5}
+  .character-wrap{max-width:1180px}
+  .character-layout{display:grid;grid-template-columns:minmax(300px,420px) minmax(0,1fr);gap:28px;align-items:start}
+  .character-photo-panel{width:100%;position:sticky;top:28px}
+  .character-main{min-width:0;max-width:690px}
+  .portrait.large{width:100%;aspect-ratio:4/5;min-height:360px;background:#101014;border-color:#25252b}
+  .portrait.large img{width:100%;height:100%;object-fit:contain}
+  .portrait-button{padding:0;cursor:zoom-in;text-align:inherit}
+  .portrait-button:hover{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .photo-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
   .profile-id{flex:1;min-width:0;padding-top:6px}
   .profile-id .pname{font-size:30px;font-weight:700;letter-spacing:-.4px;margin:0 0 10px}
   .badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);
@@ -184,6 +193,11 @@
   .finput:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .modal .mbody{overflow-y:auto;padding:6px 0}
   .modal .mfoot{padding:18px 26px;display:flex;justify-content:flex-end;gap:10px}
+  .modal.photo{max-width:min(1120px,calc(100vw - 48px));height:min(88vh,880px);background:#0f0f12;color:#fff}
+  .photo-view-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .modal.photo h3{padding:0;margin:0;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .photo-view-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px}
+  .photo-view-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px}
   .set-section{padding:18px 26px;border-top:1px solid var(--line)}
   .set-section:first-child{border-top:none}
   .set-section .sh{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;margin-bottom:14px}
@@ -304,6 +318,9 @@
     .plan-fields{grid-template-columns:1fr}
     .plan-card-head{align-items:flex-start;flex-wrap:wrap}
     .plan-title{min-width:220px}
+    .character-layout{grid-template-columns:1fr}
+    .character-photo-panel{position:static;max-width:420px}
+    .portrait.large{min-height:0}
     .map-wrap{padding:18px 16px 46px}
     .map-studio{grid-template-columns:1fr}
     .map-board,.map-panel{height:auto;min-height:560px}
@@ -1200,32 +1217,35 @@ function renderCharacterView(main,b){
   const c=b.characters.find(x=>x.id===route.itemId);
   if(!c){ route.view="overview"; return renderMain(); }
   const by=birthYear(b,c);
-  const portrait=c.photo?`<div class="portrait"><img src="${c.photo}"></div>`:`<div class="portrait empty">${icon('user',46)}</div>`;
+  const photoAlt=escapeAttr(c.name||"Фото персонажа");
+  const portrait=c.photo?`<button class="portrait large portrait-button" title="Открыть фото крупно" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
   const meta=[];
   if(c.age) meta.push(`<b>${escapeHtml(c.age)}</b> лет`);
   if(by!==null) meta.push(`год рождения ≈ <b>${by}</b>`);
   const sec=(title,val)=>val&&val.trim()?`<div class="section"><h4>${title}</h4><p>${escapeHtml(val)}</p></div>`:"";
   const anyField=[c.appearance,c.personality,c.background,c.goals,c.relationships,c.notes].some(v=>v&&v.trim());
-  main.innerHTML=`<div class="wrap">
+  main.innerHTML=`<div class="wrap character-wrap">
     <div class="pagehead">
       <div></div>
       <button class="btn" onclick="editCharacter()">${icon('edit',16)} Редактировать</button>
     </div>
-    <div class="profile-top">
-      ${portrait}
-      <div class="profile-id">
-        <h1 class="pname">${escapeHtml(c.name||"Без имени")}</h1>
-        ${c.role?`<span class="badge">${escapeHtml(c.role)}</span>`:""}
-        ${meta.length?`<div class="profile-meta">${meta.join(" · ")}</div>`:""}
+    <div class="character-layout">
+      <div class="character-photo-panel">${portrait}</div>
+      <div class="character-main">
+        <div class="profile-id">
+          <h1 class="pname">${escapeHtml(c.name||"Без имени")}</h1>
+          ${c.role?`<span class="badge">${escapeHtml(c.role)}</span>`:""}
+          ${meta.length?`<div class="profile-meta">${meta.join(" · ")}</div>`:""}
+        </div>
+        ${sec("Внешность",c.appearance)}
+        ${sec("Характер",c.personality)}
+        ${sec("Биография",c.background)}
+        ${sec("Цели и мотивация",c.goals)}
+        ${sec("Связи",c.relationships)}
+        ${sec("Заметки",c.notes)}
+        ${!anyField?`<div class="section"><p class="empty-note">Профиль пока пустой. Нажми «Редактировать», чтобы заполнить.</p></div>`:""}
       </div>
     </div>
-    ${sec("Внешность",c.appearance)}
-    ${sec("Характер",c.personality)}
-    ${sec("Биография",c.background)}
-    ${sec("Цели и мотивация",c.goals)}
-    ${sec("Связи",c.relationships)}
-    ${sec("Заметки",c.notes)}
-    ${!anyField?`<div class="section"><p class="empty-note">Профиль пока пустой. Нажми «Редактировать», чтобы заполнить.</p></div>`:""}
   </div>`;
 }
 function editCharacter(){ route.charMode="edit"; renderMain(); }
@@ -1235,37 +1255,38 @@ function doneCharacter(){ route.charMode="view"; renderMain(); renderSidebar(); 
 function renderCharacterEdit(main,b){
   const c=b.characters.find(x=>x.id===route.itemId);
   if(!c){ route.view="overview"; return renderMain(); }
-  const photo=c.photo?`<img src="${c.photo}">`:icon('user',46);
+  const photoAlt=escapeAttr(c.name||"Фото персонажа");
+  const photo=c.photo?`<button class="portrait large portrait-button" title="Открыть фото крупно" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
   const by=birthYear(b,c);
-  main.innerHTML=`<div class="wrap">
+  main.innerHTML=`<div class="wrap character-wrap">
     <div class="pagehead">
       <button class="btn ghost" onclick="doneCharacter()">${icon('back',16)} Готово</button>
       <button class="btn ghost small" onclick="deleteCharacter('${c.id}')">${icon('trash',16)} Удалить</button>
     </div>
-    <div class="profile-top">
-      <div>
-        <div class="portrait ${c.photo?'':'empty'}">${photo}</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+    <div class="character-layout">
+      <div class="character-photo-panel">
+        ${photo}
+        <div class="photo-actions">
           <button class="btn small" onclick="pickCharPhoto('${c.id}')">${icon('image',15)} ${c.photo?'Заменить фото':'Добавить фото'}</button>
           ${c.photo?`<button class="btn small ghost" onclick="removeCharPhoto('${c.id}')">${icon('x',15)} Убрать</button>`:''}
         </div>
       </div>
-      <div class="profile-id" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
+      <div class="character-main profile-id" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
         <div class="fld"><label>Имя</label><input id="cName" value="${escapeAttr(c.name)}" placeholder="Имя персонажа"></div>
         <div class="fld-grid">
           <div class="fld"><label>Роль в книге</label>${roleSelect(c)}</div>
           <div class="fld"><label>Возраст</label><input id="cAge" value="${escapeAttr(c.age)}" placeholder="напр. 34">
             <div class="hint" id="byHint">${by!==null?`год рождения ≈ ${by}`:'укажи год действия в обзоре книги, чтобы видеть год рождения'}</div></div>
         </div>
+        <div class="fld-stack">
+          ${taField("cApp","Внешность",c.appearance,"Рост, телосложение, лицо, одежда, особые приметы…")}
+          ${taField("cPers","Характер",c.personality,"Темперамент, привычки, сильные и слабые стороны…")}
+          ${taField("cBack","Биография",c.background,"Откуда родом, ключевые события, что сформировало персонажа…")}
+          ${taField("cGoals","Цели и мотивация",c.goals,"Чего хочет, чего боится, что им движет…")}
+          ${taField("cRel","Связи с другими персонажами",c.relationships,"Семья, друзья, враги, отношения…")}
+          ${taField("cNotes","Заметки",c.notes,"Всё прочее, что важно помнить…")}
+        </div>
       </div>
-    </div>
-    <div class="fld-stack" style="margin-top:24px">
-      ${taField("cApp","Внешность",c.appearance,"Рост, телосложение, лицо, одежда, особые приметы…")}
-      ${taField("cPers","Характер",c.personality,"Темперамент, привычки, сильные и слабые стороны…")}
-      ${taField("cBack","Биография",c.background,"Откуда родом, ключевые события, что сформировало персонажа…")}
-      ${taField("cGoals","Цели и мотивация",c.goals,"Чего хочет, чего боится, что им движет…")}
-      ${taField("cRel","Связи с другими персонажами",c.relationships,"Семья, друзья, враги, отношения…")}
-      ${taField("cNotes","Заметки",c.notes,"Всё прочее, что важно помнить…")}
     </div>
   </div>`;
   const bind=(id,field,reflect)=>{ const el=document.getElementById(id); if(!el) return;
@@ -1731,6 +1752,19 @@ async function importBackup(){
 }
 
 /* ============ МОДАЛКИ ============ */
+function openCharacterPhoto(id){
+  const b=curBook();
+  const c=b&&b.characters.find(x=>x.id===id);
+  if(!c||!c.photo) return;
+  modal(`<div class="photo-view-head">
+      <h3>${escapeHtml(c.name||"Фото персонажа")}</h3>
+      <button class="btn icon ghost" id="mClosePhoto" title="Закрыть">${icon('x',16)}</button>
+    </div>
+    <div class="photo-view-body"><img src="${c.photo}" alt="${escapeAttr(c.name||"Фото персонажа")}"></div>`,"photo");
+  const done=()=>closeModal();
+  document.getElementById("mClosePhoto").onclick=done;
+  document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
+}
 function modal(html,cls){ document.getElementById("modalRoot").innerHTML=`<div class="modal-back" id="mback"><div class="modal ${cls||''}">${html}</div></div>`; }
 function closeModal(){ document.getElementById("modalRoot").innerHTML=""; }
 function openInput({title,label,value="",placeholder="",ok="Готово"}){
@@ -1776,7 +1810,10 @@ function escapeAttr(s){ return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot
 document.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="f"){ e.preventDefault(); openSearch(); }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){ e.preventDefault(); if(route.view==="chapter") manualSnapshot(); }
-  if(e.key==="Escape"){ if(!document.getElementById("preview").classList.contains("hidden")) closePreview(); }
+  if(e.key==="Escape"){
+    if(document.querySelector(".modal.photo")){ closeModal(); return; }
+    if(!document.getElementById("preview").classList.contains("hidden")) closePreview();
+  }
 });
 
 /* ============ СТАРТ ============ */
