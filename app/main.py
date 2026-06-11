@@ -22,6 +22,7 @@ MUTEX_NAME = "Local\\KnizhnitsaSingleInstance"
 LEGACY_APP_NAMES = ("Пиши книгу",)
 MAX_BACKUPS = 15
 AUTO_BACKUP_INTERVAL = 10 * 60
+ALWAYS_START_MAXIMIZED = True
 window = None
 instance_mutex = None
 last_auto_backup = 0
@@ -522,9 +523,9 @@ def main():
 
     window = webview.create_window(APP_NAME, **win_kwargs)
 
-    if state and state.get("maximized"):
+    if ALWAYS_START_MAXIMIZED or (state and state.get("maximized")):
         window.events.shown += lambda: window.maximize()
-    # запоминаем размер/позицию окна, чтобы открываться там же
+    # Запоминаем размер/позицию на случай, если позже отключим автозапуск развёрнутым.
     window.events.resized += lambda *a: save_window_state()
     window.events.moved += lambda *a: save_window_state()
     window.events.closing += save_window_state
