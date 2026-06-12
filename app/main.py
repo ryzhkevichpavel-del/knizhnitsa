@@ -54,6 +54,14 @@ def result(ok=True, error=""):
     return {"ok": bool(ok), "error": error}
 
 
+def norm_lang(lang):
+    return "en" if lang == "en" else "ru"
+
+
+def msg(lang, ru, en):
+    return en if norm_lang(lang) == "en" else ru
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -169,7 +177,7 @@ def prune_backups():
         pass
 
 
-def create_backup_from_text(data, reason):
+def create_backup_from_text(data, reason, lang="ru"):
     if not data:
         return result(True)
     try:
@@ -183,26 +191,26 @@ def create_backup_from_text(data, reason):
         prune_backups()
         return {"ok": True, "path": path, "error": ""}
     except Exception as e:
-        return result(False, f"Не удалось сделать резервную копию: {e}")
+        return result(False, f"{msg(lang, 'Не удалось сделать резервную копию', 'Could not create a backup')}: {e}")
 
 
-def backup_current_file(reason, force=False):
+def backup_current_file(reason, force=False, lang="ru"):
     global last_auto_backup
     if not os.path.exists(DATA_FILE):
         return result(True)
     if not force and time.time() - last_auto_backup < AUTO_BACKUP_INTERVAL:
         return result(True)
     try:
-        res = create_backup_from_text(read_text(DATA_FILE), reason)
+        res = create_backup_from_text(read_text(DATA_FILE), reason, lang)
         if res.get("ok"):
             last_auto_backup = time.time()
         return res
     except Exception as e:
-        return result(False, f"Не удалось сделать резервную копию: {e}")
+        return result(False, f"{msg(lang, 'Не удалось сделать резервную копию', 'Could not create a backup')}: {e}")
 
 
 def load_initial_settings():
-    settings = {"theme": "light", "accent": "#3f4ea3", "fontSize": 19}
+    settings = {"theme": "light", "accent": "#3f4ea3", "fontSize": 19, "lang": "ru"}
     try:
         if os.path.exists(DATA_FILE):
             data = json.loads(read_text(DATA_FILE))
@@ -213,6 +221,8 @@ def load_initial_settings():
                 settings["accent"] = saved["accent"]
             if isinstance(saved.get("fontSize"), int):
                 settings["fontSize"] = saved["fontSize"]
+            if saved.get("lang") == "en":
+                settings["lang"] = "en"
     except Exception:
         pass
     return settings
@@ -228,8 +238,10 @@ def accent_soft(hex_color, theme):
 def prepare_html(html, settings):
     theme = settings["theme"]
     accent = settings["accent"]
+    lang = norm_lang(settings.get("lang"))
     soft = accent_soft(accent, theme)
     html = html.replace('data-theme="light"', f'data-theme="{theme}"', 1)
+    html = re.sub(r'<html lang="[^"]+"', f'<html lang="{lang}"', html, count=1)
     initial = (
         "<script>"
         f"window.__INITIAL_SETTINGS__={json.dumps(settings, ensure_ascii=False)};"
@@ -316,13 +328,17 @@ class Api:
         except Exception:
             return ""
 
-    def save(self, data):
+    def save(self, data, lang="ru"):
+        lang = norm_lang(lang)
         try:
             old = ""
             if os.path.exists(DATA_FILE):
                 old = read_text(DATA_FILE)
             if old and old != data:
-                backup_res = backup_current_file("автокопия перед сохранением")
+                backup_res = backup_current_file(
+                    msg(lang, "автокопия перед сохранением", "auto backup before saving"),
+                    lang=lang,
+                )
                 if not backup_res.get("ok"):
                     return backup_res
             tmp = DATA_FILE + ".tmp"
@@ -331,13 +347,13 @@ class Api:
             os.replace(tmp, DATA_FILE)  # атомарно — не потеряем книгу при сбое
             return result(True)
         except Exception as e:
-            return result(False, f"Не удалось сохранить библиотеку: {e}")
+            return result(False, f"{msg(lang, 'Не удалось сохранить библиотеку', 'Could not save library')}: {e}")
 
     def data_location(self):
         return DATA_FILE
 
-    def backup_state(self, data, reason="ручная копия"):
-        return create_backup_from_text(data, reason)
+    def backup_state(self, data, reason="ручная копия", lang="ru"):
+        return create_backup_from_text(data, reason, lang)
 
     # ---- цвет системного заголовка окна (Windows 11) ----
     def set_titlebar(self, caption_hex):
@@ -368,12 +384,15 @@ class Api:
             return False
 
     # ---- выбор изображения (фото персонажа / фон карты) ----
-    def pick_image(self):
+    def pick_image(self, lang="ru"):
+        lang = norm_lang(lang)
         try:
             paths = window.create_file_dialog(
                 webview.OPEN_DIALOG,
-                file_types=("Изображения (*.png;*.jpg;*.jpeg;*.webp;*.bmp;*.gif)",
-                            "Все файлы (*.*)"),
+                file_types=(
+                    msg(lang, "Изображения (*.png;*.jpg;*.jpeg;*.webp;*.bmp;*.gif)", "Images (*.png;*.jpg;*.jpeg;*.webp;*.bmp;*.gif)"),
+                    msg(lang, "Все файлы (*.*)", "All files (*.*)"),
+                ),
             )
             if not paths:
                 return ""
@@ -403,17 +422,18 @@ class Api:
             return ""
 
     # ---- экспорт готовой книги ----
-    def export_docx(self, book):
+    def export_docx(self, book, lang="ru"):
+        lang = norm_lang(lang)
         try:
             from docx import Document
             from docx.enum.text import WD_ALIGN_PARAGRAPH
             from docx.shared import Pt, Inches
 
-            title = (book or {}).get("title") or "книга"
+            title = (book or {}).get("title") or msg(lang, "книга", "book")
             path = window.create_file_dialog(
                 webview.SAVE_DIALOG,
                 save_filename=f"{safe_slug(title)}.docx",
-                file_types=("Документ Word (*.docx)",),
+                file_types=(msg(lang, "Документ Word (*.docx)", "Word document (*.docx)"),),
             )
             if not path:
                 return result(False, "")
@@ -442,7 +462,7 @@ class Api:
                 doc.add_page_break()
                 h = doc.add_paragraph()
                 h.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                h_run = h.add_run(chapter.get("title") or f"Глава {index + 1}")
+                h_run = h.add_run(chapter.get("title") or f"{msg(lang, 'Глава', 'Chapter')} {index + 1}")
                 h_run.bold = True
                 h_run.font.size = Pt(16)
 
@@ -461,13 +481,15 @@ class Api:
             doc.save(path)
             return result(True)
         except Exception as e:
-            return result(False, f"Не удалось сохранить DOCX: {e}")
+            return result(False, f"{msg(lang, 'Не удалось сохранить DOCX', 'Could not save DOCX')}: {e}")
 
-    def export_txt(self, content):
-        return self._write_dialog(content, "книга.txt",
-                                  ("Текстовый файл (*.txt)",), encoding="utf-8")
+    def export_txt(self, content, lang="ru"):
+        lang = norm_lang(lang)
+        return self._write_dialog(content, msg(lang, "книга.txt", "book.txt"),
+                                  (msg(lang, "Текстовый файл (*.txt)", "Text file (*.txt)"),), encoding="utf-8", lang=lang)
 
-    def _write_dialog(self, content, fname, ftypes, encoding="utf-8"):
+    def _write_dialog(self, content, fname, ftypes, encoding="utf-8", lang="ru"):
+        lang = norm_lang(lang)
         try:
             path = window.create_file_dialog(
                 webview.SAVE_DIALOG, save_filename=fname, file_types=ftypes)
@@ -479,17 +501,23 @@ class Api:
                 f.write(content)
             return result(True)
         except Exception as e:
-            return result(False, f"Не удалось сохранить файл: {e}")
+            return result(False, f"{msg(lang, 'Не удалось сохранить файл', 'Could not save file')}: {e}")
 
     # ---- резервные копии ----
-    def export_backup(self, data):
-        return self._write_dialog(data, "Книжница-копия.json",
-                                  ("Файл копии (*.json)",))
+    def export_backup(self, data, lang="ru"):
+        lang = norm_lang(lang)
+        return self._write_dialog(
+            data,
+            msg(lang, "Книжница-копия.json", "Knizhnitsa-backup.json"),
+            (msg(lang, "Файл копии (*.json)", "Backup file (*.json)"),),
+            lang=lang,
+        )
 
-    def import_backup(self):
+    def import_backup(self, lang="ru"):
+        lang = norm_lang(lang)
         try:
             paths = window.create_file_dialog(
-                webview.OPEN_DIALOG, file_types=("Файл копии (*.json)",))
+                webview.OPEN_DIALOG, file_types=(msg(lang, "Файл копии (*.json)", "Backup file (*.json)"),))
             if not paths:
                 return ""
             p = paths[0] if isinstance(paths, (list, tuple)) else paths

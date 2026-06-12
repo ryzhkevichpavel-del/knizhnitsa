@@ -420,7 +420,8 @@ const ICONS={
   word:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
   txt:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
   sun:'<circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="7" y2="7"/><line x1="17" y1="17" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="7" y2="17"/><line x1="17" y1="7" x2="19.1" y2="4.9"/>',
-  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>'
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'
 };
 function icon(n,s){ s=s||18; return `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`; }
 
@@ -471,13 +472,83 @@ const THREAD_COLORS=[
 ];
 const MAP_MIN_ZOOM=.65, MAP_MAX_ZOOM=2.2, MAP_ZOOM_STEP=.15;
 
+/* ============ ЛОКАЛИЗАЦИЯ ============ */
+const TEXT={
+  appName:["Книжница","Knizhnitsa"], settings:["Настройки","Settings"], search:["Поиск","Search"], trash:["Корзина","Trash"],
+  allBooks:["Все книги","All books"], export:["Экспорт","Export"], preview:["Как в книге","Book view"], done:["Готово","Done"],
+  cancel:["Отмена","Cancel"], close:["Закрыть","Close"], delete:["Удалить","Delete"], save:["Сохранить","Save"], add:["Добавить","Add"],
+  create:["Создать","Create"], restore:["Вернуть","Restore"], edit:["Редактировать","Edit"], rename:["Переименовать","Rename"],
+  noTitle:["Без названия","Untitled"], noName:["Без имени","Unnamed"], noRole:["Без роли","No role"], noNote:["Без заметки","No note"],
+  words:["слов","words"], pages:["стр.","pages"], pagesFull:["страниц","pages"], chaptersShort:["гл.","ch."], chapters:["глав","chapters"],
+  characters:["персонажей","characters"], authorSheets:["авт. листов","author sheets"], authorSheetShort:["авт.л.","author sheets"],
+  myBooks:["Мои книги","My books"], homeSub:["Открой книгу, чтобы продолжить, или начни новую.","Open a book to continue, or start a new one."],
+  newBook:["Новая книга","New book"], bookTitle:["Название книги","Book title"], bookTitlePh:["Например: Тень над городом","For example: The Shadow Over Town"],
+  bookMoved:["Книга перемещена в корзину","Book moved to trash"], chapterMoved:["Глава перемещена в корзину","Chapter moved to trash"],
+  characterMoved:["Персонаж перемещён в корзину","Character moved to trash"], loreMoved:["Заметка перемещена в корзину","World note moved to trash"],
+  moveToTrash:["В корзину","To trash"], moveToTrashTitle:["Переместить в корзину?","Move to trash?"], moveChapterTitle:["Переместить главу в корзину?","Move chapter to trash?"],
+  moveCharacterTitle:["Переместить персонажа в корзину?","Move character to trash?"], moveLoreTitle:["Переместить заметку в корзину?","Move note to trash?"],
+  canRestoreFromTrash:["можно будет вернуть из корзины.","can be restored from trash."], canRestoreToBook:["можно будет вернуть в эту книгу.","can be restored to this book."],
+  renameBook:["Переименовать книгу","Rename book"], renameChapter:["Переименовать главу","Rename chapter"], title:["Название","Title"],
+  newChapter:["Новая глава","New chapter"], chapter:["Глава","Chapter"], chapterTitle:["Название главы","Chapter title"], chooseChapter:["Выбери главу слева — или создай новую.","Choose a chapter on the left, or create a new one."],
+  saveVersion:["Сохранить версию","Save version"], history:["История","History"], saved:["Сохранено","Saved"], saving:["Сохранение…","Saving..."], notSaved:["Не сохранено","Not saved"],
+  chapterBodyPh:["Здесь начинается глава…","The chapter starts here..."], current:["текущая","current"], empty:["(пусто)","(empty)"],
+  noVersions:["Пока нет сохранённых версий. Они создаются автоматически при переходе между главами и по кнопке «Сохранить версию».","No saved versions yet. Versions are created automatically when switching chapters and with the Save version button."],
+  chapterHistory:["История главы","Chapter history"], restoreVersionTitle:["Вернуть эту версию?","Restore this version?"], restoreVersionMsg:["Текущий текст сначала сохранится в историю, затем заменится выбранной версией.","Current text will be saved to history first, then replaced with the selected version."],
+  versionRestored:["Версия восстановлена","Version restored"], versionSaved:["Версия сохранена","Version saved"], noVersionChanges:["Изменений нет — версия не создана","No changes, version was not created"],
+  versionFrom:["Версия от","Version from"], backToList:["← К списку","← Back to list"], restoreThisText:["Вернуть этот текст","Restore this text"],
+  bookOverview:["Обзор и настройки книги","Book overview and settings"], book:["Книга","Book"], plan:["План","Plan"], characterMap:["Карта персонажей","Character map"],
+  chaptersGroup:["Главы","Chapters"], noChapters:["Глав пока нет","No chapters yet"], addChapter:["Добавить главу","Add chapter"],
+  charactersGroup:["Персонажи","Characters"], noCharacters:["Персонажей пока нет","No characters yet"], addCharacter:["Добавить персонажа","Add character"],
+  worldLore:["Мир и лор","World notes"], noLore:["Заметок пока нет","No notes yet"], addLore:["Добавить заметку","Add note"], worldNote:["Заметка мира","World note"],
+  mapEmpty:["Сначала добавь персонажей, а потом связывай их на карте.","Add characters first, then connect them on the map."],
+  zoomOut:["Отдалить","Zoom out"], zoomIn:["Приблизить","Zoom in"], newLink:["Новая связь","New link"], legend:["Условные обозначения","Legend"],
+  links:["Связи","Links"], noLinks:["Связей пока нет.","No links yet."], setupLink:["Настроить связь","Edit link"], deleteLink:["Удалить связь","Delete link"],
+  needCharacters:["Нужны персонажи","Characters needed"], needTwoCharacters:["Для связи нужны хотя бы два персонажа.","At least two characters are needed for a link."],
+  firstCharacter:["Первый персонаж","First character"], secondCharacter:["Второй персонаж","Second character"], linkMeaning:["Смысл связи","Link meaning"], linkStrength:["Сила связи","Link strength"],
+  note:["Заметка","Note"], linkNotePh:["Например: скрытая вражда, давний долг, семейная тайна...","For example: hidden rivalry, old debt, family secret..."],
+  chooseDifferentCharacters:["Выбери двух разных персонажей","Choose two different characters"], linkUpdated:["Связь обновлена","Link updated"], linkAdded:["Связь добавлена","Link added"],
+  deleteLinkTitle:["Удалить связь?","Delete link?"], deleteLinkMsg:["Персонажи останутся на месте, удалится только линия между ними.","Characters will stay; only the line between them will be removed."],
+  profile:["Профиль","Profile"], details:["Описание","Description"], relations:["Связи","Relations"], map:["Карта","Map"], photoAlt:["Фото персонажа","Character photo"],
+  openPhoto:["Открыть фото крупно","Open large photo"], replacePhoto:["Заменить фото","Replace photo"], addPhoto:["Добавить фото","Add photo"], remove:["Убрать","Remove"], photoAdded:["Фото добавлено","Photo added"],
+  profileShort:["Коротко","Summary"], profileEmpty:["Профиль пока пустой.","Profile is empty."], name:["Имя","Name"], characterName:["Имя персонажа","Character name"],
+  role:["Роль в книге","Role in the book"], age:["Возраст","Age"], agePh:["напр. 34","e.g. 34"], birthYear:["год рождения ≈","birth year ≈"], birthYearHint:["укажи год действия в обзоре книги, чтобы видеть год рождения","set the story year in the book overview to see birth year"],
+  aliases:["Варианты имени","Name variants"], aliasesPh:["Фамилия, прозвище, отчество, склонения...","Surname, nickname, patronymic, inflections..."], aliasesHint:["По этим словам приложение само найдёт персонажа в главах. Можно писать через запятую или с новой строки.","The app will use these words to find the character in chapters. Separate with commas or new lines."],
+  appearance:["Внешность","Appearance"], appearancePh:["Рост, телосложение, лицо, одежда, особые приметы…","Height, build, face, clothes, distinctive marks..."], personality:["Характер","Personality"], personalityPh:["Темперамент, привычки, сильные и слабые стороны…","Temperament, habits, strengths and weaknesses..."],
+  biography:["Биография","Biography"], biographyPh:["Откуда родом, ключевые события, что сформировало персонажа…","Origin, key events, what shaped the character..."], goals:["Цели и мотивация","Goals and motivation"], goalsPh:["Чего хочет, чего боится, что им движет…","What they want, fear, and what drives them..."],
+  notes:["Заметки","Notes"], notesPh:["Всё прочее, что важно помнить…","Anything else worth remembering..."], descriptionEmpty:["Описание пока пустое.","Description is empty."],
+  relationshipsMap:["Связи из карты персонажей","Character map relations"], addRelation:["Добавить связь","Add relation"], noRelationsLong:["Связей пока нет. Добавь связь здесь — она сразу появится и на карте персонажей.","No relations yet. Add one here and it will appear on the character map."],
+  oldManualNote:["Старая ручная заметка","Old manual note"], characterWork:["Работа с персонажем","Character work"], openMap:["Открыть карту","Open map"], openMapSub:["Посмотреть место персонажа среди остальных","See this character among the others"],
+  liveRelationsSub:["Перейти к живым связям из карты","Go to live map relations"], foundInTextSub:["Где персонаж найден в тексте","Where the character appears in text"], addRelationSub:["Создать связь без ручной анкеты","Create a relation without a manual form"],
+  appearances:["Появления в главах","Chapter appearances"], noAppearances:["Пока не найдено в тексте глав. Проверь имя или добавь варианты имени.","Not found in chapter text yet. Check the name or add name variants."], mentions:["упоминан","mention"], yearsOld:["лет","years old"], recognizedBy:["Распознаётся по","Recognized by"], linkLower:["связь","link"],
+  notSpecified:["— не указана —","— not set —"], customOther:["＋ Другое…","＋ Other..."], customRole:["Своя роль","Custom role"], customRolePh:["например, Хранитель тайны","for example, Keeper of Secrets"],
+  newLore:["Новая заметка мира","New world note"], loreTitlePh:["например: Северный порт","for example: Northern Harbor"], loreNamePh:["Название места, события, термина...","Name of a place, event, term..."], type:["Тип","Type"], loreSummaryPh:["Суть в двух-трёх фразах...","The essence in two or three sentences..."],
+  detailsPh:["История, правила, детали, важные факты...","History, rules, details, important facts..."], linksPh:["С какими персонажами, главами, местами или событиями связано...","Connected characters, chapters, places, or events..."], loreEmpty:["Заметка пока пустая. Нажми «Редактировать», чтобы заполнить.","This note is empty. Click Edit to fill it in."],
+  bookPlan:["План книги","Book plan"], planHint:["Собери книгу по главам: статус, суть сцены и рабочие заметки.","Build the book by chapter: status, scene summary, and working notes."], whatHappens:["Что происходит","What happens"], planSummaryPh:["Коротко: сцена, конфликт, поворот...","Briefly: scene, conflict, twist..."], chapterNotes:["Заметки к главе","Chapter notes"], chapterNotesPh:["Что не забыть, что проверить, что переписать...","What to remember, check, or rewrite..."], openChapter:["Открыть главу","Open chapter"], openCharacter:["Открыть персонажа","Open character"], up:["Выше","Up"], down:["Ниже","Down"], planEmpty:["Глав пока нет. Создай первую главу, и она появится в плане.","No chapters yet. Create the first chapter and it will appear in the plan."], more:["ещё","more"],
+  overviewYear:["Год действия","Story year"], overviewYearPh:["напр. 1965","e.g. 1965"], overviewYearHint:["Используется, чтобы считать год рождения персонажей по возрасту","Used to calculate character birth year by age"], era:["Эпоха / период","Era / period"], eraPh:["напр. послевоенное время","e.g. postwar period"], place:["Место действия","Setting"], placePh:["Город, страна, мир…","City, country, world..."], synopsis:["Синопсис / о чём книга","Synopsis / what the book is about"], synopsisPh:["Краткое содержание, идея, замысел…","Short summary, idea, concept..."], authorSheetHelp:["Авторский лист = 40 000 знаков, принятая в издательствах единица объёма","Author sheet = 40,000 characters, a publishing volume unit"],
+  theme:["Тема","Theme"], language:["Язык","Language"], switchToRussian:["Переключить на русский","Switch to Russian"], switchToEnglish:["Переключить на английский","Switch to English"], light:["Светлая","Light"], dark:["Тёмная","Dark"], appColor:["Цвет приложения","App color"], data:["Данные","Data"], saveBackup:["Сохранить резервную копию","Save backup"], loadBackup:["Загрузить из копии","Load from backup"], dataHint:["Все книги хранятся в одном файле на твоём компьютере. Резервную копию полезно делать время от времени.","All books are stored in one file on your computer. It is useful to make a backup from time to time."],
+  trashEmpty:["Корзина пуста.","Trash is empty."], clear:["Очистить","Empty"], withChaptersCharacters:["Со всеми главами и персонажами","With all chapters and characters"], fromBook:["Из книги","From book"], restoredBook:["Восстановленная книга","Restored book"], restored:["Восстановлено","Restored"], deleteForever:["Удалить окончательно","Delete permanently"], deleteForeverTitle:["Удалить окончательно?","Delete permanently?"], deleteForeverMsg:["После этого вернуть из корзины уже не получится.","After this, it cannot be restored from trash."], emptyTrashTitle:["Очистить корзину?","Empty trash?"], emptyTrashMsg:["Все элементы в корзине будут удалены окончательно.","All items in trash will be permanently deleted."],
+  searchPh:["Имя, сцена, фраза, место...","Name, scene, phrase, place..."], searchMin:["Введите хотя бы 2 символа.","Enter at least 2 characters."], searchNothing:["Ничего не найдено.","Nothing found."], link:["Связь","Link"], lore:["Лор","Lore"],
+  exportBook:["Экспорт книги","Export book"], docxExport:["Настоящий документ Word (.docx)","Real Word document (.docx)"], txtExport:["Текстовый файл (.txt)","Text file (.txt)"], wordSaved:["Книга сохранена в Word","Book saved to Word"], txtSaved:["Книга сохранена в .txt","Book saved as .txt"], failTitle:["Не получилось","Something went wrong"], wordFail:["Не удалось сохранить Word-файл.","Could not save the Word file."], txtFail:["Не удалось сохранить текстовый файл.","Could not save the text file."],
+  chapterUpper:["ГЛАВА","CHAPTER"], emptyChapter:["(глава пока пустая)","(chapter is empty)"], backupSaved:["Копия сохранена","Backup saved"], backupFail:["Не удалось сохранить копию.","Could not save backup."], badBackup:["Файл не похож на копию Книжницы.","This file does not look like a Knizhnitsa backup."], replaceBooks:["Заменить книги?","Replace books?"], replaceBooksMsg:["Текущая библиотека заменится содержимым копии.","Current library will be replaced by the backup contents."], replace:["Заменить","Replace"], beforeImport:["перед импортом","before import"], oldBackupFail:["Не удалось сохранить старое состояние перед импортом.","Could not save the old state before import."], backupLoaded:["Копия загружена","Backup loaded"], understand:["Понятно","OK"], saveModuleMissing:["Не найден модуль сохранения.","Save module was not found."], saveLibraryFail:["Не удалось сохранить библиотеку.","Could not save library."]
+};
+const ENUM_LABELS={
+  roles:{"Главный герой":"Main character","Протагонист":"Protagonist","Антагонист":"Antagonist","Второстепенный персонаж":"Supporting character","Эпизодический персонаж":"Minor character","Наставник":"Mentor","Союзник":"Ally","Соперник":"Rival","Любовная линия":"Love interest","Рассказчик":"Narrator","Резонёр":"Reasoner"},
+  plan:{"Задумка":"Idea","Черновик":"Draft","Готово":"Done","Переписать":"Rewrite"},
+  lore:{"Заметка":"Note","Место":"Place","Организация":"Organization","Событие":"Event","Термин":"Term","Предмет":"Item","Правило мира":"World rule","Лор":"Lore"},
+  relations:{"Союз":"Alliance","Дружба":"Friendship","Семья":"Family","Любовь":"Love","Конфликт":"Conflict","Вражда":"Enmity","Тайна":"Secret","Наставник":"Mentor","Долг":"Debt","Другое":"Other","Связь":"Link"},
+  patterns:{"Сплошная":"Solid","Пунктир":"Dashed","Точки":"Dotted","Мягкая":"Soft","Штрих-точка":"Dash-dot"},
+  strengths:{"Слабая":"Weak","Обычная":"Normal","Сильная":"Strong"},
+  accents:{"Изумруд":"Emerald","Бирюза":"Turquoise","Сапфир":"Sapphire","Индиго":"Indigo","Слива":"Plum","Бордо":"Burgundy","Роза":"Rose","Графит":"Graphite","Янтарь":"Amber","Лазурь":"Azure"}
+};
+
 /* ============ ДАННЫЕ ============ */
 const WORDS_PER_PAGE=280, CHARS_PER_SHEET=40000, MAX_VERSIONS=60;
 const INITIAL_SETTINGS=window.__INITIAL_SETTINGS__||{};
 let state={ books:[], settings:{
   fontSize:INITIAL_SETTINGS.fontSize||19,
   theme:INITIAL_SETTINGS.theme==="dark"?"dark":"light",
-  accent:INITIAL_SETTINGS.accent||DEFAULT_ACCENT
+  accent:INITIAL_SETTINGS.accent||DEFAULT_ACCENT,
+  lang:INITIAL_SETTINGS.lang==="en"?"en":"ru"
 } };
 let route={ screen:"home", bookId:null, view:null, itemId:null, charMode:"view", charTab:"profile" };
 let editorFontSize=19, saveTimer=null, snapTimer=null;
@@ -485,18 +556,31 @@ let editorFontSize=19, saveTimer=null, snapTimer=null;
 function api(){ return (window.pywebview&&window.pywebview.api)?window.pywebview.api:null; }
 function apiOk(res){ return res===true || (res&&res.ok); }
 function apiError(res,fallback){ return (res&&res.error)?res.error:fallback; }
+function lang(){ return state.settings&&state.settings.lang==="en"?"en":"ru"; }
+function isEn(){ return lang()==="en"; }
+function t(key){ const v=TEXT[key]; return v ? v[isEn()?1:0] : key; }
+function tx(ru,en){ return isEn()?en:ru; }
+function labelEnum(group,value){ return isEn()&&ENUM_LABELS[group]&&ENUM_LABELS[group][value]?ENUM_LABELS[group][value]:value; }
+function optionList(values,group,current){
+  return values.map(v=>`<option value="${escapeAttr(v)}" ${current===v?'selected':''}>${escapeHtml(labelEnum(group,v))}</option>`).join("");
+}
+function dateLocale(){ return isEn()?"en-US":"ru-RU"; }
+function titleOrFallback(v){ return v || t("noTitle"); }
+function nameOrFallback(v){ return v || t("noName"); }
+function characterFallback(){ return isEn() ? "Character" : "Персонаж"; }
+function roleOrFallback(v){ return v ? labelEnum("roles",v) : t("noRole"); }
 let lastSaveErrorAt=0;
 function save(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{
     const a=api();
-    if(!a||!a.save) return markSaveError("Не найден модуль сохранения.");
+    if(!a||!a.save) return markSaveError(t("saveModuleMissing"));
     try{
-      const res=await a.save(JSON.stringify(state));
+      const res=await a.save(JSON.stringify(state),lang());
       if(apiOk(res)) markSaved();
-      else markSaveError(apiError(res,"Не удалось сохранить библиотеку."));
+      else markSaveError(apiError(res,t("saveLibraryFail")));
     }catch(e){
-      markSaveError("Не удалось сохранить библиотеку: "+(e&&e.message?e.message:e));
+      markSaveError(t("saveLibraryFail")+" "+(e&&e.message?e.message:e));
     }
   },250);
 }
@@ -508,6 +592,8 @@ async function boot(){
   if(s.theme!=="dark") s.theme="light";
   if(!s.accent) s.accent=DEFAULT_ACCENT;
   if(!s.fontSize) s.fontSize=19;
+  if(s.lang!=="en") s.lang="ru";
+  document.documentElement.lang=s.lang;
   if(!Array.isArray(s.roles)||!s.roles.length) s.roles=DEFAULT_ROLES.slice();
   editorFontSize=s.fontSize;
   applyTheme(); render();
@@ -516,7 +602,7 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 function now(){ return Date.now(); }
 function countWords(t){ t=(t||"").trim(); return t?t.split(/\s+/).length:0; }
 function countChars(t){ return (t||"").length; }
-function fmt(n){ return n.toLocaleString("ru-RU"); }
+function fmt(n){ return n.toLocaleString(dateLocale()); }
 function uniqueClean(list){
   const seen=new Set(),out=[];
   (list||[]).forEach(v=>{
@@ -567,7 +653,7 @@ function bookWordCount(b){ return b.chapters.reduce((s,c)=>s+countWords(c.conten
 function bookCharCount(b){ return b.chapters.reduce((s,c)=>s+countChars(c.content),0); }
 function statsLine(b){
   const w=bookWordCount(b),ch=bookCharCount(b),pages=Math.max(1,Math.round(w/WORDS_PER_PAGE)),sheets=ch/CHARS_PER_SHEET;
-  return `<b>${fmt(w)}</b> слов · <b>≈${fmt(pages)}</b> стр. · ${sheets.toFixed(1)} авт.л.`;
+  return `<b>${fmt(w)}</b> ${t("words")} · <b>≈${fmt(pages)}</b> ${t("pages")} · ${sheets.toFixed(1)} ${t("authorSheetShort")}`;
 }
 function getBook(id){ return state.books.find(b=>b.id===id); }
 function curBook(){ return getBook(route.bookId); }
@@ -638,6 +724,15 @@ function applyTheme(){
 }
 function setTheme(t){ state.settings.theme=t; save(); applyTheme(); openSettings(); }
 function setAccent(h){ state.settings.accent=h; save(); applyTheme(); openSettings(); }
+function toggleLang(){
+  setLang(isEn()?"ru":"en");
+}
+function setLang(next){
+  state.settings.lang=next==="en"?"en":"ru";
+  document.documentElement.lang=state.settings.lang;
+  save();
+  render();
+}
 
 /* ============ НАВИГАЦИЯ ============ */
 function goHome(){ route={screen:"home",bookId:null,view:null,itemId:null,charMode:"view",charTab:"profile"}; render(); }
@@ -655,49 +750,49 @@ function setCharacterTab(tab){ route.charTab=tab; renderMain(); }
 
 /* ============ КНИГИ ============ */
 async function newBook(){
-  const title=await openInput({title:"Новая книга",label:"Название книги",placeholder:"Например: Тень над городом",ok:"Создать"});
+  const title=await openInput({title:t("newBook"),label:t("bookTitle"),placeholder:t("bookTitlePh"),ok:t("create")});
   if(title===null) return;
-  const b={id:uid(),title:(title.trim()||"Без названия"),createdAt:now(),updatedAt:now(),
+  const b={id:uid(),title:(title.trim()||t("noTitle")),createdAt:now(),updatedAt:now(),
     year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],characterLinks:[],characterMapZoom:1,lore:[]};
   state.books.unshift(b); save(); openBook(b.id);
 }
 async function deleteBook(id,ev){
   if(ev) ev.stopPropagation(); const b=getBook(id); if(!b) return;
-  if(!await openConfirm({title:"Переместить в корзину?",message:`«${b.title}» можно будет вернуть из корзины.`,ok:"В корзину",danger:false})) return;
+  if(!await openConfirm({title:t("moveToTrashTitle"),message:`«${b.title}» ${t("canRestoreFromTrash")}`,ok:t("moveToTrash"),danger:false})) return;
   ensureData();
   state.trash.books.unshift({id:uid(),deletedAt:now(),data:cloneData(b)});
-  state.books=state.books.filter(x=>x.id!==id); save(); toast("Книга перемещена в корзину");
+  state.books=state.books.filter(x=>x.id!==id); save(); toast(t("bookMoved"));
   if(route.bookId===id) goHome(); else render();
 }
 async function renameBook(id,ev){
   if(ev) ev.stopPropagation(); const b=getBook(id); if(!b) return;
-  const t=await openInput({title:"Переименовать книгу",label:"Название",value:b.title,ok:"Сохранить"});
-  if(t===null) return; b.title=t.trim()||b.title; b.updatedAt=now(); save(); render();
+  const v=await openInput({title:t("renameBook"),label:t("title"),value:b.title,ok:t("save")});
+  if(v===null) return; b.title=v.trim()||b.title; b.updatedAt=now(); save(); render();
 }
 
 /* ============ ГЛАВЫ ============ */
 function addChapter(){
   const b=curBook();
-  const ch={id:uid(),title:"Глава "+(b.chapters.length+1),content:"",updatedAt:now(),versions:[],planStatus:"Задумка",planSummary:"",planNotes:""};
+  const ch={id:uid(),title:t("chapter")+" "+(b.chapters.length+1),content:"",updatedAt:now(),versions:[],planStatus:"Задумка",planSummary:"",planNotes:""};
   b.chapters.push(ch); b.updatedAt=now(); save(); selectItem("chapter",ch.id);
 }
 async function deleteChapter(id,ev){
   if(ev) ev.stopPropagation();
   const b=curBook(); const ch=b.chapters.find(c=>c.id===id); if(!ch) return;
-  if(!await openConfirm({title:"Переместить главу в корзину?",message:`«${ch.title}» можно будет вернуть в эту книгу.`,ok:"В корзину",danger:false})) return;
+  if(!await openConfirm({title:t("moveChapterTitle"),message:`«${ch.title}» ${t("canRestoreToBook")}`,ok:t("moveToTrash"),danger:false})) return;
   ensureData();
   state.trash.chapters.unshift({id:uid(),deletedAt:now(),bookId:b.id,bookTitle:b.title,data:cloneData(ch)});
   b.chapters=b.chapters.filter(c=>c.id!==id); save();
   if(route.itemId===id){ if(b.chapters.length){route.itemId=b.chapters[0].id;route.view="chapter";} else {route.view="overview";route.itemId=null;} }
-  toast("Глава перемещена в корзину");
+  toast(t("chapterMoved"));
   render();
 }
 async function renameChapter(id,ev){
   if(ev) ev.stopPropagation();
   const b=curBook(); const ch=b&&b.chapters.find(c=>c.id===id); if(!ch) return;
-  const t=await openInput({title:"Переименовать главу",label:"Название",value:ch.title,ok:"Сохранить"});
-  if(t===null) return;
-  ch.title=t.trim()||ch.title; ch.updatedAt=now(); b.updatedAt=now(); save(); render();
+  const v=await openInput({title:t("renameChapter"),label:t("title"),value:ch.title,ok:t("save")});
+  if(v===null) return;
+  ch.title=v.trim()||ch.title; ch.updatedAt=now(); b.updatedAt=now(); save(); render();
 }
 function moveChapter(id,dir,ev){
   ev.stopPropagation();
@@ -777,18 +872,18 @@ function addCharacter(){
 }
 async function deleteCharacter(id){
   const b=curBook(); const c=b.characters.find(x=>x.id===id); if(!c) return;
-  if(!await openConfirm({title:"Переместить персонажа в корзину?",message:`«${c.name||"Без имени"}» можно будет вернуть в эту книгу.`,ok:"В корзину",danger:false})) return;
+  if(!await openConfirm({title:t("moveCharacterTitle"),message:`«${nameOrFallback(c.name)}» ${t("canRestoreToBook")}`,ok:t("moveToTrash"),danger:false})) return;
   ensureData();
   state.trash.characters.unshift({id:uid(),deletedAt:now(),bookId:b.id,bookTitle:b.title,data:cloneData(c)});
   b.characters=b.characters.filter(x=>x.id!==id); save();
-  toast("Персонаж перемещён в корзину");
+  toast(t("characterMoved"));
   if(route.itemId===id){route.view="overview";route.itemId=null;} render();
 }
 async function pickCharPhoto(id){
   const a=api(); if(!a) return;
-  const data=await a.pick_image(); if(!data) return;
+  const data=await a.pick_image(lang()); if(!data) return;
   const c=curBook().characters.find(x=>x.id===id); if(!c) return;
-  c.photo=data; save(); renderMain(); renderSidebar(); toast("Фото добавлено");
+  c.photo=data; save(); renderMain(); renderSidebar(); toast(t("photoAdded"));
 }
 function removeCharPhoto(id){
   const c=curBook().characters.find(x=>x.id===id); if(!c) return;
@@ -807,10 +902,10 @@ function renderCharacterMap(main,b){
   if(b.characterMapZoom<=1){ b.characterMapPanX=0; b.characterMapPanY=0; }
   if(!b.characters.length){
     main.innerHTML=`<div class="wrap map-wrap">
-      <div class="pagehead"><h1>Карта персонажей</h1></div>
+      <div class="pagehead"><h1>${t("characterMap")}</h1></div>
       <div class="placeholder"><div class="pic">${icon('map',56)}</div>
-        <div>Сначала добавь персонажей, а потом связывай их на карте.</div>
-        <button class="btn primary" onclick="addCharacter()">${icon('plus',16)} Добавить персонажа</button>
+        <div>${t("mapEmpty")}</div>
+        <button class="btn primary" onclick="addCharacter()">${icon('plus',16)} ${t("addCharacter")}</button>
       </div>
     </div>`;
     return;
@@ -824,23 +919,23 @@ function renderCharacterMap(main,b){
     return `<div class="map-node" data-character-id="${c.id}" style="left:${p.x}%;top:${p.y}%"
       onclick="openMapCharacter(event,'${c.id}')" onpointerdown="startMapNodeDrag(event,'${c.id}')">
       <span class="map-avatar">${avatar}</span>
-      <span style="min-width:0"><span class="map-name">${escapeHtml(c.name||"Без имени")}</span>
-        <span class="map-role">${escapeHtml(c.role||"Без роли")}</span></span>
+      <span style="min-width:0"><span class="map-name">${escapeHtml(nameOrFallback(c.name))}</span>
+        <span class="map-role">${escapeHtml(roleOrFallback(c.role))}</span></span>
     </div>`;
   }).join("");
   const lines=links.map(link=>mapLinkSvg(b,link,pos)).join("");
   const linkRows=links.length?links.map(link=>renderCharacterLinkCard(b,link)).join(""):`<div class="section" style="margin:0">
-    <p class="empty-note">Связей пока нет.</p>
+    <p class="empty-note">${t("noLinks")}</p>
   </div>`;
   main.innerHTML=`<div class="wrap map-wrap">
     <div class="pagehead map-pagehead">
-      <h1>Карта персонажей</h1>
+      <h1>${t("characterMap")}</h1>
       <div class="map-tools">
-        <button class="btn small icon" title="Отдалить" onclick="setCharacterMapZoom(-1)">${icon('minus',16)}</button>
+        <button class="btn small icon" title="${t("zoomOut")}" onclick="setCharacterMapZoom(-1)">${icon('minus',16)}</button>
         <span class="zoom-pill">${zoomPct}%</span>
-        <button class="btn small icon" title="Приблизить" onclick="setCharacterMapZoom(1)">${icon('plus',16)}</button>
+        <button class="btn small icon" title="${t("zoomIn")}" onclick="setCharacterMapZoom(1)">${icon('plus',16)}</button>
         <button class="btn small ghost" onclick="resetCharacterMapZoom()">100%</button>
-        ${b.characters.length>1?`<button class="btn primary" onclick="openAddCharacterLink()">${icon('plus',16)} Новая связь</button>`:""}
+        ${b.characters.length>1?`<button class="btn primary" onclick="openAddCharacterLink()">${icon('plus',16)} ${t("newLink")}</button>`:""}
       </div>
     </div>
     <div class="map-studio">
@@ -852,11 +947,11 @@ function renderCharacterMap(main,b){
       </div>
       <div class="map-panel">
         <div class="map-panel-section">
-          <div class="map-panel-title">Условные обозначения</div>
+          <div class="map-panel-title">${t("legend")}</div>
           <div class="legend-grid">${renderMapLegend(b)}</div>
         </div>
         <div class="map-panel-section" style="padding-bottom:0;border-bottom:none">
-          <div class="map-panel-title">Связи</div>
+          <div class="map-panel-title">${t("links")}</div>
         </div>
         <div class="link-list">${linkRows}</div>
       </div>
@@ -902,7 +997,7 @@ function validCharacterLinks(b){
 function mapLinkSvg(book,link,pos){
   const a=pos[link.from],b=pos[link.to]; if(!a||!b) return "";
   const st=relationStyle(link),path=mapCurvePath(a,b);
-  const tip=link.note&&link.note.trim()?link.note.trim():`${characterName(book,link.from)} — ${characterName(book,link.to)}: ${link.type||"Связь"}`;
+  const tip=link.note&&link.note.trim()?link.note.trim():`${characterName(book,link.from)} — ${characterName(book,link.to)}: ${labelEnum("relations",link.type||"Связь")}`;
   return `<g data-link-id="${link.id}">
     <path id="mapHit${link.id}" class="map-link-hit" d="${path}"><title>${escapeHtml(tip)}</title></path>
     <path id="mapShadow${link.id}" class="map-line-shadow" d="${path}"></path>
@@ -920,22 +1015,22 @@ function mapCurvePath(a,b){
 function renderCharacterLinkCard(b,link){
   const from=characterName(b,link.from),to=characterName(b,link.to);
   const st=relationStyle(link);
-  const note=link.note&&link.note.trim()?link.note.trim():"Без заметки";
+  const note=link.note&&link.note.trim()?link.note.trim():t("noNote");
   return `<div class="link-card" style="--thread-color:${st.color}" title="${escapeAttr(note)}">
     <span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
       stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" ${st.dash?`stroke-dasharray="${st.dash}"`:''}></line></svg></span>
-    <span class="rel-badge">${escapeHtml(link.type||"Связь")}</span>
+    <span class="rel-badge">${escapeHtml(labelEnum("relations",link.type||"Связь"))}</span>
     <div class="link-main">
       <div class="link-title">${escapeHtml(from)} — ${escapeHtml(to)}</div>
       <div class="link-note">${escapeHtml(note)}</div>
     </div>
-    <button class="btn small ghost" title="Настроить связь" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
-    <button class="btn small ghost" title="Удалить связь" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
+    <button class="btn small ghost" title="${t("setupLink")}" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
+    <button class="btn small ghost" title="${t("deleteLink")}" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
   </div>`;
 }
 function characterName(b,id){
   const c=(b.characters||[]).find(x=>x.id===id);
-  return c?(c.name||"Без имени"):"Персонаж";
+  return c?nameOrFallback(c.name):characterFallback();
 }
 function relationStyle(linkOrType){
   const link=typeof linkOrType==="string"?{type:linkOrType}:linkOrType;
@@ -958,7 +1053,7 @@ function renderMapLegend(b){
   if(!rows.length) rows.push(...["Союз","Конфликт","Тайна"].map(t=>({type:t,...RELATION_STYLES[t]})));
   return rows.map(link=>{
     const st=relationStyle(link);
-    return `<div class="legend-row" style="--thread-color:${st.color}">${threadSample(st)}<span class="legend-name">${escapeHtml(link.type||"Связь")}</span></div>`;
+    return `<div class="legend-row" style="--thread-color:${st.color}">${threadSample(st)}<span class="legend-name">${escapeHtml(labelEnum("relations",link.type||"Связь"))}</span></div>`;
   }).join("");
 }
 function openMapCharacter(ev,id){
@@ -1073,21 +1168,21 @@ function updateCharacterMapLines(){
   });
 }
 function openAddCharacterLink(editId,fromId){
-  const b=curBook(); if(!b||b.characters.length<2){ openInfo("Нужны персонажи","Для связи нужны хотя бы два персонажа."); return; }
+  const b=curBook(); if(!b||b.characters.length<2){ openInfo(t("needCharacters"),t("needTwoCharacters")); return; }
   const editing=(b.characterLinks||[]).find(x=>x.id===editId);
   if(editing) normalizeCharacterLink(editing);
-  const opts=b.characters.map(c=>`<option value="${escapeAttr(c.id)}">${escapeHtml(c.name||"Без имени")}</option>`).join("");
-  const typeOpts=RELATION_TYPES.map(t=>`<option>${escapeHtml(t)}</option>`).join("");
-  const strengthOpts=Object.entries(RELATION_STRENGTHS).map(([k,s])=>`<option value="${escapeAttr(k)}" ${k==="normal"?"selected":""}>${escapeHtml(s.name)}</option>`).join("");
-  modal(`<h3>${editing?"Настроить связь":"Новая связь"}</h3><div class="mpad fld-stack">
-    <div class="fld"><label>Первый персонаж</label><select id="linkFrom">${opts}</select></div>
-    <div class="fld"><label>Второй персонаж</label><select id="linkTo">${opts}</select></div>
+  const opts=b.characters.map(c=>`<option value="${escapeAttr(c.id)}">${escapeHtml(nameOrFallback(c.name))}</option>`).join("");
+  const typeOpts=optionList(RELATION_TYPES,"relations",editing&&editing.type);
+  const strengthOpts=Object.entries(RELATION_STRENGTHS).map(([k,s])=>`<option value="${escapeAttr(k)}" ${k==="normal"?"selected":""}>${escapeHtml(labelEnum("strengths",s.name))}</option>`).join("");
+  modal(`<h3>${editing?t("setupLink"):t("newLink")}</h3><div class="mpad fld-stack">
+    <div class="fld"><label>${t("firstCharacter")}</label><select id="linkFrom">${opts}</select></div>
+    <div class="fld"><label>${t("secondCharacter")}</label><select id="linkTo">${opts}</select></div>
     <div class="fld-grid">
-      <div class="fld"><label>Смысл связи</label><select id="linkType">${typeOpts}</select></div>
-      <div class="fld"><label>Сила связи</label><select id="linkStrength">${strengthOpts}</select></div>
+      <div class="fld"><label>${t("linkMeaning")}</label><select id="linkType">${typeOpts}</select></div>
+      <div class="fld"><label>${t("linkStrength")}</label><select id="linkStrength">${strengthOpts}</select></div>
     </div>
-    <div class="fld"><label>Заметка</label><textarea id="linkNote" placeholder="Например: скрытая вражда, давний долг, семейная тайна..."></textarea></div>
-  </div><div class="mfoot"><button class="btn" id="mCancel">Отмена</button><button class="btn primary" id="mOk">${editing?"Сохранить":"Добавить"}</button></div>`);
+    <div class="fld"><label>${t("note")}</label><textarea id="linkNote" placeholder="${escapeAttr(t("linkNotePh"))}"></textarea></div>
+  </div><div class="mfoot"><button class="btn" id="mCancel">${t("cancel")}</button><button class="btn primary" id="mOk">${editing?t("save"):t("add")}</button></div>`);
   if(editing){
     document.getElementById("linkFrom").value=editing.from;
     document.getElementById("linkTo").value=editing.to;
@@ -1104,37 +1199,37 @@ function openAddCharacterLink(editId,fromId){
   document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
   document.getElementById("mOk").onclick=()=>{
     const from=document.getElementById("linkFrom").value,to=document.getElementById("linkTo").value;
-    if(from===to){ toast("Выбери двух разных персонажей"); return; }
+    if(from===to){ toast(t("chooseDifferentCharacters")); return; }
     const data=normalizeCharacterLink({id:editing?editing.id:uid(),from,to,type:document.getElementById("linkType").value,
       strength:document.getElementById("linkStrength").value,
       note:document.getElementById("linkNote").value.trim()});
     if(editing) Object.assign(editing,data);
     else { b.characterLinks=b.characterLinks||[]; b.characterLinks.push(data); }
-    b.updatedAt=now(); save(); closeModal(); renderMain(); toast(editing?"Связь обновлена":"Связь добавлена");
+    b.updatedAt=now(); save(); closeModal(); renderMain(); toast(editing?t("linkUpdated"):t("linkAdded"));
   };
 }
 async function deleteCharacterLink(id){
   const b=curBook(); if(!b) return;
   const link=(b.characterLinks||[]).find(x=>x.id===id); if(!link) return;
-  if(!await openConfirm({title:"Удалить связь?",message:"Персонажи останутся на месте, удалится только линия между ними.",ok:"Удалить",danger:false})) return;
+  if(!await openConfirm({title:t("deleteLinkTitle"),message:t("deleteLinkMsg"),ok:t("delete"),danger:false})) return;
   b.characterLinks=b.characterLinks.filter(x=>x.id!==id); b.updatedAt=now(); save(); renderMain();
 }
 
 /* ============ МИР И ЛОР ============ */
 async function addLore(){
   const b=curBook(); if(!b) return;
-  const title=await openInput({title:"Новая заметка мира",label:"Название",placeholder:"например: Северный порт",ok:"Создать"});
+  const title=await openInput({title:t("newLore"),label:t("title"),placeholder:t("loreTitlePh"),ok:t("create")});
   if(title===null) return;
-  const item={id:uid(),type:"Заметка",title:title.trim()||"Без названия",summary:"",details:"",links:"",createdAt:now(),updatedAt:now()};
+  const item={id:uid(),type:"Заметка",title:title.trim()||t("noTitle"),summary:"",details:"",links:"",createdAt:now(),updatedAt:now()};
   b.lore=b.lore||[]; b.lore.unshift(item); b.updatedAt=now(); save();
   route.view="lore"; route.itemId=item.id; route.charMode="edit"; render();
 }
 async function deleteLore(id){
   const b=curBook(); const item=(b.lore||[]).find(x=>x.id===id); if(!item) return;
-  if(!await openConfirm({title:"Переместить заметку в корзину?",message:`«${item.title||"Без названия"}» можно будет вернуть в эту книгу.`,ok:"В корзину",danger:false})) return;
+  if(!await openConfirm({title:t("moveLoreTitle"),message:`«${titleOrFallback(item.title)}» ${t("canRestoreToBook")}`,ok:t("moveToTrash"),danger:false})) return;
   ensureData();
   state.trash.lore.unshift({id:uid(),deletedAt:now(),bookId:b.id,bookTitle:b.title,data:cloneData(item)});
-  b.lore=b.lore.filter(x=>x.id!==id); b.updatedAt=now(); save(); toast("Заметка перемещена в корзину");
+  b.lore=b.lore.filter(x=>x.id!==id); b.updatedAt=now(); save(); toast(t("loreMoved"));
   route.view="overview"; route.itemId=null; render();
 }
 function editLore(){ route.charMode="edit"; renderMain(); }
@@ -1144,47 +1239,48 @@ function doneLore(){ route.charMode="view"; renderMain(); renderSidebar(); }
 function snapshotChapter(ch,manual){
   if(!ch) return false; ch.versions=ch.versions||[];
   const last=ch.versions[ch.versions.length-1];
-  if(last&&last.content===ch.content){ if(manual) toast("Изменений нет — версия не создана"); return false; }
+  if(last&&last.content===ch.content){ if(manual) toast(t("noVersionChanges")); return false; }
   if(!manual&&!ch.content.trim()) return false;
   ch.versions.push({ts:now(),content:ch.content});
   if(ch.versions.length>MAX_VERSIONS) ch.versions=ch.versions.slice(-MAX_VERSIONS);
   save(); return true;
 }
 function snapshotCurrent(){ if(route.view==="chapter"){ const b=curBook(),ch=b&&b.chapters.find(c=>c.id===route.itemId); if(ch) snapshotChapter(ch,false); } }
-function manualSnapshot(){ const b=curBook(),ch=b.chapters.find(c=>c.id===route.itemId); if(ch&&snapshotChapter(ch,true)) toast("Версия сохранена"); }
+function manualSnapshot(){ const b=curBook(),ch=b.chapters.find(c=>c.id===route.itemId); if(ch&&snapshotChapter(ch,true)) toast(t("versionSaved")); }
 function openHistory(){
   const b=curBook(),ch=b.chapters.find(c=>c.id===route.itemId); if(!ch) return;
   const vers=(ch.versions||[]).slice().reverse();
   const rows=vers.length?vers.map((v,i)=>{
     const idx=ch.versions.length-1-i,d=new Date(v.ts);
-    const when=d.toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
-    const preview=(v.content||"").replace(/\s+/g," ").slice(0,70)||"(пусто)";
+    const when=d.toLocaleString(dateLocale(),{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+    const preview=(v.content||"").replace(/\s+/g," ").slice(0,70)||t("empty");
     const isCur=i===0&&v.content===ch.content;
     return `<div class="ver-row"><div class="vinfo">
-      <div class="vt">${when}${isCur?' · <span style="color:var(--ok)">текущая</span>':''} · ${fmt(countWords(v.content))} слов</div>
+      <div class="vt">${when}${isCur?` · <span style="color:var(--ok)">${t("current")}</span>`:''} · ${fmt(countWords(v.content))} ${t("words")}</div>
       <div class="vp">${escapeHtml(preview)}</div></div>
       <button class="btn small ghost" onclick="previewVersion('${ch.id}',${idx})">${icon('eye',16)}</button>
-      <button class="btn small" onclick="restoreVersion('${ch.id}',${idx})">Вернуть</button></div>`;
-  }).join(""):`<div class="mpad mmsg" style="padding:30px 26px">Пока нет сохранённых версий. Они создаются автоматически при переходе между главами и по кнопке «Сохранить версию».</div>`;
-  modal(`<h3>История главы «${escapeHtml(ch.title)}»</h3><div class="mbody">${rows}</div><div class="mfoot"><button class="btn" onclick="closeModal()">Закрыть</button></div>`,"wide");
+      <button class="btn small" onclick="restoreVersion('${ch.id}',${idx})">${t("restore")}</button></div>`;
+  }).join(""):`<div class="mpad mmsg" style="padding:30px 26px">${t("noVersions")}</div>`;
+  modal(`<h3>${t("chapterHistory")} «${escapeHtml(ch.title)}»</h3><div class="mbody">${rows}</div><div class="mfoot"><button class="btn" onclick="closeModal()">${t("close")}</button></div>`,"wide");
 }
 async function restoreVersion(chId,idx){
   const b=curBook(),ch=b.chapters.find(c=>c.id===chId); if(!ch) return;
   const v=ch.versions[idx]; if(!v) return;
-  if(!await openConfirm({title:"Вернуть эту версию?",message:"Текущий текст сначала сохранится в историю, затем заменится выбранной версией.",ok:"Вернуть",danger:false})) return;
-  snapshotChapter(ch,false); ch.content=v.content; ch.updatedAt=now(); save(); render(); toast("Версия восстановлена");
+  if(!await openConfirm({title:t("restoreVersionTitle"),message:t("restoreVersionMsg"),ok:t("restore"),danger:false})) return;
+  snapshotChapter(ch,false); ch.content=v.content; ch.updatedAt=now(); save(); render(); toast(t("versionRestored"));
 }
 function previewVersion(chId,idx){
   const b=curBook(),ch=b.chapters.find(c=>c.id===chId); if(!ch) return;
   const v=ch.versions[idx]; if(!v) return;
-  const d=new Date(v.ts).toLocaleString("ru-RU");
-  modal(`<h3>Версия от ${d}</h3><div class="mbody" style="padding:18px 26px;font-family:Georgia,serif;line-height:1.7;white-space:pre-wrap">${escapeHtml(v.content)||"(пусто)"}</div>
-    <div class="mfoot"><button class="btn" onclick="openHistory()">← К списку</button>
-    <button class="btn primary" onclick="restoreVersion('${ch.id}',${idx})">Вернуть этот текст</button></div>`,"wide");
+  const d=new Date(v.ts).toLocaleString(dateLocale());
+  modal(`<h3>${t("versionFrom")} ${d}</h3><div class="mbody" style="padding:18px 26px;font-family:Georgia,serif;line-height:1.7;white-space:pre-wrap">${escapeHtml(v.content)||t("empty")}</div>
+    <div class="mfoot"><button class="btn" onclick="openHistory()">${t("backToList")}</button>
+    <button class="btn primary" onclick="restoreVersion('${ch.id}',${idx})">${t("restoreThisText")}</button></div>`,"wide");
 }
 
 /* ============ РЕНДЕР ============ */
 function render(){
+  document.title=t("appName");
   if(route.screen==="home") renderHome(); else renderBookScreen();
   renderTopbar();
 }
@@ -1193,21 +1289,21 @@ function renderHome(){
   document.getElementById("book").classList.add("hidden");
   const cards=state.books.map(b=>{
     const w=bookWordCount(b),pages=Math.max(1,Math.round(w/WORDS_PER_PAGE));
-    const upd=new Date(b.updatedAt).toLocaleDateString("ru-RU",{day:"2-digit",month:"long",year:"numeric"});
+    const upd=new Date(b.updatedAt).toLocaleDateString(dateLocale(),{day:"2-digit",month:"long",year:"numeric"});
     return `<div class="book-card" onclick="openBook('${b.id}')">
-      <button class="btn icon ghost small del" title="Удалить" onclick="deleteBook('${b.id}',event)">${icon('trash',16)}</button>
-      <div class="bt">${escapeHtml(b.title)}</div>
-      <div class="bm">${b.chapters.length} гл. · ${fmt(w)} слов · ≈${fmt(pages)} стр.</div>
+      <button class="btn icon ghost small del" title="${t("delete")}" onclick="deleteBook('${b.id}',event)">${icon('trash',16)}</button>
+      <div class="bt">${escapeHtml(titleOrFallback(b.title))}</div>
+      <div class="bm">${b.chapters.length} ${t("chaptersShort")} · ${fmt(w)} ${t("words")} · ≈${fmt(pages)} ${t("pages")}</div>
       <div class="bspacer"></div>
       <div class="foot"><span class="bm">${upd}</span>
-        <button class="btn icon ghost small" title="Переименовать" onclick="renameBook('${b.id}',event)">${icon('edit',16)}</button></div>
+        <button class="btn icon ghost small" title="${t("rename")}" onclick="renameBook('${b.id}',event)">${icon('edit',16)}</button></div>
     </div>`;
   }).join("");
   document.getElementById("homeInner").innerHTML=`
-    <h1>Мои книги</h1>
-    <p class="sub">Открой книгу, чтобы продолжить, или начни новую.</p>
+    <h1>${t("myBooks")}</h1>
+    <p class="sub">${t("homeSub")}</p>
     <div class="books-grid">
-      <div class="book-card add" onclick="newBook()">${icon('plus',26)}<div style="font-weight:600">Новая книга</div></div>
+      <div class="book-card add" onclick="newBook()">${icon('plus',26)}<div style="font-weight:600">${t("newBook")}</div></div>
       ${cards}
     </div>`;
 }
@@ -1222,33 +1318,33 @@ function renderSidebar(){
     const active=route.view==="chapter"&&route.itemId===c.id?"active":"";
     return `<div class="nav-item chapter-item ${active}" data-chapter-id="${c.id}" onclick="openChapterFromSidebar(event,'${c.id}')"
       onpointerdown="startChapterDrag(event,'${c.id}')">
-      <span class="num">${i+1}</span><span class="label">${escapeHtml(c.title||"Без названия")}</span>
+      <span class="num">${i+1}</span><span class="label">${escapeHtml(titleOrFallback(c.title))}</span>
       <span class="nav-actions">
-        <button title="Переименовать" onclick="renameChapter('${c.id}',event)">${icon('edit',14)}</button>
-        <button title="В корзину" onclick="deleteChapter('${c.id}',event)">${icon('trash',14)}</button>
+        <button title="${t("rename")}" onclick="renameChapter('${c.id}',event)">${icon('edit',14)}</button>
+        <button title="${t("moveToTrash")}" onclick="deleteChapter('${c.id}',event)">${icon('trash',14)}</button>
       </span></div>`;
-  }).join(""):`<div class="side-empty">Глав пока нет</div>`;
+  }).join(""):`<div class="side-empty">${t("noChapters")}</div>`;
   const chrItems=b.characters.length?b.characters.map(c=>{
     const active=route.view==="character"&&route.itemId===c.id?"active":"";
     const av=c.photo?`<img class="avatar" src="${c.photo}">`:`<span class="avatar">${icon('user',14)}</span>`;
-    return `<div class="nav-item ${active}" onclick="selectItem('character','${c.id}')">${av}<span class="label">${escapeHtml(c.name||"Без имени")}</span></div>`;
-  }).join(""):`<div class="side-empty">Персонажей пока нет</div>`;
+    return `<div class="nav-item ${active}" onclick="selectItem('character','${c.id}')">${av}<span class="label">${escapeHtml(nameOrFallback(c.name))}</span></div>`;
+  }).join(""):`<div class="side-empty">${t("noCharacters")}</div>`;
   const loreItems=(b.lore||[]).length?b.lore.map(item=>{
     const active=route.view==="lore"&&route.itemId===item.id?"active":"";
-    return `<div class="nav-item ${active}" onclick="selectItem('lore','${item.id}')">${icon('map',15)}<span class="label">${escapeHtml(item.title||"Без названия")}</span></div>`;
-  }).join(""):`<div class="side-empty">Заметок пока нет</div>`;
+    return `<div class="nav-item ${active}" onclick="selectItem('lore','${item.id}')">${icon('map',15)}<span class="label">${escapeHtml(titleOrFallback(item.title))}</span></div>`;
+  }).join(""):`<div class="side-empty">${t("noLore")}</div>`;
   document.getElementById("sidebar").innerHTML=`
     <div class="side-book ${route.view==='overview'?'active':''}" onclick="openOverview()">
       <span class="bk-mark">${icon('book',17)}</span>
-      <span style="min-width:0"><div class="bk-name">${escapeHtml(b.title)}</div><div class="bk-sub">Обзор и настройки книги</div></span>
+      <span style="min-width:0"><div class="bk-name">${escapeHtml(titleOrFallback(b.title))}</div><div class="bk-sub">${t("bookOverview")}</div></span>
     </div>
-    <div class="side-group"><div class="side-head"><span>Книга</span></div>
-      <div class="nav-item ${route.view==='plan'?'active':''}" onclick="openPlan()">${icon('list',16)}<span class="label">План</span></div>
-      <div class="nav-item ${route.view==='characterMap'?'active':''}" onclick="openCharacterMap()">${icon('map',16)}<span class="label">Карта персонажей</span></div>
+    <div class="side-group"><div class="side-head"><span>${t("book")}</span></div>
+      <div class="nav-item ${route.view==='plan'?'active':''}" onclick="openPlan()">${icon('list',16)}<span class="label">${t("plan")}</span></div>
+      <div class="nav-item ${route.view==='characterMap'?'active':''}" onclick="openCharacterMap()">${icon('map',16)}<span class="label">${t("characterMap")}</span></div>
     </div>
-    <div class="side-group"><div class="side-head"><span>Главы</span><span class="add" title="Добавить главу" onclick="addChapter()">${icon('plus',16)}</span></div><div class="chapter-list" id="chapterList">${chItems}</div></div>
-    <div class="side-group"><div class="side-head"><span>Персонажи</span><span class="add" title="Добавить персонажа" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>
-    <div class="side-group"><div class="side-head"><span>Мир и лор</span><span class="add" title="Добавить заметку" onclick="addLore()">${icon('plus',16)}</span></div>${loreItems}</div>`;
+    <div class="side-group"><div class="side-head"><span>${t("chaptersGroup")}</span><span class="add" title="${t("addChapter")}" onclick="addChapter()">${icon('plus',16)}</span></div><div class="chapter-list" id="chapterList">${chItems}</div></div>
+    <div class="side-group"><div class="side-head"><span>${t("charactersGroup")}</span><span class="add" title="${t("addCharacter")}" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>
+    <div class="side-group"><div class="side-head"><span>${t("worldLore")}</span><span class="add" title="${t("addLore")}" onclick="addLore()">${icon('plus',16)}</span></div>${loreItems}</div>`;
 }
 function renderMain(){
   const b=curBook(),main=document.getElementById("main");
@@ -1259,8 +1355,8 @@ function renderMain(){
   if(route.view==="plan") return renderPlan(main,b);
   if(route.view==="overview") return renderOverview(main,b);
   main.innerHTML=`<div class="placeholder"><div class="pic">${icon('book',56)}</div>
-    <div>Выбери главу слева — или создай новую.</div>
-    <button class="btn primary" onclick="addChapter()">${icon('plus',16)} Новая глава</button></div>`;
+    <div>${t("chooseChapter")}</div>
+    <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button></div>`;
 }
 
 /* ---- глава ---- */
@@ -1268,21 +1364,21 @@ function renderChapterEditor(main,b){
   const ch=b.chapters.find(c=>c.id===route.itemId);
   if(!ch){ route.view="overview"; return renderMain(); }
   main.innerHTML=`<div class="wrap">
-    <input class="ed-title" id="edTitle" value="${escapeAttr(ch.title)}" placeholder="Название главы">
+    <input class="ed-title" id="edTitle" value="${escapeAttr(ch.title)}" placeholder="${escapeAttr(t("chapterTitle"))}">
     <div class="ed-meta">
       <span id="edCount"></span>
-      <span class="size-ctl"><button onclick="setFont(-1)">А−</button><button onclick="setFont(1)">А+</button></span>
-      <button class="btn small ghost" onclick="manualSnapshot()">${icon('clock',16)} Сохранить версию</button>
-      <button class="btn small ghost" onclick="openHistory()">${icon('restore',16)} История</button>
+      <span class="size-ctl"><button onclick="setFont(-1)">A-</button><button onclick="setFont(1)">A+</button></span>
+      <button class="btn small ghost" onclick="manualSnapshot()">${icon('clock',16)} ${t("saveVersion")}</button>
+      <button class="btn small ghost" onclick="openHistory()">${icon('restore',16)} ${t("history")}</button>
       <span style="flex:1"></span>
-      <span class="saved" id="edSaved">${icon('clock',14)} Сохранено</span>
+      <span class="saved" id="edSaved">${icon('clock',14)} ${t("saved")}</span>
       <button class="btn small ghost" onclick="deleteChapter('${ch.id}')">${icon('trash',16)}</button>
     </div>
-    <textarea class="ed-body" id="edBody" placeholder="Здесь начинается глава…" style="--ed-size:${editorFontSize}px">${escapeHtml(ch.content)}</textarea>
+    <textarea class="ed-body" id="edBody" placeholder="${escapeAttr(t("chapterBodyPh"))}" style="--ed-size:${editorFontSize}px">${escapeHtml(ch.content)}</textarea>
   </div>`;
   const title=document.getElementById("edTitle"),body=document.getElementById("edBody");
   const updCount=()=>{ const w=countWords(body.value),pg=Math.max(1,Math.round(w/WORDS_PER_PAGE));
-    document.getElementById("edCount").innerHTML=`<b>${fmt(w)}</b> слов · ≈${fmt(pg)} стр.`; };
+    document.getElementById("edCount").innerHTML=`<b>${fmt(w)}</b> ${t("words")} · ≈${fmt(pg)} ${t("pages")}`; };
   updCount();
   title.addEventListener("input",()=>{ ch.title=title.value; ch.updatedAt=now(); flagSaving(); save(); renderSidebar(); renderTopbar(); });
   body.addEventListener("input",()=>{ ch.content=body.value; ch.updatedAt=now(); b.updatedAt=now(); updCount(); flagSaving(); save(); renderTopbar(); scheduleAutoSnapshot(ch); });
@@ -1292,16 +1388,16 @@ function scheduleAutoSnapshot(ch){ clearTimeout(snapTimer); snapTimer=setTimeout
 let savingTimer=null;
 function flagSaving(){
   const el=document.getElementById("edSaved"); if(!el) return;
-  el.innerHTML=`${icon('clock',14)} Сохранение…`; el.style.color="var(--muted)";
+  el.innerHTML=`${icon('clock',14)} ${t("saving")}`; el.style.color="var(--muted)";
 }
 function markSaved(){
   const el=document.getElementById("edSaved"); if(!el) return;
   clearTimeout(savingTimer);
-  el.innerHTML=`${icon('clock',14)} Сохранено`; el.style.color="var(--ok)";
+  el.innerHTML=`${icon('clock',14)} ${t("saved")}`; el.style.color="var(--ok)";
 }
 function markSaveError(msg){
   const el=document.getElementById("edSaved");
-  if(el){ el.innerHTML=`${icon('x',14)} Не сохранено`; el.style.color="var(--danger)"; }
+  if(el){ el.innerHTML=`${icon('x',14)} ${t("notSaved")}`; el.style.color="var(--danger)"; }
   const t=Date.now();
   if(t-lastSaveErrorAt>3000){ toast(msg); lastSaveErrorAt=t; }
 }
@@ -1315,12 +1411,12 @@ function renderCharacterView(main,b){
   const c=b.characters.find(x=>x.id===route.itemId);
   if(!c){ route.view="overview"; return renderMain(); }
   normalizeCharacter(c);
-  const photoAlt=escapeAttr(c.name||"Фото персонажа");
-  const portrait=c.photo?`<button class="portrait large portrait-button" title="Открыть фото крупно" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
+  const photoAlt=escapeAttr(c.name||t("photoAlt"));
+  const portrait=c.photo?`<button class="portrait large portrait-button" title="${t("openPhoto")}" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
   main.innerHTML=`<div class="wrap character-wrap">
     <div class="pagehead">
       <div></div>
-      <button class="btn" onclick="editCharacter()">${icon('edit',16)} Редактировать</button>
+      <button class="btn" onclick="editCharacter()">${icon('edit',16)} ${t("edit")}</button>
     </div>
     <div class="character-layout">
       <div class="character-photo-panel">${portrait}</div>
@@ -1340,20 +1436,20 @@ function renderCharacterEdit(main,b){
   const c=b.characters.find(x=>x.id===route.itemId);
   if(!c){ route.view="overview"; return renderMain(); }
   normalizeCharacter(c);
-  const photoAlt=escapeAttr(c.name||"Фото персонажа");
-  const photo=c.photo?`<button class="portrait large portrait-button" title="Открыть фото крупно" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
+  const photoAlt=escapeAttr(c.name||t("photoAlt"));
+  const photo=c.photo?`<button class="portrait large portrait-button" title="${t("openPhoto")}" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
   const by=birthYear(b,c);
   main.innerHTML=`<div class="wrap character-wrap">
     <div class="pagehead">
-      <button class="btn ghost" onclick="doneCharacter()">${icon('back',16)} Готово</button>
-      <button class="btn ghost small" onclick="deleteCharacter('${c.id}')">${icon('trash',16)} Удалить</button>
+      <button class="btn ghost" onclick="doneCharacter()">${icon('back',16)} ${t("done")}</button>
+      <button class="btn ghost small" onclick="deleteCharacter('${c.id}')">${icon('trash',16)} ${t("delete")}</button>
     </div>
     <div class="character-layout">
       <div class="character-photo-panel">
         ${photo}
         <div class="photo-actions">
-          <button class="btn small" onclick="pickCharPhoto('${c.id}')">${icon('image',15)} ${c.photo?'Заменить фото':'Добавить фото'}</button>
-          ${c.photo?`<button class="btn small ghost" onclick="removeCharPhoto('${c.id}')">${icon('x',15)} Убрать</button>`:''}
+          <button class="btn small" onclick="pickCharPhoto('${c.id}')">${icon('image',15)} ${c.photo?t("replacePhoto"):t("addPhoto")}</button>
+          ${c.photo?`<button class="btn small ghost" onclick="removeCharPhoto('${c.id}')">${icon('x',15)} ${t("remove")}</button>`:''}
         </div>
       </div>
       <div class="character-main profile-id" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
@@ -1370,7 +1466,7 @@ function renderCharacterEdit(main,b){
   bind("cAge","age",false);
   const ageEl=document.getElementById("cAge");
   if(ageEl) ageEl.addEventListener("input",()=>{ const yy=birthYear(b,c),hint=document.getElementById("byHint");
-    if(hint) hint.textContent=yy!==null?`год рождения ≈ ${yy}`:'укажи год действия в обзоре книги, чтобы видеть год рождения'; });
+    if(hint) hint.textContent=yy!==null?`${t("birthYear")} ${yy}`:t("birthYearHint"); });
   bind("cApp","appearance",false); bind("cPers","personality",false); bind("cBack","background",false);
   bind("cGoals","goals",false); bind("cNotes","notes",false);
   const aliases=document.getElementById("cAliases");
@@ -1387,24 +1483,24 @@ function currentCharacterTab(){
 function renderCharacterTabs(){
   const active=currentCharacterTab();
   const tabs=[
-    ["profile","Профиль","user"],
-    ["details","Описание","edit"],
-    ["relations","Связи","map"],
-    ["chapters","Главы","list"],
-    ["map","Карта","map"]
+    ["profile",t("profile"),"user"],
+    ["details",t("details"),"edit"],
+    ["relations",t("relations"),"map"],
+    ["chapters",t("chaptersGroup"),"list"],
+    ["map",t("map"),"map"]
   ];
   return `<div class="character-tabs">${tabs.map(([id,label,ic])=>`<button class="${active===id?'on':''}" onclick="setCharacterTab('${id}')">${icon(ic,15)} ${label}</button>`).join("")}</div>`;
 }
 function renderCharacterIdentity(b,c){
   const by=birthYear(b,c),meta=[];
-  if(c.age) meta.push(`<b>${escapeHtml(c.age)}</b> лет`);
-  if(by!==null) meta.push(`год рождения ≈ <b>${by}</b>`);
+  if(c.age) meta.push(`<b>${escapeHtml(c.age)}</b> ${t("yearsOld")}`);
+  if(by!==null) meta.push(`${t("birthYear")} <b>${by}</b>`);
   const aliases=(c.aliases||[]).join(", ");
   return `<div class="profile-id">
-    <h1 class="pname">${escapeHtml(c.name||"Без имени")}</h1>
-    ${c.role?`<span class="badge">${escapeHtml(c.role)}</span>`:""}
+    <h1 class="pname">${escapeHtml(nameOrFallback(c.name))}</h1>
+    ${c.role?`<span class="badge">${escapeHtml(labelEnum("roles",c.role))}</span>`:""}
     ${meta.length?`<div class="profile-meta">${meta.join(" · ")}</div>`:""}
-    ${aliases?`<div class="alias-line"><b>Варианты имени:</b> ${escapeHtml(aliases)}</div>`:""}
+    ${aliases?`<div class="alias-line"><b>${t("aliases")}:</b> ${escapeHtml(aliases)}</div>`:""}
   </div>`;
 }
 function renderCharacterTabContent(b,c,editing){
@@ -1419,41 +1515,41 @@ function renderCharacterTabContent(b,c,editing){
 function renderCharacterProfileView(b,c){
   const terms=characterTerms(c);
   return `<div class="section">
-    <h4>Коротко</h4>
-    <p>${escapeHtml([c.role?`Роль: ${c.role}`:"",c.age?`Возраст: ${c.age}`:"",terms.length?`Распознаётся по: ${terms.join(", ")}`:""].filter(Boolean).join("\n")||"Профиль пока пустой.")}</p>
+    <h4>${t("profileShort")}</h4>
+    <p>${escapeHtml([c.role?`${t("role")}: ${labelEnum("roles",c.role)}`:"",c.age?`${t("age")}: ${c.age}`:"",terms.length?`${t("recognizedBy")}: ${terms.join(", ")}`:""].filter(Boolean).join("\n")||t("profileEmpty"))}</p>
   </div>`;
 }
 function renderCharacterProfileEdit(b,c){
   const by=birthYear(b,c);
   return `<div class="fld-stack">
-    <div class="fld"><label>Имя</label><input id="cName" value="${escapeAttr(c.name)}" placeholder="Имя персонажа"></div>
+    <div class="fld"><label>${t("name")}</label><input id="cName" value="${escapeAttr(c.name)}" placeholder="${escapeAttr(t("characterName"))}"></div>
     <div class="fld-grid">
-      <div class="fld"><label>Роль в книге</label>${roleSelect(c)}</div>
-      <div class="fld"><label>Возраст</label><input id="cAge" value="${escapeAttr(c.age)}" placeholder="напр. 34">
-        <div class="hint" id="byHint">${by!==null?`год рождения ≈ ${by}`:'укажи год действия в обзоре книги, чтобы видеть год рождения'}</div></div>
+      <div class="fld"><label>${t("role")}</label>${roleSelect(c)}</div>
+      <div class="fld"><label>${t("age")}</label><input id="cAge" value="${escapeAttr(c.age)}" placeholder="${escapeAttr(t("agePh"))}">
+        <div class="hint" id="byHint">${by!==null?`${t("birthYear")} ${by}`:t("birthYearHint")}</div></div>
     </div>
-    <div class="fld"><label>Варианты имени</label><textarea id="cAliases" placeholder="Фамилия, прозвище, отчество, склонения...">${escapeHtml((c.aliases||[]).join("\n"))}</textarea>
-      <div class="hint">По этим словам приложение само найдёт персонажа в главах. Можно писать через запятую или с новой строки.</div></div>
+    <div class="fld"><label>${t("aliases")}</label><textarea id="cAliases" placeholder="${escapeAttr(t("aliasesPh"))}">${escapeHtml((c.aliases||[]).join("\n"))}</textarea>
+      <div class="hint">${t("aliasesHint")}</div></div>
   </div>`;
 }
 function renderCharacterDetailsView(c){
   const sec=(title,val)=>val&&val.trim()?`<div class="section"><h4>${title}</h4><p>${escapeHtml(val)}</p></div>`:"";
   const html=[
-    sec("Внешность",c.appearance),
-    sec("Характер",c.personality),
-    sec("Биография",c.background),
-    sec("Цели и мотивация",c.goals),
-    sec("Заметки",c.notes)
+    sec(t("appearance"),c.appearance),
+    sec(t("personality"),c.personality),
+    sec(t("biography"),c.background),
+    sec(t("goals"),c.goals),
+    sec(t("notes"),c.notes)
   ].join("");
-  return html||`<div class="section"><p class="empty-note">Описание пока пустое.</p></div>`;
+  return html||`<div class="section"><p class="empty-note">${t("descriptionEmpty")}</p></div>`;
 }
 function renderCharacterDetailsEdit(c){
   return `<div class="fld-stack">
-    ${taField("cApp","Внешность",c.appearance,"Рост, телосложение, лицо, одежда, особые приметы…")}
-    ${taField("cPers","Характер",c.personality,"Темперамент, привычки, сильные и слабые стороны…")}
-    ${taField("cBack","Биография",c.background,"Откуда родом, ключевые события, что сформировало персонажа…")}
-    ${taField("cGoals","Цели и мотивация",c.goals,"Чего хочет, чего боится, что им движет…")}
-    ${taField("cNotes","Заметки",c.notes,"Всё прочее, что важно помнить…")}
+    ${taField("cApp",t("appearance"),c.appearance,t("appearancePh"))}
+    ${taField("cPers",t("personality"),c.personality,t("personalityPh"))}
+    ${taField("cBack",t("biography"),c.background,t("biographyPh"))}
+    ${taField("cGoals",t("goals"),c.goals,t("goalsPh"))}
+    ${taField("cNotes",t("notes"),c.notes,t("notesPh"))}
   </div>`;
 }
 function characterRelationships(b,c){
@@ -1461,16 +1557,16 @@ function characterRelationships(b,c){
 }
 function relationStrengthName(link){
   const s=RELATION_STRENGTHS[link.strength]||RELATION_STRENGTHS.normal;
-  return s.name.toLocaleLowerCase("ru-RU");
+  return labelEnum("strengths",s.name).toLocaleLowerCase(dateLocale());
 }
 function renderCharacterRelationships(b,c){
   const links=characterRelationships(b,c);
-  const add=b.characters.length>1?`<button class="btn small primary" onclick="openAddCharacterLink('', '${c.id}')">${icon('plus',15)} Добавить связь</button>`:"";
-  const cards=links.length?links.map(link=>renderCharacterRelationshipCard(b,c,link)).join(""):`<div class="section"><p class="empty-note">Связей пока нет. Добавь связь здесь — она сразу появится и на карте персонажей.</p></div>`;
-  const legacy=c.relationships&&c.relationships.trim()?`<div class="section"><h4>Старая ручная заметка</h4><p>${escapeHtml(c.relationships)}</p></div>`:"";
+  const add=b.characters.length>1?`<button class="btn small primary" onclick="openAddCharacterLink('', '${c.id}')">${icon('plus',15)} ${t("addRelation")}</button>`:"";
+  const cards=links.length?links.map(link=>renderCharacterRelationshipCard(b,c,link)).join(""):`<div class="section"><p class="empty-note">${t("noRelationsLong")}</p></div>`;
+  const legacy=c.relationships&&c.relationships.trim()?`<div class="section"><h4>${t("oldManualNote")}</h4><p>${escapeHtml(c.relationships)}</p></div>`:"";
   return `<div class="section">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
-      <h4 style="margin:0">Связи из карты персонажей</h4>${add}
+      <h4 style="margin:0">${t("relationshipsMap")}</h4>${add}
     </div>
     <div class="relationship-list">${cards}</div>
   </div>${legacy}`;
@@ -1478,17 +1574,17 @@ function renderCharacterRelationships(b,c){
 function renderCharacterRelationshipCard(b,c,link){
   const otherId=link.from===c.id?link.to:link.from;
   const other=(b.characters||[]).find(x=>x.id===otherId);
-  const st=relationStyle(link),note=link.note&&link.note.trim()?link.note.trim():"Без заметки";
+  const st=relationStyle(link),note=link.note&&link.note.trim()?link.note.trim():t("noNote");
   return `<div class="relationship-card" style="--thread-color:${st.color}" title="${escapeAttr(note)}">
     ${threadSample(st)}
     <div>
-      <div class="relationship-name">${escapeHtml(other?(other.name||"Без имени"):"Персонаж")}</div>
-      <div class="relationship-meta">${escapeHtml(link.type||"Связь")} · ${escapeHtml(relationStrengthName(link))} связь</div>
+      <div class="relationship-name">${escapeHtml(other?nameOrFallback(other.name):characterFallback())}</div>
+      <div class="relationship-meta">${escapeHtml(labelEnum("relations",link.type||"Связь"))} · ${escapeHtml(relationStrengthName(link))} ${t("linkLower")}</div>
     </div>
     <div class="relationship-actions">
-      <button class="btn small ghost" title="Открыть персонажа" onclick="selectItem('character','${otherId}')">${icon('user',15)}</button>
-      <button class="btn small ghost" title="Изменить связь" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
-      <button class="btn small ghost" title="Удалить связь" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
+      <button class="btn small ghost" title="${t("openCharacter")}" onclick="selectItem('character','${otherId}')">${icon('user',15)}</button>
+      <button class="btn small ghost" title="${t("setupLink")}" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
+      <button class="btn small ghost" title="${t("deleteLink")}" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
     </div>
     <div class="relationship-note">${escapeHtml(note)}</div>
   </div>`;
@@ -1496,13 +1592,15 @@ function renderCharacterRelationshipCard(b,c,link){
 function renderCharacterMapQuick(b,c){
   const links=characterRelationships(b,c).length;
   const appears=characterChapterAppearances(b,c).length;
+  const linkTitle=isEn()?`${fmt(links)} ${links===1?"link":"links"}`:`${fmt(links)} связ${pluralRu(links,"ь","и","ей")}`;
+  const appearsTitle=isEn()?`${fmt(appears)} ${appears===1?"chapter":"chapters"}`:`${fmt(appears)} глав${pluralRu(appears,"а","ы","")}`;
   return `<div class="section">
-    <h4>Работа с персонажем</h4>
+    <h4>${t("characterWork")}</h4>
     <div class="quick-grid">
-      <button class="quick-tile" onclick="openCharacterOnMap('${c.id}')"><span class="qt-ico">${icon('map',18)}</span><span class="qt-text"><span class="qt-title">Открыть карту</span> <span class="qt-sub">Посмотреть место персонажа среди остальных</span></span></button>
-      <button class="quick-tile" onclick="setCharacterTab('relations')"><span class="qt-ico">${icon('map',18)}</span><span class="qt-text"><span class="qt-title">${fmt(links)} связ${pluralRu(links,"ь","и","ей")}</span> <span class="qt-sub">Перейти к живым связям из карты</span></span></button>
-      <button class="quick-tile" onclick="setCharacterTab('chapters')"><span class="qt-ico">${icon('list',18)}</span><span class="qt-text"><span class="qt-title">${fmt(appears)} глав${pluralRu(appears,"а","ы","")}</span> <span class="qt-sub">Где персонаж найден в тексте</span></span></button>
-      ${b.characters.length>1?`<button class="quick-tile" onclick="openAddCharacterLink('', '${c.id}')"><span class="qt-ico">${icon('plus',18)}</span><span class="qt-text"><span class="qt-title">Добавить связь</span> <span class="qt-sub">Создать связь без ручной анкеты</span></span></button>`:""}
+      <button class="quick-tile" onclick="openCharacterOnMap('${c.id}')"><span class="qt-ico">${icon('map',18)}</span><span class="qt-text"><span class="qt-title">${t("openMap")}</span> <span class="qt-sub">${t("openMapSub")}</span></span></button>
+      <button class="quick-tile" onclick="setCharacterTab('relations')"><span class="qt-ico">${icon('map',18)}</span><span class="qt-text"><span class="qt-title">${linkTitle}</span> <span class="qt-sub">${t("liveRelationsSub")}</span></span></button>
+      <button class="quick-tile" onclick="setCharacterTab('chapters')"><span class="qt-ico">${icon('list',18)}</span><span class="qt-text"><span class="qt-title">${appearsTitle}</span> <span class="qt-sub">${t("foundInTextSub")}</span></span></button>
+      ${b.characters.length>1?`<button class="quick-tile" onclick="openAddCharacterLink('', '${c.id}')"><span class="qt-ico">${icon('plus',18)}</span><span class="qt-text"><span class="qt-title">${t("addRelation")}</span> <span class="qt-sub">${t("addRelationSub")}</span></span></button>`:""}
     </div>
   </div>`;
 }
@@ -1514,16 +1612,16 @@ function openCharacterOnMap(id){
 function taField(id,label,val,ph){ return `<div class="fld"><label>${label}</label><textarea id="${id}" placeholder="${escapeAttr(ph)}">${escapeHtml(val)}</textarea></div>`; }
 function renderCharacterAppearances(b,c){
   const rows=characterChapterAppearances(b,c);
-  if(!rows.length) return `<div class="section"><h4>Появления в главах</h4><p class="empty-note">Пока не найдено в тексте глав. Проверь имя или добавь варианты имени.</p></div>`;
+  if(!rows.length) return `<div class="section"><h4>${t("appearances")}</h4><p class="empty-note">${t("noAppearances")}</p></div>`;
   const list=rows.map(row=>`<div class="appearance-row">
     <div>
-      <div class="appearance-title">${row.index+1}. ${escapeHtml(row.chapter.title||"Без названия")}</div>
-      <div class="appearance-meta">${fmt(row.count)} упоминан${pluralRu(row.count,"ие","ия","ий")}</div>
+      <div class="appearance-title">${row.index+1}. ${escapeHtml(titleOrFallback(row.chapter.title))}</div>
+      <div class="appearance-meta">${isEn()?`${fmt(row.count)} ${row.count===1?"mention":"mentions"}`:`${fmt(row.count)} упоминан${pluralRu(row.count,"ие","ия","ий")}`}</div>
     </div>
-    <button class="btn small" onclick="selectItem('chapter','${row.chapter.id}')">${icon('edit',15)} Открыть</button>
+    <button class="btn small" onclick="selectItem('chapter','${row.chapter.id}')">${icon('edit',15)} ${t("openChapter")}</button>
     <div class="appearance-snippet">${mentionSnippet(row.chapter.content||"",row.first)}</div>
   </div>`).join("");
-  return `<div class="section"><h4>Появления в главах</h4><div class="appearance-list">${list}</div></div>`;
+  return `<div class="section"><h4>${t("appearances")}</h4><div class="appearance-list">${list}</div></div>`;
 }
 function pluralRu(n,one,two,many){
   n=Math.abs(Number(n)||0)%100;
@@ -1536,18 +1634,18 @@ function pluralRu(n,one,two,many){
 function roleSelect(c){
   const roles=state.settings.roles||[];
   if(c.role && !roles.includes(c.role)) roles.push(c.role);   // легаси/импорт — подхватим
-  const opts=roles.map(r=>`<option ${c.role===r?"selected":""}>${escapeHtml(r)}</option>`).join("");
+  const opts=roles.map(r=>`<option value="${escapeAttr(r)}" ${c.role===r?"selected":""}>${escapeHtml(labelEnum("roles",r))}</option>`).join("");
   return `<select id="cRoleSel" onchange="onRoleSelect('${c.id}')">
-    <option value="" ${!c.role?"selected":""}>— не указана —</option>
+    <option value="" ${!c.role?"selected":""}>${t("notSpecified")}</option>
     ${opts}
-    <option value="__custom">＋ Другое…</option>
+    <option value="__custom">${t("customOther")}</option>
   </select>`;
 }
 async function onRoleSelect(id){
   const sel=document.getElementById("cRoleSel");
   const c=curBook().characters.find(x=>x.id===id); if(!c) return;
   if(sel.value==="__custom"){
-    const v=await openInput({title:"Своя роль",label:"Роль персонажа в этой книге",placeholder:"например, Хранитель тайны",ok:"Добавить"});
+    const v=await openInput({title:t("customRole"),label:t("role"),placeholder:t("customRolePh"),ok:t("add")});
     if(v&&v.trim()){ const role=v.trim();
       state.settings.roles=state.settings.roles||[];
       if(!state.settings.roles.includes(role)) state.settings.roles.push(role);  // запоминаем как доступную роль
@@ -1572,19 +1670,19 @@ function renderLoreView(main,b){
   main.innerHTML=`<div class="wrap">
     <div class="pagehead">
       <div></div>
-      <button class="btn" onclick="editLore()">${icon('edit',16)} Редактировать</button>
+      <button class="btn" onclick="editLore()">${icon('edit',16)} ${t("edit")}</button>
     </div>
     <div class="profile-top">
       <div class="portrait empty" style="width:126px;aspect-ratio:1">${icon('map',46)}</div>
       <div class="profile-id">
-        <h1 class="pname">${escapeHtml(item.title||"Без названия")}</h1>
-        <span class="badge">${escapeHtml(item.type||"Заметка")}</span>
+        <h1 class="pname">${escapeHtml(titleOrFallback(item.title))}</h1>
+        <span class="badge">${escapeHtml(labelEnum("lore",item.type||"Заметка"))}</span>
       </div>
     </div>
-    ${sec("Коротко",item.summary)}
-    ${sec("Подробности",item.details)}
-    ${sec("Связи",item.links)}
-    ${!hasText?`<div class="section"><p class="empty-note">Заметка пока пустая. Нажми «Редактировать», чтобы заполнить.</p></div>`:""}
+    ${sec(t("profileShort"),item.summary)}
+    ${sec(t("details"),item.details)}
+    ${sec(t("links"),item.links)}
+    ${!hasText?`<div class="section"><p class="empty-note">${t("loreEmpty")}</p></div>`:""}
   </div>`;
 }
 function renderLoreEdit(main,b){
@@ -1593,20 +1691,20 @@ function renderLoreEdit(main,b){
   normalizeLore(item);
   main.innerHTML=`<div class="wrap">
     <div class="pagehead">
-      <button class="btn ghost" onclick="doneLore()">${icon('back',16)} Готово</button>
-      <button class="btn ghost small" onclick="deleteLore('${item.id}')">${icon('trash',16)} Удалить</button>
+      <button class="btn ghost" onclick="doneLore()">${icon('back',16)} ${t("done")}</button>
+      <button class="btn ghost small" onclick="deleteLore('${item.id}')">${icon('trash',16)} ${t("delete")}</button>
     </div>
     <div class="profile-top">
       <div class="portrait empty" style="width:126px;aspect-ratio:1">${icon('map',46)}</div>
       <div class="profile-id" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
-        <div class="fld"><label>Название</label><input id="loreTitle" value="${escapeAttr(item.title)}" placeholder="Название места, события, термина..."></div>
-        <div class="fld"><label>Тип</label><select id="loreType">${LORE_TYPES.map(t=>`<option ${item.type===t?'selected':''}>${t}</option>`).join("")}</select></div>
+        <div class="fld"><label>${t("title")}</label><input id="loreTitle" value="${escapeAttr(item.title)}" placeholder="${escapeAttr(t("loreNamePh"))}"></div>
+        <div class="fld"><label>${t("type")}</label><select id="loreType">${optionList(LORE_TYPES,"lore",item.type)}</select></div>
       </div>
     </div>
     <div class="fld-stack" style="margin-top:24px">
-      ${taField("loreSummary","Коротко",item.summary,"Суть в двух-трёх фразах...")}
-      ${taField("loreDetails","Подробности",item.details,"История, правила, детали, важные факты...")}
-      ${taField("loreLinks","Связи",item.links,"С какими персонажами, главами, местами или событиями связано...")}
+      ${taField("loreSummary",t("profileShort"),item.summary,t("loreSummaryPh"))}
+      ${taField("loreDetails",t("details"),item.details,t("detailsPh"))}
+      ${taField("loreLinks",t("links"),item.links,t("linksPh"))}
     </div>
   </div>`;
   const bind=(id,field,reflect)=>{ const el=document.getElementById(id); if(!el) return;
@@ -1629,32 +1727,32 @@ function renderPlan(main,b){
     <div class="plan-card">
       <div class="plan-card-head">
         <div class="plan-num">${i+1}</div>
-        <input class="plan-title" id="plTitle${i}" value="${escapeAttr(ch.title||'')}" placeholder="Название главы">
-        <select class="plan-status" id="plStatus${i}">${PLAN_STATUSES.map(s=>`<option ${ch.planStatus===s?'selected':''}>${s}</option>`).join("")}</select>
+        <input class="plan-title" id="plTitle${i}" value="${escapeAttr(ch.title||'')}" placeholder="${escapeAttr(t("chapterTitle"))}">
+        <select class="plan-status" id="plStatus${i}">${optionList(PLAN_STATUSES,"plan",ch.planStatus)}</select>
       </div>
       <div class="plan-fields">
-        <div class="fld"><label>Что происходит</label><textarea id="plSummary${i}" placeholder="Коротко: сцена, конфликт, поворот...">${escapeHtml(ch.planSummary)}</textarea></div>
-        <div class="fld"><label>Заметки к главе</label><textarea id="plNotes${i}" placeholder="Что не забыть, что проверить, что переписать...">${escapeHtml(ch.planNotes)}</textarea></div>
+        <div class="fld"><label>${t("whatHappens")}</label><textarea id="plSummary${i}" placeholder="${escapeAttr(t("planSummaryPh"))}">${escapeHtml(ch.planSummary)}</textarea></div>
+        <div class="fld"><label>${t("chapterNotes")}</label><textarea id="plNotes${i}" placeholder="${escapeAttr(t("chapterNotesPh"))}">${escapeHtml(ch.planNotes)}</textarea></div>
       </div>
       ${chars}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-        <button class="btn small" onclick="selectItem('chapter','${ch.id}')">${icon('edit',15)} Открыть главу</button>
-        <button class="btn small ghost" onclick="moveChapter('${ch.id}',-1,event)">${icon('up',14)} Выше</button>
-        <button class="btn small ghost" onclick="moveChapter('${ch.id}',1,event)">${icon('down',14)} Ниже</button>
+        <button class="btn small" onclick="selectItem('chapter','${ch.id}')">${icon('edit',15)} ${t("openChapter")}</button>
+        <button class="btn small ghost" onclick="moveChapter('${ch.id}',-1,event)">${icon('up',14)} ${t("up")}</button>
+        <button class="btn small ghost" onclick="moveChapter('${ch.id}',1,event)">${icon('down',14)} ${t("down")}</button>
       </div>
     </div>`;
   }).join(""):`<div class="placeholder" style="height:auto;min-height:260px">
       <div class="pic">${icon('list',54)}</div>
-      <div>Глав пока нет. Создай первую главу, и она появится в плане.</div>
-      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} Новая глава</button>
+      <div>${t("planEmpty")}</div>
+      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button>
     </div>`;
   main.innerHTML=`<div class="wrap">
     <div class="pagehead">
       <div>
-        <h1 style="margin:0;font-size:28px;letter-spacing:-.4px">План книги</h1>
-        <div class="hint" style="margin-top:8px">Собери книгу по главам: статус, суть сцены и рабочие заметки.</div>
+        <h1 style="margin:0;font-size:28px;letter-spacing:-.4px">${t("bookPlan")}</h1>
+        <div class="hint" style="margin-top:8px">${t("planHint")}</div>
       </div>
-      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} Новая глава</button>
+      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button>
     </div>
     <div class="plan-list">${cards}</div>
   </div>`;
@@ -1673,8 +1771,8 @@ function renderPlan(main,b){
 function renderChapterCharacterChips(b,ch){
   const mentions=chapterCharacterMentions(b,ch);
   if(!mentions.length) return "";
-  const chips=mentions.slice(0,8).map(x=>`<button class="char-chip" title="${escapeAttr((x.character.name||"Без имени")+" — "+fmt(x.count)+" упоминаний")}" onclick="selectItem('character','${x.character.id}')">${icon('user',13)}<span>${escapeHtml(x.character.name||"Без имени")}</span><b>${fmt(x.count)}</b></button>`).join("");
-  const rest=mentions.length>8?`<span class="char-chip"><span>ещё ${mentions.length-8}</span></span>`:"";
+  const chips=mentions.slice(0,8).map(x=>`<button class="char-chip" title="${escapeAttr(nameOrFallback(x.character.name)+" — "+(isEn()?`${fmt(x.count)} ${x.count===1?"mention":"mentions"}`:`${fmt(x.count)} упоминаний`))}" onclick="selectItem('character','${x.character.id}')">${icon('user',13)}<span>${escapeHtml(nameOrFallback(x.character.name))}</span><b>${fmt(x.count)}</b></button>`).join("");
+  const rest=mentions.length>8?`<span class="char-chip"><span>${t("more")} ${mentions.length-8}</span></span>`:"";
   return `<div class="chapter-characters">${chips}${rest}</div>`;
 }
 
@@ -1682,29 +1780,29 @@ function renderChapterCharacterChips(b,ch){
 function renderOverview(main,b){
   const w=bookWordCount(b),pg=Math.max(0,Math.round(w/WORDS_PER_PAGE)),sheets=bookCharCount(b)/CHARS_PER_SHEET;
   main.innerHTML=`<div class="wrap">
-    <input class="ed-title" id="ovTitle" value="${escapeAttr(b.title)}" placeholder="Название книги">
+    <input class="ed-title" id="ovTitle" value="${escapeAttr(b.title)}" placeholder="${escapeAttr(t("bookTitle"))}">
     <div class="ovstats">
-      <div class="ovstat"><div class="n">${fmt(w)}</div><div class="l">слов</div></div>
-      <div class="ovstat"><div class="n">≈${fmt(pg)}</div><div class="l">страниц</div></div>
-      <div class="ovstat"><div class="n">${b.chapters.length}</div><div class="l">глав</div></div>
-      <div class="ovstat"><div class="n">${b.characters.length}</div><div class="l">персонажей</div></div>
-      <div class="ovstat" title="Авторский лист = 40 000 знаков, принятая в издательствах единица объёма"><div class="n">${sheets.toFixed(1)}</div><div class="l">авт. листов</div></div>
+      <div class="ovstat"><div class="n">${fmt(w)}</div><div class="l">${t("words")}</div></div>
+      <div class="ovstat"><div class="n">≈${fmt(pg)}</div><div class="l">${t("pagesFull")}</div></div>
+      <div class="ovstat"><div class="n">${b.chapters.length}</div><div class="l">${t("chapters")}</div></div>
+      <div class="ovstat"><div class="n">${b.characters.length}</div><div class="l">${t("characters")}</div></div>
+      <div class="ovstat" title="${t("authorSheetHelp")}"><div class="n">${sheets.toFixed(1)}</div><div class="l">${t("authorSheets")}</div></div>
     </div>
     <div class="fld-stack">
       <div class="fld-grid">
-        <div class="fld"><label>Год действия</label><input id="ovYear" value="${escapeAttr(b.year)}" placeholder="напр. 1965">
-          <div class="hint">Используется, чтобы считать год рождения персонажей по возрасту</div></div>
-        <div class="fld"><label>Эпоха / период</label><input id="ovEra" value="${escapeAttr(b.era)}" placeholder="напр. послевоенное время"></div>
+        <div class="fld"><label>${t("overviewYear")}</label><input id="ovYear" value="${escapeAttr(b.year)}" placeholder="${escapeAttr(t("overviewYearPh"))}">
+          <div class="hint">${t("overviewYearHint")}</div></div>
+        <div class="fld"><label>${t("era")}</label><input id="ovEra" value="${escapeAttr(b.era)}" placeholder="${escapeAttr(t("eraPh"))}"></div>
       </div>
-      <div class="fld"><label>Место действия</label><input id="ovPlace" value="${escapeAttr(b.place)}" placeholder="Город, страна, мир…"></div>
-      ${taField("ovSyn","Синопсис / о чём книга",b.synopsis,"Краткое содержание, идея, замысел…")}
+      <div class="fld"><label>${t("place")}</label><input id="ovPlace" value="${escapeAttr(b.place)}" placeholder="${escapeAttr(t("placePh"))}"></div>
+      ${taField("ovSyn",t("synopsis"),b.synopsis,t("synopsisPh"))}
     </div>
     <div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} Новая глава</button>
-      <button class="btn" onclick="openPlan()">${icon('list',16)} План</button>
-      <button class="btn" onclick="addLore()">${icon('map',16)} Заметка мира</button>
-      <button class="btn" onclick="openExport()">${icon('download',16)} Экспорт</button>
-      <button class="btn" onclick="openPreview()">${icon('eye',16)} Как в книге</button>
+      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button>
+      <button class="btn" onclick="openPlan()">${icon('list',16)} ${t("plan")}</button>
+      <button class="btn" onclick="addLore()">${icon('map',16)} ${t("worldNote")}</button>
+      <button class="btn" onclick="openExport()">${icon('download',16)} ${t("export")}</button>
+      <button class="btn" onclick="openPreview()">${icon('eye',16)} ${t("preview")}</button>
     </div>
   </div>`;
   const bind=(id,field,reflect)=>{ const el=document.getElementById(id);
@@ -1717,23 +1815,24 @@ function renderOverview(main,b){
 /* ============ ВЕРХНЯЯ ПАНЕЛЬ ============ */
 function renderTopbar(){
   const L=document.getElementById("tbLeft"),R=document.getElementById("tbRight");
-  const gear=`<button class="btn icon ghost" title="Настройки" onclick="openSettings()">${icon('gear',18)}</button>`;
-  const searchBtn=`<button class="btn icon ghost" title="Поиск" onclick="openSearch()">${icon('search',18)}</button>`;
-  const trashBtn=`<button class="btn icon ghost" title="Корзина${trashCount()?': '+trashCount():''}" onclick="openTrash()">${icon('trash',18)}</button>`;
+  const langBtn=`<button class="btn small ghost" title="${isEn()?t("switchToRussian"):t("switchToEnglish")}" onclick="toggleLang()">${icon('globe',16)} ${isEn()?"EN":"RU"}</button>`;
+  const gear=`<button class="btn icon ghost" title="${t("settings")}" onclick="openSettings()">${icon('gear',18)}</button>`;
+  const searchBtn=`<button class="btn icon ghost" title="${t("search")}" onclick="openSearch()">${icon('search',18)}</button>`;
+  const trashBtn=`<button class="btn icon ghost" title="${t("trash")}${trashCount()?': '+trashCount():''}" onclick="openTrash()">${icon('trash',18)}</button>`;
   if(route.screen==="home"){
     L.innerHTML="";
-    R.innerHTML=`${searchBtn}${trashBtn}${gear}`;
+    R.innerHTML=`${searchBtn}${trashBtn}${langBtn}${gear}`;
   } else {
     const b=curBook();
-    L.innerHTML=`<button class="btn icon ghost" title="Все книги" onclick="goHome()">${icon('back',18)}</button>
-      <span class="tb-title" onclick="openOverview()">${escapeHtml(b.title)}</span>`;
+    L.innerHTML=`<button class="btn icon ghost" title="${t("allBooks")}" onclick="goHome()">${icon('back',18)}</button>
+      <span class="tb-title" onclick="openOverview()">${escapeHtml(titleOrFallback(b.title))}</span>`;
     const w=bookWordCount(b),pg=Math.max(0,Math.round(w/WORDS_PER_PAGE));
-    const stat=route.view==="overview"?"":`<span class="stat">${fmt(w)} слов · ≈${fmt(pg)} стр.</span>`;
+    const stat=route.view==="overview"?"":`<span class="stat">${fmt(w)} ${t("words")} · ≈${fmt(pg)} ${t("pages")}</span>`;
     R.innerHTML=`${stat}
       ${searchBtn}
       ${trashBtn}
-      <button class="btn small ghost" onclick="openExport()">${icon('download',16)} Экспорт</button>
-      <button class="btn small ghost" onclick="openPreview()">${icon('eye',16)} Как в книге</button>${gear}`;
+      <button class="btn small ghost" onclick="openExport()">${icon('download',16)} ${t("export")}</button>
+      <button class="btn small ghost" onclick="openPreview()">${icon('eye',16)} ${t("preview")}</button>${langBtn}${gear}`;
   }
 }
 
@@ -1741,52 +1840,56 @@ function renderTopbar(){
 function openSettings(){
   const s=state.settings;
   const themeSeg=`<div class="seg">
-    <button class="${s.theme==='light'?'on':''}" onclick="setTheme('light')">${icon('sun',16)} Светлая</button>
-    <button class="${s.theme==='dark'?'on':''}" onclick="setTheme('dark')">${icon('moon',16)} Тёмная</button></div>`;
-  const sw=ACCENTS.map(a=>`<div class="swatch ${s.accent===a.h?'on':''}" style="background:${a.h}" title="${a.n}" onclick="setAccent('${a.h}')"><span class="nm">${a.n}</span></div>`).join("");
-  modal(`<h3>Настройки</h3>
+    <button class="${s.theme==='light'?'on':''}" onclick="setTheme('light')">${icon('sun',16)} ${t("light")}</button>
+    <button class="${s.theme==='dark'?'on':''}" onclick="setTheme('dark')">${icon('moon',16)} ${t("dark")}</button></div>`;
+  const langSeg=`<div class="seg">
+    <button class="${!isEn()?'on':''}" onclick="setLang('ru')">${icon('globe',16)} RU</button>
+    <button class="${isEn()?'on':''}" onclick="setLang('en')">${icon('globe',16)} EN</button></div>`;
+  const sw=ACCENTS.map(a=>`<div class="swatch ${s.accent===a.h?'on':''}" style="background:${a.h}" title="${labelEnum("accents",a.n)}" onclick="setAccent('${a.h}')"><span class="nm">${labelEnum("accents",a.n)}</span></div>`).join("");
+  modal(`<h3>${t("settings")}</h3>
     <div class="mbody" style="padding:0">
-      <div class="set-section"><div class="sh">Тема</div>${themeSeg}</div>
-      <div class="set-section"><div class="sh">Цвет приложения</div><div class="swatches">${sw}</div></div>
-      <div class="set-section"><div class="sh">Данные</div>
+      <div class="set-section"><div class="sh">${t("theme")}</div>${themeSeg}</div>
+      <div class="set-section"><div class="sh">${t("language")}</div>${langSeg}</div>
+      <div class="set-section"><div class="sh">${t("appColor")}</div><div class="swatches">${sw}</div></div>
+      <div class="set-section"><div class="sh">${t("data")}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn small" onclick="exportBackup()">${icon('download',16)} Сохранить резервную копию</button>
-          <button class="btn small" onclick="importBackup()">${icon('upload',16)} Загрузить из копии</button>
-          <button class="btn small" onclick="openTrash()">${icon('trash',16)} Корзина${trashCount()?` (${trashCount()})`:''}</button>
+          <button class="btn small" onclick="exportBackup()">${icon('download',16)} ${t("saveBackup")}</button>
+          <button class="btn small" onclick="importBackup()">${icon('upload',16)} ${t("loadBackup")}</button>
+          <button class="btn small" onclick="openTrash()">${icon('trash',16)} ${t("trash")}${trashCount()?` (${trashCount()})`:''}</button>
         </div>
-        <div class="hint" style="margin-top:10px">Все книги хранятся в одном файле на твоём компьютере. Резервную копию полезно делать время от времени.</div>
+        <div class="hint" style="margin-top:10px">${t("dataHint")}</div>
       </div>
     </div>
-    <div class="mfoot"><button class="btn primary" onclick="closeModal()">Готово</button></div>`,"wide");
+    <div class="mfoot"><button class="btn primary" onclick="closeModal()">${t("done")}</button></div>`,"wide");
 }
 
 /* ============ КОРЗИНА ============ */
 function openTrash(){
   ensureData();
   const rows=[
-    ...state.trash.books.map((x,i)=>trashRow("books",i,"Книга",x.data.title||"Без названия","Со всеми главами и персонажами",x.deletedAt)),
-    ...state.trash.chapters.map((x,i)=>trashRow("chapters",i,"Глава",x.data.title||"Без названия",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt)),
-    ...state.trash.characters.map((x,i)=>trashRow("characters",i,"Персонаж",x.data.name||"Без имени",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt)),
-    ...state.trash.lore.map((x,i)=>trashRow("lore",i,x.data.type||"Лор",x.data.title||"Без названия",`Из книги «${x.bookTitle||"Без названия"}»`,x.deletedAt))
+    ...state.trash.books.map((x,i)=>trashRow("books",i,t("book"),titleOrFallback(x.data.title),t("withChaptersCharacters"),x.deletedAt)),
+    ...state.trash.chapters.map((x,i)=>trashRow("chapters",i,t("chapter"),titleOrFallback(x.data.title),`${t("fromBook")} «${titleOrFallback(x.bookTitle)}»`,x.deletedAt)),
+    ...state.trash.characters.map((x,i)=>trashRow("characters",i,characterFallback(),nameOrFallback(x.data.name),`${t("fromBook")} «${titleOrFallback(x.bookTitle)}»`,x.deletedAt)),
+    ...state.trash.lore.map((x,i)=>trashRow("lore",i,labelEnum("lore",x.data.type||"Лор"),titleOrFallback(x.data.title),`${t("fromBook")} «${titleOrFallback(x.bookTitle)}»`,x.deletedAt))
   ].join("");
   const total=trashCount();
-  modal(`<h3>Корзина</h3>
+  modal(`<h3>${t("trash")}</h3>
     <div class="mbody trash-list">
-      ${rows||`<div class="search-empty">Корзина пуста.</div>`}
+      ${rows||`<div class="search-empty">${t("trashEmpty")}</div>`}
     </div>
     <div class="mfoot">
-      ${total?`<button class="btn danger" onclick="emptyTrash()">${icon('trash',16)} Очистить</button>`:""}
-      <button class="btn primary" onclick="closeModal()">Готово</button>
+      ${total?`<button class="btn danger" onclick="emptyTrash()">${icon('trash',16)} ${t("clear")}</button>`:""}
+      <button class="btn primary" onclick="closeModal()">${t("done")}</button>
     </div>`,"wide");
 }
 function trashRow(type,idx,kind,title,sub,deletedAt){
-  const when=deletedAt?new Date(deletedAt).toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+  const when=deletedAt?new Date(deletedAt).toLocaleString(dateLocale(),{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"";
   return `<div class="trash-card">
     <div class="trash-head"><span class="trash-kind">${kind}</span><span class="trash-title">${escapeHtml(title)}</span></div>
     <div class="trash-sub">${escapeHtml(sub)}${when?` · ${when}`:""}</div>
     <div class="trash-actions">
-      <button class="btn small primary" onclick="restoreTrash('${type}',${idx})">${icon('restore',15)} Вернуть</button>
-      <button class="btn small ghost" onclick="purgeTrash('${type}',${idx})">${icon('x',15)} Удалить окончательно</button>
+      <button class="btn small primary" onclick="restoreTrash('${type}',${idx})">${icon('restore',15)} ${t("restore")}</button>
+      <button class="btn small ghost" onclick="purgeTrash('${type}',${idx})">${icon('x',15)} ${t("deleteForever")}</button>
     </div>
   </div>`;
 }
@@ -1801,7 +1904,7 @@ function ensureUniqueItemId(list,item){
   return item;
 }
 function fallbackBookForTrash(title){
-  const b={id:uid(),title:title||"Восстановленная книга",createdAt:now(),updatedAt:now(),
+  const b={id:uid(),title:title||t("restoredBook"),createdAt:now(),updatedAt:now(),
     year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],lore:[]};
   state.books.unshift(b);
   return b;
@@ -1814,43 +1917,43 @@ function restoreTrash(type,idx){
     book.updatedAt=now(); state.books.unshift(book);
   }
   if(type==="chapters"){
-    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||"Восстановленная книга");
+    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||t("restoredBook"));
     const ch=ensureUniqueItemId(b.chapters,normalizeChapter(cloneData(item.data)));
     ch.updatedAt=now(); b.chapters.push(ch); b.updatedAt=now();
   }
   if(type==="characters"){
-    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||"Восстановленная книга");
+    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||t("restoredBook"));
     const c=ensureUniqueItemId(b.characters,cloneData(item.data));
     b.characters.push(c); b.updatedAt=now();
   }
   if(type==="lore"){
-    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||"Восстановленная книга");
+    let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||t("restoredBook"));
     b.lore=Array.isArray(b.lore)?b.lore:[];
     const lore=ensureUniqueItemId(b.lore,normalizeLore(cloneData(item.data)));
     b.lore.unshift(lore); b.updatedAt=now();
   }
   state.trash[type].splice(idx,1);
-  save(); toast("Восстановлено"); openTrash(); render();
+  save(); toast(t("restored")); openTrash(); render();
 }
 async function purgeTrash(type,idx){
   ensureData();
   const item=state.trash[type]&&state.trash[type][idx]; if(!item) return;
-  if(!await openConfirm({title:"Удалить окончательно?",message:"После этого вернуть из корзины уже не получится.",ok:"Удалить",danger:true})) return;
+  if(!await openConfirm({title:t("deleteForeverTitle"),message:t("deleteForeverMsg"),ok:t("delete"),danger:true})) return;
   state.trash[type].splice(idx,1); save(); openTrash(); renderTopbar();
 }
 async function emptyTrash(){
-  if(!await openConfirm({title:"Очистить корзину?",message:"Все элементы в корзине будут удалены окончательно.",ok:"Очистить",danger:true})) return;
+  if(!await openConfirm({title:t("emptyTrashTitle"),message:t("emptyTrashMsg"),ok:t("clear"),danger:true})) return;
   state.trash={books:[],chapters:[],characters:[],lore:[]}; save(); openTrash(); renderTopbar();
 }
 
 /* ============ ПОИСК ============ */
 function openSearch(){
-  modal(`<h3>Поиск</h3>
+  modal(`<h3>${t("search")}</h3>
     <div class="mpad">
-      <div class="search-box">${icon('search',20)}<input class="search-input" id="searchInput" placeholder="Имя, сцена, фраза, место..." autocomplete="off"></div>
+      <div class="search-box">${icon('search',20)}<input class="search-input" id="searchInput" placeholder="${escapeAttr(t("searchPh"))}" autocomplete="off"></div>
     </div>
     <div class="mbody search-results" id="searchResults"></div>
-    <div class="mfoot"><button class="btn" onclick="closeModal()">Закрыть</button></div>`,"wide");
+    <div class="mfoot"><button class="btn" onclick="closeModal()">${t("close")}</button></div>`,"wide");
   const input=document.getElementById("searchInput");
   input.focus();
   const run=()=>renderSearchResults(input.value);
@@ -1861,16 +1964,16 @@ function openSearch(){
 function renderSearchResults(query){
   const box=document.getElementById("searchResults"); if(!box) return;
   const q=(query||"").trim();
-  if(q.length<2){ box.innerHTML=`<div class="search-empty">Введите хотя бы 2 символа.</div>`; return; }
-  const tokens=q.toLocaleLowerCase("ru-RU").split(/\s+/).filter(Boolean);
+  if(q.length<2){ box.innerHTML=`<div class="search-empty">${t("searchMin")}</div>`; return; }
+  const tokens=q.toLocaleLowerCase(dateLocale()).split(/\s+/).filter(Boolean);
   const results=collectSearchItems().map(item=>{
-    const hay=(item.title+"\n"+item.bookTitle+"\n"+item.kind+"\n"+item.text).toLocaleLowerCase("ru-RU");
+    const hay=(item.title+"\n"+item.bookTitle+"\n"+item.kind+"\n"+item.text).toLocaleLowerCase(dateLocale());
     if(!tokens.every(t=>hay.includes(t))) return null;
-    const titleHay=(item.title+"\n"+item.bookTitle).toLocaleLowerCase("ru-RU");
+    const titleHay=(item.title+"\n"+item.bookTitle).toLocaleLowerCase(dateLocale());
     const score=tokens.reduce((s,t)=>s+(titleHay.includes(t)?10:1),0);
     return {...item,score,snippet:makeSnippet(item.title+"\n"+item.text,tokens)};
-  }).filter(Boolean).sort((a,b)=>b.score-a.score||a.kind.localeCompare(b.kind,"ru-RU")).slice(0,80);
-  if(!results.length){ box.innerHTML=`<div class="search-empty">Ничего не найдено.</div>`; return; }
+  }).filter(Boolean).sort((a,b)=>b.score-a.score||a.kind.localeCompare(b.kind,dateLocale())).slice(0,80);
+  if(!results.length){ box.innerHTML=`<div class="search-empty">${t("searchNothing")}</div>`; return; }
   box.innerHTML=results.map(r=>`<div class="search-result" onclick="openSearchResult('${r.bookId}','${r.view}','${r.itemId||''}')">
     <div class="sr-top"><span class="sr-kind">${escapeHtml(r.kind)}</span><span class="sr-title">${escapeHtml(r.title)}</span></div>
     <div class="sr-book">${escapeHtml(r.bookTitle)}</div>
@@ -1880,25 +1983,25 @@ function renderSearchResults(query){
 function collectSearchItems(){
   const items=[];
   state.books.forEach(b=>{
-    const bookTitle=b.title||"Без названия";
+    const bookTitle=titleOrFallback(b.title);
     items.push({
-      bookId:b.id,view:"overview",itemId:"",kind:"Книга",title:bookTitle,bookTitle,
+      bookId:b.id,view:"overview",itemId:"",kind:t("book"),title:bookTitle,bookTitle,
       text:[b.title,b.year,b.era,b.place,b.synopsis].filter(Boolean).join("\n")
     });
     (b.chapters||[]).forEach((c,i)=>items.push({
-      bookId:b.id,view:"chapter",itemId:c.id,kind:"Глава "+(i+1),title:c.title||"Без названия",bookTitle,
+      bookId:b.id,view:"chapter",itemId:c.id,kind:`${t("chapter")} ${i+1}`,title:titleOrFallback(c.title),bookTitle,
       text:[c.title,c.planStatus,c.planSummary,c.planNotes,c.content].filter(Boolean).join("\n")
     }));
     (b.characters||[]).forEach(c=>items.push({
-      bookId:b.id,view:"character",itemId:c.id,kind:"Персонаж",title:c.name||"Без имени",bookTitle,
+      bookId:b.id,view:"character",itemId:c.id,kind:t("charactersGroup").slice(0,-1),title:nameOrFallback(c.name),bookTitle,
       text:[c.name,c.role,c.age,c.appearance,c.personality,c.background,c.goals,c.relationships,c.notes].filter(Boolean).join("\n")
     }));
     validCharacterLinks(b).forEach(link=>items.push({
-      bookId:b.id,view:"characterMap",itemId:"",kind:"Связь",title:`${characterName(b,link.from)} — ${characterName(b,link.to)}`,bookTitle,
+      bookId:b.id,view:"characterMap",itemId:"",kind:t("link"),title:`${characterName(b,link.from)} — ${characterName(b,link.to)}`,bookTitle,
       text:[characterName(b,link.from),characterName(b,link.to),link.type,link.note].filter(Boolean).join("\n")
     }));
     (b.lore||[]).forEach(item=>items.push({
-      bookId:b.id,view:"lore",itemId:item.id,kind:item.type||"Лор",title:item.title||"Без названия",bookTitle,
+      bookId:b.id,view:"lore",itemId:item.id,kind:labelEnum("lore",item.type||"Лор"),title:titleOrFallback(item.title),bookTitle,
       text:[item.title,item.type,item.summary,item.details,item.links].filter(Boolean).join("\n")
     }));
   });
@@ -1907,7 +2010,7 @@ function collectSearchItems(){
 function makeSnippet(text,tokens){
   const src=(text||"").replace(/\s+/g," ").trim();
   if(!src) return "";
-  const lower=src.toLocaleLowerCase("ru-RU");
+  const lower=src.toLocaleLowerCase(dateLocale());
   let pos=-1;
   tokens.forEach(t=>{ const i=lower.indexOf(t); if(i>=0&&(pos<0||i<pos)) pos=i; });
   if(pos<0) pos=0;
@@ -1937,38 +2040,38 @@ function openSearchResult(bookId,view,itemId){
 }
 
 /* ============ ЭКСПОРТ ============ */
-function buildBookText(b){ let t=b.title.toUpperCase()+"\n\n"; b.chapters.forEach((c,i)=>{ t+=(c.title||("Глава "+(i+1)))+"\n\n"+(c.content||"")+"\n\n\n"; }); return t; }
+function buildBookText(b){ let out=b.title.toUpperCase()+"\n\n"; b.chapters.forEach((c,i)=>{ out+=(c.title||(`${t("chapter")} ${i+1}`))+"\n\n"+(c.content||"")+"\n\n\n"; }); return out; }
 function openExport(){
-  modal(`<h3>Экспорт книги</h3><div class="mpad">
-    <button class="btn" style="width:100%;justify-content:flex-start;margin-bottom:10px;padding:14px 16px" onclick="exportDocx()">${icon('word',20)} Настоящий документ Word (.docx)</button>
-    <button class="btn" style="width:100%;justify-content:flex-start;padding:14px 16px" onclick="exportTxt()">${icon('txt',20)} Текстовый файл (.txt)</button>
-    </div><div class="mfoot"><button class="btn" onclick="closeModal()">Отмена</button></div>`);
+  modal(`<h3>${t("exportBook")}</h3><div class="mpad">
+    <button class="btn" style="width:100%;justify-content:flex-start;margin-bottom:10px;padding:14px 16px" onclick="exportDocx()">${icon('word',20)} ${t("docxExport")}</button>
+    <button class="btn" style="width:100%;justify-content:flex-start;padding:14px 16px" onclick="exportTxt()">${icon('txt',20)} ${t("txtExport")}</button>
+    </div><div class="mfoot"><button class="btn" onclick="closeModal()">${t("cancel")}</button></div>`);
 }
 async function exportDocx(){
   const a=api(); if(!a) return;
   closeModal(); snapshotCurrent();
-  const res=await a.export_docx(curBook());
-  if(apiOk(res)) toast("Книга сохранена в Word");
-  else if(apiError(res,"")) openInfo("Не получилось",apiError(res,"Не удалось сохранить Word-файл."));
+  const res=await a.export_docx(curBook(),lang());
+  if(apiOk(res)) toast(t("wordSaved"));
+  else if(apiError(res,"")) openInfo(t("failTitle"),apiError(res,t("wordFail")));
 }
 async function exportTxt(){
   const a=api(); if(!a) return;
   closeModal(); snapshotCurrent();
-  const res=await a.export_txt(buildBookText(curBook()));
-  if(apiOk(res)) toast("Книга сохранена в .txt");
-  else if(apiError(res,"")) openInfo("Не получилось",apiError(res,"Не удалось сохранить текстовый файл."));
+  const res=await a.export_txt(buildBookText(curBook()),lang());
+  if(apiOk(res)) toast(t("txtSaved"));
+  else if(apiError(res,"")) openInfo(t("failTitle"),apiError(res,t("txtFail")));
 }
 
 /* ============ ПРЕДПРОСМОТР ============ */
 function openPreview(){
   snapshotCurrent(); const b=curBook();
-  let html=`<div class="pv-toolbar"><button class="btn small primary" onclick="closePreview()">${icon('x',16)} Закрыть</button></div>
+  let html=`<div class="pv-toolbar"><button class="btn small primary" onclick="closePreview()">${icon('x',16)} ${t("close")}</button></div>
     <div class="pv-page pv-title-page"><div class="tt">${escapeHtml(b.title)}</div>
-    <div class="ta">${bookWordCount(b)?'≈'+fmt(Math.max(1,Math.round(bookWordCount(b)/WORDS_PER_PAGE)))+' страниц':''}</div></div>`;
+    <div class="ta">${bookWordCount(b)?'≈'+fmt(Math.max(1,Math.round(bookWordCount(b)/WORDS_PER_PAGE)))+' '+t("pagesFull"):''}</div></div>`;
   b.chapters.forEach((c,i)=>{
     const paras=(c.content||"").split(/\n+/).filter(p=>p.trim()).map(p=>`<p>${escapeHtml(p)}</p>`).join("");
-    html+=`<div class="pv-page"><div class="pv-cnum">ГЛАВА ${i+1}</div><h2>${escapeHtml(c.title||"")}</h2>
-      ${paras||'<p style="color:#bbb;text-indent:0">(глава пока пустая)</p>'}</div>`;
+    html+=`<div class="pv-page"><div class="pv-cnum">${t("chapterUpper")} ${i+1}</div><h2>${escapeHtml(c.title||"")}</h2>
+      ${paras||`<p style="color:#bbb;text-indent:0">${t("emptyChapter")}</p>`}</div>`;
   });
   const pv=document.getElementById("preview"); pv.innerHTML=html; pv.classList.remove("hidden");
 }
@@ -1978,21 +2081,23 @@ function closePreview(){ document.getElementById("preview").classList.add("hidde
 async function exportBackup(){
   const a=api(); if(!a) return;
   snapshotCurrent();
-  const res=await a.export_backup(JSON.stringify(state,null,1));
-  if(apiOk(res)) toast("Копия сохранена");
-  else openInfo("Не получилось",apiError(res,"Не удалось сохранить копию."));
+  const res=await a.export_backup(JSON.stringify(state,null,1),lang());
+  if(apiOk(res)) toast(t("backupSaved"));
+  else if(apiError(res,"")) openInfo(t("failTitle"),apiError(res,t("backupFail")));
 }
 async function importBackup(){
   const a=api(); if(!a) return;
-  const raw=await a.import_backup(); if(!raw) return;
-  let d; try{ d=JSON.parse(raw); if(!d.books) throw 0; }catch(e){ return openInfo("Не получилось","Файл не похож на копию Книжницы."); }
-  if(!await openConfirm({title:"Заменить книги?",message:"Текущая библиотека заменится содержимым копии.",ok:"Заменить",danger:false})) return;
+  const raw=await a.import_backup(lang()); if(!raw) return;
+  let d; try{ d=JSON.parse(raw); if(!d.books) throw 0; }catch(e){ return openInfo(t("failTitle"),t("badBackup")); }
+  if(!await openConfirm({title:t("replaceBooks"),message:t("replaceBooksMsg"),ok:t("replace"),danger:false})) return;
   snapshotCurrent();
-  const backup=await a.backup_state(JSON.stringify(state,null,1),"перед импортом");
-  if(!apiOk(backup)) return openInfo("Не получилось",apiError(backup,"Не удалось сохранить старое состояние перед импортом."));
+  const backup=await a.backup_state(JSON.stringify(state,null,1),t("beforeImport"),lang());
+  if(!apiOk(backup)) return openInfo(t("failTitle"),apiError(backup,t("oldBackupFail")));
   state=d; if(!state.settings) state.settings={fontSize:19,theme:"light",accent:DEFAULT_ACCENT};
   if(!state.settings.accent) state.settings.accent=DEFAULT_ACCENT;
-  applyTheme(); save(); goHome(); toast("Копия загружена");
+  if(state.settings.lang!=="en") state.settings.lang="ru";
+  document.documentElement.lang=state.settings.lang;
+  applyTheme(); save(); goHome(); toast(t("backupLoaded"));
 }
 
 /* ============ МОДАЛКИ ============ */
@@ -2001,21 +2106,21 @@ function openCharacterPhoto(id){
   const c=b&&b.characters.find(x=>x.id===id);
   if(!c||!c.photo) return;
   modal(`<div class="photo-view-head">
-      <h3>${escapeHtml(c.name||"Фото персонажа")}</h3>
-      <button class="btn icon ghost" id="mClosePhoto" title="Закрыть">${icon('x',16)}</button>
+      <h3>${escapeHtml(c.name||t("photoAlt"))}</h3>
+      <button class="btn icon ghost" id="mClosePhoto" title="${t("close")}">${icon('x',16)}</button>
     </div>
-    <div class="photo-view-body"><img src="${c.photo}" alt="${escapeAttr(c.name||"Фото персонажа")}"></div>`,"photo");
+    <div class="photo-view-body"><img src="${c.photo}" alt="${escapeAttr(c.name||t("photoAlt"))}"></div>`,"photo");
   const done=()=>closeModal();
   document.getElementById("mClosePhoto").onclick=done;
   document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
 }
 function modal(html,cls){ document.getElementById("modalRoot").innerHTML=`<div class="modal-back" id="mback"><div class="modal ${cls||''}">${html}</div></div>`; }
 function closeModal(){ document.getElementById("modalRoot").innerHTML=""; }
-function openInput({title,label,value="",placeholder="",ok="Готово"}){
+function openInput({title,label,value="",placeholder="",ok=t("done")}){
   return new Promise(res=>{
     modal(`<h3>${escapeHtml(title)}</h3><div class="mpad">${label?`<label class="flbl">${escapeHtml(label)}</label>`:''}
       <input class="finput" id="mInput" value="${escapeAttr(value)}" placeholder="${escapeAttr(placeholder)}"></div>
-      <div class="mfoot"><button class="btn" id="mCancel">Отмена</button><button class="btn primary" id="mOk">${escapeHtml(ok)}</button></div>`);
+      <div class="mfoot"><button class="btn" id="mCancel">${t("cancel")}</button><button class="btn primary" id="mOk">${escapeHtml(ok)}</button></div>`);
     const inp=document.getElementById("mInput"); inp.focus(); inp.select();
     const done=v=>{ closeModal(); res(v); };
     document.getElementById("mOk").onclick=()=>done(inp.value);
@@ -2024,10 +2129,10 @@ function openInput({title,label,value="",placeholder="",ok="Готово"}){
     inp.onkeydown=e=>{ if(e.key==="Enter"){e.preventDefault();done(inp.value);} if(e.key==="Escape")done(null); };
   });
 }
-function openConfirm({title,message,ok="Удалить",danger=true}){
+function openConfirm({title,message,ok=t("delete"),danger=true}){
   return new Promise(res=>{
     modal(`<h3>${escapeHtml(title)}</h3><div class="mpad mmsg">${escapeHtml(message||"")}</div>
-      <div class="mfoot"><button class="btn" id="mCancel">Отмена</button><button class="btn ${danger?'danger':'primary'}" id="mOk">${escapeHtml(ok)}</button></div>`);
+      <div class="mfoot"><button class="btn" id="mCancel">${t("cancel")}</button><button class="btn ${danger?'danger':'primary'}" id="mOk">${escapeHtml(ok)}</button></div>`);
     const done=v=>{ closeModal(); res(v); };
     document.getElementById("mOk").onclick=()=>done(true);
     document.getElementById("mCancel").onclick=()=>done(false);
@@ -2037,7 +2142,7 @@ function openConfirm({title,message,ok="Удалить",danger=true}){
 function openInfo(title,message){
   return new Promise(res=>{
     modal(`<h3>${escapeHtml(title)}</h3><div class="mpad mmsg">${escapeHtml(message)}</div>
-      <div class="mfoot"><button class="btn primary" id="mOk">Понятно</button></div>`);
+      <div class="mfoot"><button class="btn primary" id="mOk">${t("understand")}</button></div>`);
     const done=()=>{ closeModal(); res(); };
     document.getElementById("mOk").onclick=done;
     document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };

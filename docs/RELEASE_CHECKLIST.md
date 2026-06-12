@@ -9,6 +9,8 @@ samples only. Do not test with private manuscripts.
 - [ ] Open the app successfully.
 - [ ] Confirm the main window renders correctly.
 - [ ] Confirm existing local data loads from `%APPDATA%\Книжница`.
+- [ ] Confirm Russian opens by default, then switch `RU / EN` and confirm the
+  selected interface language persists after restart.
 
 ## Books
 
