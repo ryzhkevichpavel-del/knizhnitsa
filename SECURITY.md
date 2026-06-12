@@ -40,8 +40,8 @@ Security-sensitive areas in this project include:
 
 ## Supported versions
 
-The current public release is `v1.0.0`. Security fixes are expected to target the
-latest public release unless the maintainer states otherwise.
+Security fixes are expected to target the latest public release unless the
+maintainer states otherwise.
 
 ## Data handling principle
 

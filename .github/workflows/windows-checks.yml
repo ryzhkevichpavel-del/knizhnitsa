@@ -1,0 +1,38 @@
+name: Windows checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  syntax:
+    name: Python and UI syntax
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r app\requirements.txt
+
+      - name: Check Python syntax
+        run: python -m compileall app\main.py
+
+      - name: Check UI JavaScript syntax
+        shell: pwsh
+        run: |
+          $tmp = Join-Path $env:RUNNER_TEMP "knizhnitsa-ui-check.js"
+          $html = Get-Content -Raw app\ui.html
+          $matches = [regex]::Matches($html, '(?s)<script>(.*?)</script>')
+          $js = ($matches | ForEach-Object { $_.Groups[1].Value }) -join "`n"
+          Set-Content -LiteralPath $tmp -Value $js -Encoding UTF8
+          node --check $tmp

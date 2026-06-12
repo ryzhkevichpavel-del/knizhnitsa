@@ -1,5 +1,11 @@
 # Книжница
 
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/ryzhkevichpavel-del/knizhnitsa?label=release)](https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest)
+![Windows](https://img.shields.io/badge/platform-Windows-0078d4.svg)
+![Python](https://img.shields.io/badge/python-3.x-3776ab.svg)
+![Local-first](https://img.shields.io/badge/local--first-privacy-6a5acd.svg)
+
 Книжница is a local-first Windows desktop app for writers. It helps keep books,
 chapters, characters, plans, search, trash, backups, and exports in one quiet
 workspace.
@@ -9,6 +15,8 @@ workspace.
 
 Интерфейс поддерживает русский и английский языки; переключатель `RU / EN`
 находится в верхней панели приложения.
+
+**Скачать последнюю версию:** [GitHub Releases](https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest)
 
 ![Книжница — редактор главы](docs/screenshot.png)
 
@@ -20,7 +28,7 @@ workspace.
 - ищет по книгам, главам, персонажам, связям и плану;
 - отправляет удаленные книги, главы, персонажей и заметки в корзину;
 - делает локальные резервные копии;
-- экспортирует книгу в `.docx` и `.txt`.
+- экспортирует книгу в `.docx` и `.txt`;
 - переключает интерфейс между русским и английским без второй копии приложения.
 
 ## Где хранятся данные
@@ -93,8 +101,9 @@ app\dist\installer\Книжница-Setup.exe
 
 ## Проверка изменений
 
-Автоматических тестов пока нет. Перед выпуском изменения проверяются вручную по
-чеклисту:
+Автоматическое покрытие пока минимальное: GitHub Actions проверяет синтаксис
+Python и JavaScript-интерфейса на Windows без запуска GUI. Перед выпуском
+изменения также проверяются вручную по чеклисту:
 
 - запуск приложения;
 - создание и редактирование книги;
@@ -132,6 +141,18 @@ app\dist\installer\Книжница-Setup.exe
 7. Создать GitHub release с установщиком и понятными заметками.
 
 План сопровождения лежит в [docs/ROADMAP.md](docs/ROADMAP.md).
+
+## Roadmap
+
+Короткий план развития и сопровождения: [docs/ROADMAP.md](docs/ROADMAP.md).
+В ближайших задачах - автоматические проверки локального хранения, экспорта,
+резервных копий, установщика и границ WebView/Python bridge.
+
+Дополнительные maintainer-документы:
+
+- [OpenAI OSS application notes](docs/OPENAI_OSS_APPLICATION.md);
+- [Promotion notes](docs/PROMOTION.md);
+- [Adoption notes](docs/ADOPTION_NOTES.md).
 
 ## Безопасность
 
