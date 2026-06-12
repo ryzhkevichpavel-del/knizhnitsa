@@ -4,7 +4,7 @@
 ; установка для текущего пользователя (без пароля администратора).
 
 #define AppName "Книжница"
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.1"
 #define AppPublisher "Книжница"
 #define AppExe "Книжница.exe"
 
