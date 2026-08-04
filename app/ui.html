@@ -525,7 +525,7 @@ const TEXT={
   detailsPh:["История, правила, детали, важные факты...","History, rules, details, important facts..."], linksPh:["С какими персонажами, главами, местами или событиями связано...","Connected characters, chapters, places, or events..."], loreEmpty:["Заметка пока пустая. Нажми «Редактировать», чтобы заполнить.","This note is empty. Click Edit to fill it in."],
   bookPlan:["План книги","Book plan"], planHint:["Собери книгу по главам: статус, суть сцены и рабочие заметки.","Build the book by chapter: status, scene summary, and working notes."], whatHappens:["Что происходит","What happens"], planSummaryPh:["Коротко: сцена, конфликт, поворот...","Briefly: scene, conflict, twist..."], chapterNotes:["Заметки к главе","Chapter notes"], chapterNotesPh:["Что не забыть, что проверить, что переписать...","What to remember, check, or rewrite..."], openChapter:["Открыть главу","Open chapter"], openCharacter:["Открыть персонажа","Open character"], up:["Выше","Up"], down:["Ниже","Down"], planEmpty:["Глав пока нет. Создай первую главу, и она появится в плане.","No chapters yet. Create the first chapter and it will appear in the plan."], more:["ещё","more"],
   overviewYear:["Год действия","Story year"], overviewYearPh:["напр. 1965","e.g. 1965"], overviewYearHint:["Используется, чтобы считать год рождения персонажей по возрасту","Used to calculate character birth year by age"], era:["Эпоха / период","Era / period"], eraPh:["напр. послевоенное время","e.g. postwar period"], place:["Место действия","Setting"], placePh:["Город, страна, мир…","City, country, world..."], synopsis:["Синопсис / о чём книга","Synopsis / what the book is about"], synopsisPh:["Краткое содержание, идея, замысел…","Short summary, idea, concept..."], authorSheetHelp:["Авторский лист = 40 000 знаков, принятая в издательствах единица объёма","Author sheet = 40,000 characters, a publishing volume unit"],
-  theme:["Тема","Theme"], language:["Язык","Language"], switchToRussian:["Переключить на русский","Switch to Russian"], switchToEnglish:["Переключить на английский","Switch to English"], light:["Светлая","Light"], dark:["Тёмная","Dark"], appColor:["Цвет приложения","App color"], data:["Данные","Data"], saveBackup:["Сохранить резервную копию","Save backup"], loadBackup:["Загрузить из копии","Load from backup"], dataHint:["Все книги хранятся в одном файле на твоём компьютере. Резервную копию полезно делать время от времени.","All books are stored in one file on your computer. It is useful to make a backup from time to time."],
+  theme:["Тема","Theme"], language:["Язык","Language"], switchToRussian:["Переключить на русский","Switch to Russian"], switchToEnglish:["Переключить на английский","Switch to English"], light:["Светлая","Light"], dark:["Тёмная","Dark"], appColor:["Цвет приложения","App color"], autoDash:["Умное тире","Smart dash"], autoDashHint:["Два пробела в начале строки превращаются в тире реплики, а после текста — в тире с пробелами.","Two spaces become a dialogue dash at the start of a line, or a spaced dash after text."], enabled:["Включено","On"], disabled:["Выключено","Off"], data:["Данные","Data"], saveBackup:["Сохранить резервную копию","Save backup"], loadBackup:["Загрузить из копии","Load backup"], dataHint:["Все книги хранятся в одном файле на твоём компьютере. Резервную копию полезно делать время от времени.","All books are stored in one file on your computer. It is useful to make a backup from time to time."],
   trashEmpty:["Корзина пуста.","Trash is empty."], clear:["Очистить","Empty"], withChaptersCharacters:["Со всеми главами и персонажами","With all chapters and characters"], fromBook:["Из книги","From book"], restoredBook:["Восстановленная книга","Restored book"], restored:["Восстановлено","Restored"], deleteForever:["Удалить окончательно","Delete permanently"], deleteForeverTitle:["Удалить окончательно?","Delete permanently?"], deleteForeverMsg:["После этого вернуть из корзины уже не получится.","After this, it cannot be restored from trash."], emptyTrashTitle:["Очистить корзину?","Empty trash?"], emptyTrashMsg:["Все элементы в корзине будут удалены окончательно.","All items in trash will be permanently deleted."],
   searchPh:["Имя, сцена, фраза, место...","Name, scene, phrase, place..."], searchMin:["Введите хотя бы 2 символа.","Enter at least 2 characters."], searchNothing:["Ничего не найдено.","Nothing found."], link:["Связь","Link"], lore:["Лор","Lore"],
   exportBook:["Экспорт книги","Export book"], docxExport:["Настоящий документ Word (.docx)","Real Word document (.docx)"], txtExport:["Текстовый файл (.txt)","Text file (.txt)"], wordSaved:["Книга сохранена в Word","Book saved to Word"], txtSaved:["Книга сохранена в .txt","Book saved as .txt"], failTitle:["Не получилось","Something went wrong"], wordFail:["Не удалось сохранить Word-файл.","Could not save the Word file."], txtFail:["Не удалось сохранить текстовый файл.","Could not save the text file."],
@@ -548,8 +548,10 @@ let state={ books:[], settings:{
   fontSize:INITIAL_SETTINGS.fontSize||19,
   theme:INITIAL_SETTINGS.theme==="dark"?"dark":"light",
   accent:INITIAL_SETTINGS.accent||DEFAULT_ACCENT,
-  lang:INITIAL_SETTINGS.lang==="en"?"en":"ru"
+  lang:INITIAL_SETTINGS.lang==="en"?"en":"ru",
+  autoDialogueDash:INITIAL_SETTINGS.autoDialogueDash!==false
 } };
+let dialogueDashUndo=[],dialogueDashRedo=[];
 let route={ screen:"home", bookId:null, view:null, itemId:null, charMode:"view", charTab:"profile" };
 let editorFontSize=19, saveTimer=null, snapTimer=null;
 
@@ -593,6 +595,7 @@ async function boot(){
   if(!s.accent) s.accent=DEFAULT_ACCENT;
   if(!s.fontSize) s.fontSize=19;
   if(s.lang!=="en") s.lang="ru";
+  if(s.autoDialogueDash!==false) s.autoDialogueDash=true;
   document.documentElement.lang=s.lang;
   if(!Array.isArray(s.roles)||!s.roles.length) s.roles=DEFAULT_ROLES.slice();
   editorFontSize=s.fontSize;
@@ -724,6 +727,7 @@ function applyTheme(){
 }
 function setTheme(t){ state.settings.theme=t; save(); applyTheme(); openSettings(); }
 function setAccent(h){ state.settings.accent=h; save(); applyTheme(); openSettings(); }
+function setAutoDialogueDash(on){ state.settings.autoDialogueDash=!!on; save(); openSettings(); }
 function toggleLang(){
   setLang(isEn()?"ru":"en");
 }
@@ -1381,8 +1385,46 @@ function renderChapterEditor(main,b){
     document.getElementById("edCount").innerHTML=`<b>${fmt(w)}</b> ${t("words")} · ≈${fmt(pg)} ${t("pages")}`; };
   updCount();
   title.addEventListener("input",()=>{ ch.title=title.value; ch.updatedAt=now(); flagSaving(); save(); renderSidebar(); renderTopbar(); });
-  body.addEventListener("input",()=>{ ch.content=body.value; ch.updatedAt=now(); b.updatedAt=now(); updCount(); flagSaving(); save(); renderTopbar(); scheduleAutoSnapshot(ch); });
+  const syncBody=()=>{ ch.content=body.value; ch.updatedAt=now(); b.updatedAt=now(); updCount(); flagSaving(); save(); renderTopbar(); scheduleAutoSnapshot(ch); };
+  body.addEventListener("input",e=>{ applyDialogueDash(body,e); syncBody(); });
+  body.addEventListener("keydown",e=>{ if(handleDialogueDashHistory(body,e)){ e.preventDefault(); syncBody(); } });
   body.focus();
+}
+function applyDialogueDash(body,event){
+  if(state.settings.autoDialogueDash===false || event.inputType!=="insertText" || event.data!==" " || event.isComposing) return false;
+  const start=body.selectionStart,end=body.selectionEnd;
+  if(start!==end || start<2) return false;
+  const before=body.value.slice(0,start);
+  if(!before.endsWith("  ")) return false;
+  const originalValue=body.value,originalPos=start;
+  const pairStart=start-2,lineStart=originalValue.lastIndexOf("\n",pairStart-1)+1;
+  const linePrefix=originalValue.slice(lineStart,pairStart);
+  let replaceStart=pairStart,replacement=" — ";
+  if(/^\s*$/.test(linePrefix)){ replaceStart=lineStart; replacement="— "; }
+  else if(/[\s—–-]$/.test(linePrefix)) return false;
+  const nextValue=originalValue.slice(0,replaceStart)+replacement+originalValue.slice(start);
+  const nextPos=replaceStart+replacement.length;
+  body.value=nextValue;
+  body.selectionStart=body.selectionEnd=nextPos;
+  dialogueDashUndo.push({bookId:route.bookId,chapterId:route.itemId,beforeValue:originalValue,beforePos:originalPos,afterValue:nextValue,afterPos:nextPos});
+  if(dialogueDashUndo.length>100) dialogueDashUndo.shift();
+  dialogueDashRedo=[];
+  return true;
+}
+function handleDialogueDashHistory(body,event){
+  if(!(event.ctrlKey||event.metaKey) || event.altKey) return false;
+  const key=event.key.toLowerCase(),redo=key==="y"||(key==="z"&&event.shiftKey),undo=key==="z"&&!event.shiftKey;
+  const stack=redo?dialogueDashRedo:dialogueDashUndo;
+  if(!redo&&!undo) return false;
+  for(let i=stack.length-1;i>=0;i--){
+    const x=stack[i],expected=redo?x.beforeValue:x.afterValue;
+    if(x.bookId!==route.bookId || x.chapterId!==route.itemId || body.value!==expected) continue;
+    stack.splice(i,1);
+    if(redo){ body.value=x.afterValue; body.selectionStart=body.selectionEnd=x.afterPos; dialogueDashUndo.push(x); }
+    else{ body.value=x.beforeValue; body.selectionStart=body.selectionEnd=x.beforePos; dialogueDashRedo.push(x); }
+    return true;
+  }
+  return false;
 }
 function scheduleAutoSnapshot(ch){ clearTimeout(snapTimer); snapTimer=setTimeout(()=>snapshotChapter(ch,false),180000); }
 let savingTimer=null;
@@ -1845,11 +1887,15 @@ function openSettings(){
   const langSeg=`<div class="seg">
     <button class="${!isEn()?'on':''}" onclick="setLang('ru')">${icon('globe',16)} RU</button>
     <button class="${isEn()?'on':''}" onclick="setLang('en')">${icon('globe',16)} EN</button></div>`;
+  const dashSeg=`<div class="seg">
+    <button class="${s.autoDialogueDash!==false?'on':''}" onclick="setAutoDialogueDash(true)">${t("enabled")}</button>
+    <button class="${s.autoDialogueDash===false?'on':''}" onclick="setAutoDialogueDash(false)">${t("disabled")}</button></div>`;
   const sw=ACCENTS.map(a=>`<div class="swatch ${s.accent===a.h?'on':''}" style="background:${a.h}" title="${labelEnum("accents",a.n)}" onclick="setAccent('${a.h}')"><span class="nm">${labelEnum("accents",a.n)}</span></div>`).join("");
   modal(`<h3>${t("settings")}</h3>
     <div class="mbody" style="padding:0">
       <div class="set-section"><div class="sh">${t("theme")}</div>${themeSeg}</div>
       <div class="set-section"><div class="sh">${t("language")}</div>${langSeg}</div>
+      <div class="set-section"><div class="sh">${t("autoDash")}</div>${dashSeg}<div class="hint" style="margin-top:10px">${t("autoDashHint")}</div></div>
       <div class="set-section"><div class="sh">${t("appColor")}</div><div class="swatches">${sw}</div></div>
       <div class="set-section"><div class="sh">${t("data")}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -2096,6 +2142,7 @@ async function importBackup(){
   state=d; if(!state.settings) state.settings={fontSize:19,theme:"light",accent:DEFAULT_ACCENT};
   if(!state.settings.accent) state.settings.accent=DEFAULT_ACCENT;
   if(state.settings.lang!=="en") state.settings.lang="ru";
+  if(state.settings.autoDialogueDash!==false) state.settings.autoDialogueDash=true;
   document.documentElement.lang=state.settings.lang;
   applyTheme(); save(); goHome(); toast(t("backupLoaded"));
 }
