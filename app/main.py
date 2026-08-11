@@ -291,6 +291,9 @@ def build_book_txt(book, lang="ru"):
     book = book if isinstance(book, dict) else {}
     title = book.get("title") or msg(lang, "Книга", "Book")
     parts = [str(title).strip()]
+    author = str(book.get("author") or "").strip()
+    if author:
+        parts.append(author)
     for index, chapter in enumerate(book.get("chapters") or []):
         if not isinstance(chapter, dict):
             continue
@@ -325,6 +328,13 @@ def write_book_docx(book, path, lang="ru"):
     title_run = title_paragraph.add_run(str(title))
     title_run.bold = True
     title_run.font.size = Pt(22)
+
+    author = str(book.get("author") or "").strip()
+    if author:
+        author_paragraph = doc.add_paragraph()
+        author_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        author_run = author_paragraph.add_run(author)
+        author_run.font.size = Pt(12)
 
     chapters = book.get("chapters") or []
     for index, chapter in enumerate(chapters):

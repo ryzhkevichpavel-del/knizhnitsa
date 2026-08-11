@@ -12,6 +12,7 @@ class ExportStructureTests(unittest.TestCase):
     def setUp(self):
         self.book = {
             "title": "Тестовая книга",
+            "author": "Анна Авторова",
             "chapters": [
                 {"title": "Первая глава", "content": "Первый абзац.\nПродолжение строки.\n\nВторой абзац."},
                 {"title": "", "content": "Финал."},
@@ -20,7 +21,7 @@ class ExportStructureTests(unittest.TestCase):
 
     def test_txt_contains_book_and_chapter_structure(self):
         text = main.build_book_txt(self.book, "ru")
-        self.assertTrue(text.startswith("Тестовая книга\n\nПервая глава"))
+        self.assertTrue(text.startswith("Тестовая книга\n\nАнна Авторова\n\nПервая глава"))
         self.assertIn("Первый абзац.\nПродолжение строки.\n\nВторой абзац.", text)
         self.assertIn("\n\nГлава 2\n\nФинал.", text)
         self.assertTrue(text.endswith("\n"))
@@ -33,6 +34,7 @@ class ExportStructureTests(unittest.TestCase):
 
         texts = [paragraph.text for paragraph in document.paragraphs]
         self.assertEqual(texts[0], "Тестовая книга")
+        self.assertEqual(texts[1], "Анна Авторова")
         self.assertIn("Первая глава", texts)
         self.assertIn("Первый абзац.\nПродолжение строки.", texts)
         self.assertIn("Второй абзац.", texts)
@@ -52,6 +54,12 @@ class ExportStructureTests(unittest.TestCase):
         self.assertTrue(new_response["ok"])
         self.assertIn("Тестовая книга", new_content)
         self.assertIn("Первая глава", new_content)
+
+    def test_exports_without_author_keep_the_old_structure(self):
+        book = dict(self.book)
+        book.pop("author")
+        text = main.build_book_txt(book, "ru")
+        self.assertTrue(text.startswith("Тестовая книга\n\nПервая глава"))
 
 
 if __name__ == "__main__":

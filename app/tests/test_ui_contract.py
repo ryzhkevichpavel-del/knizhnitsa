@@ -95,6 +95,13 @@ class UiContractTests(unittest.TestCase):
     def test_truncated_sidebar_labels_expose_the_full_name(self):
         self.assertIn('class="label" title="${escapeAttr(titleOrFallback(item.title))}"', self.html)
 
+    def test_character_map_keeps_long_names_and_roles_inside_cards(self):
+        self.assertIn('.map-copy{display:block;flex:1;min-width:0;overflow:hidden}', self.html)
+        self.assertIn('.map-role{display:block;width:100%;', self.html)
+        self.assertIn('class="map-name" title="${escapeAttr(nameOrFallback(c.name))}"', self.html)
+        self.assertIn('class="map-role" title="${escapeAttr(roleOrFallback(c.role))}"', self.html)
+        self.assertNotIn('<span style="min-width:0"><span class="map-name">', self.html)
+
     def test_sidebar_actions_are_consistent_for_chapters_characters_and_lore(self):
         self.assertIn("async function renameCharacter(id,ev)", self.html)
         self.assertIn("async function renameLore(id,ev)", self.html)
@@ -103,6 +110,54 @@ class UiContractTests(unittest.TestCase):
         self.assertIn("onclick=\"renameLore('${item.id}',event)\"", self.html)
         self.assertIn("onclick=\"deleteLore('${item.id}',event)\"", self.html)
         self.assertIn('if(route.view==="lore"&&route.itemId===id)', self.html)
+
+    def test_book_overview_has_clear_editing_controls_without_duplicate_actions(self):
+        self.assertIn('<div class="wrap overview-wrap">', self.html)
+        self.assertNotIn('<h1 class="overview-heading">', self.html)
+        self.assertIn('<label for="ovTitle">${t("bookTitle")}</label>', self.html)
+        self.assertIn('class="overview-title-input" id="ovTitle"', self.html)
+        self.assertIn('<label for="ovAuthor">${t("author")}</label>', self.html)
+        self.assertIn('class="overview-title-input" id="ovAuthor"', self.html)
+        self.assertIn('bind("ovAuthor","author",false)', self.html)
+        self.assertIn('function eraSelect(b)', self.html)
+        self.assertIn('document.getElementById("ovEra").addEventListener("change",onEraSelect)', self.html)
+        self.assertNotIn('class="side-book ', self.html)
+        overview=self.html.split('function renderOverview(main,b){',1)[1].split('/* ============ ВЕРХНЯЯ ПАНЕЛЬ',1)[0]
+        for duplicate_action in ('onclick="addChapter()"','onclick="openPlan()"','onclick="addLore()"','onclick="openExport()"','onclick="openPreview()"'):
+            self.assertNotIn(duplicate_action, overview)
+
+    def test_book_layout_uses_writer_presets_and_real_pages(self):
+        self.assertIn('preview:["Макет книги","Book layout"]', self.html)
+        self.assertIn('const BOOK_FORMATS={', self.html)
+        self.assertIn('compact:{width:130,height:200', self.html)
+        self.assertIn('standard:{width:145,height:215', self.html)
+        self.assertIn('a5:{width:148,height:210', self.html)
+        self.assertIn('function renderPreviewPages()', self.html)
+        self.assertIn('function fitPreviewParagraph(body,text,continued=false)', self.html)
+        self.assertIn('function previewOverflows(body)', self.html)
+        self.assertIn('number.className="pv-page-number"', self.html)
+        self.assertIn('author.textContent=book.author.trim()', self.html)
+        self.assertIn('document.fonts&&document.fonts.ready', self.html)
+        self.assertIn('count.textContent=previewPageCountLabel(pageNumber)', self.html)
+        self.assertIn('.pv-title-page .pv-page-body{width:100%', self.html)
+        self.assertIn('.pv-title-page{padding:24mm 21mm;text-align:center}', self.html)
+        self.assertIn('.pv-title-page .pv-book-title{width:100%', self.html)
+        self.assertNotIn('.pv-pages.spread .pv-title-sheet{grid-column:1 / -1', self.html)
+        self.assertNotIn('.pv-title-page .pv-book-title{font:700 24pt/1.25 "Georgia",serif;max-width:90%;overflow-wrap:anywhere}', self.html)
+
+        preview=self.html.split('/* ============ ПРЕДПРОСМОТР ============ */',1)[1].split('/* ============ РЕЗЕРВНЫЕ КОПИИ ============ */',1)[0]
+        self.assertNotIn('WORDS_PER_PAGE', preview)
+        self.assertNotIn("'≈'", preview)
+        self.assertNotIn('export_pdf', preview.lower())
+
+    def test_default_author_is_reused_but_can_be_overridden_per_book(self):
+        self.assertIn('defaultAuthor:["Автор новых книг","Default author"]', self.html)
+        self.assertIn('function setDefaultAuthor(value)', self.html)
+        self.assertIn('id="defaultAuthorInput"', self.html)
+        self.assertIn('function openNewBookForm()', self.html)
+        self.assertIn('value="${escapeAttr(defaultAuthor)}"', self.html)
+        self.assertIn('author,previewFormat:"standard"', self.html)
+        self.assertIn('if(!String(state.settings.defaultAuthor||"").trim()&&author) state.settings.defaultAuthor=author', self.html)
 
 
 if __name__ == "__main__":

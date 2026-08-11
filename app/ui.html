@@ -77,13 +77,6 @@
   /* ===================== ЭКРАН КНИГИ ===================== */
   #book{display:flex;height:calc(100vh - 52px)}
   .sidebar{width:288px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:14px 12px}
-  .side-book{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:11px;cursor:pointer;margin-bottom:16px;transition:.12s}
-  .side-book:hover{background:var(--accent-soft)}
-  .side-book.active{background:var(--accent-soft)}
-  .side-book .bk-mark{width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--on-accent);
-    display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .side-book .bk-name{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .side-book .bk-sub{font-size:11px;color:var(--muted)}
   .side-group{margin-bottom:22px}
   .side-head{display:flex;align-items:center;justify-content:space-between;padding:4px 10px 8px;color:var(--muted);
     font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
@@ -141,6 +134,9 @@
   .fld-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
   .fld-stack{display:flex;flex-direction:column;gap:18px}
   .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .overview-wrap{padding-top:20px}
+  .overview-identity{grid-template-columns:minmax(0,2fr) minmax(260px,1fr);align-items:end}
+  .fld .overview-title-input{font-size:18px;font-weight:650;padding:13px 14px}
   .ovstats{display:flex;gap:30px;flex-wrap:wrap;margin:14px 0 30px;padding-bottom:24px;border-bottom:1px solid var(--line)}
   .ovstat .n{font-size:25px;font-weight:700;letter-spacing:-.5px}
   .ovstat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
@@ -245,17 +241,42 @@
   .appearance-snippet mark{background:var(--accent-soft);color:var(--accent);border-radius:4px;padding:0 3px}
 
   /* ===================== ПРЕДПРОСМОТР ===================== */
-  #preview{position:fixed;inset:0;background:#d7d7d3;z-index:40;overflow-y:auto;padding:54px 20px 40px}
-  [data-theme="dark"] #preview{background:#0e0e10}
-  .pv-toolbar{position:fixed;top:16px;right:20px;display:flex;gap:8px;z-index:41}
-  .pv-page{max-width:580px;margin:0 auto 30px;background:#fdfdfb;color:#1d1d1f;box-shadow:0 10px 40px rgba(0,0,0,.22);
-    padding:70px 64px;border-radius:4px;min-height:780px;font-family:"Georgia",serif;line-height:1.75}
-  .pv-page h2{text-align:center;font-size:23px;margin:0 0 8px;font-weight:600}
-  .pv-page .pv-cnum{text-align:center;color:#aaa;font-size:12px;margin-bottom:38px;letter-spacing:3px}
-  .pv-page p{text-indent:1.7em;margin:0 0 3px;text-align:justify;font-size:17px;white-space:pre-wrap}
-  .pv-title-page{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-  .pv-title-page .tt{font-size:34px;font-weight:700;margin-bottom:16px}
-  .pv-title-page .ta{color:#aaa}
+  #preview{position:fixed;inset:0;background:#d7d7d3;z-index:40;overflow:auto;padding:76px 20px 46px;color:#1d1d1f}
+  [data-theme="dark"] #preview{background:#111113}
+  .pv-toolbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:41;display:flex;align-items:center;gap:8px;
+    max-width:calc(100vw - 24px);overflow-x:auto;padding:7px;background:color-mix(in srgb,var(--panel) 96%,transparent);
+    border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 28px rgba(0,0,0,.16);backdrop-filter:blur(12px)}
+  .pv-tool{display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .pv-tool label{font-size:11px;text-transform:uppercase;letter-spacing:.55px;color:var(--muted);font-weight:700}
+  .pv-tool select{height:32px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);
+    font:13px/1 "Segoe UI",sans-serif;padding:0 30px 0 10px;outline:none}
+  .pv-tool select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .pv-zoom{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
+  .pv-zoom button{width:31px;height:30px;border:0;background:transparent;color:var(--ink);font-size:17px;line-height:1}
+  .pv-zoom button:hover{background:var(--accent-soft);color:var(--accent)}
+  .pv-zoom-value{min-width:48px;text-align:center;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .pv-count{font-size:13px;color:var(--muted);white-space:nowrap;padding:0 4px;font-variant-numeric:tabular-nums}
+  .pv-pages{display:flex;flex-direction:column;align-items:center;gap:28px;min-width:min-content;--pv-zoom:1}
+  .pv-pages.spread{display:grid;grid-template-columns:max-content max-content;align-items:start;justify-content:center;column-gap:8px;row-gap:28px}
+  .pv-sheet{width:var(--pv-width);height:var(--pv-height);zoom:var(--pv-zoom);flex:none;transition:width .16s,height .16s}
+  .pv-page{position:relative;width:100%;height:100%;overflow:hidden;background:#fffefa;color:#161616;
+    padding:var(--pv-top) var(--pv-outer) var(--pv-bottom) var(--pv-inner);border-radius:2px;
+    box-shadow:0 10px 38px rgba(0,0,0,.22);font-family:"Georgia","Times New Roman",serif;font-size:var(--pv-font);line-height:var(--pv-leading)}
+  .pv-page.pv-even{padding-left:var(--pv-outer);padding-right:var(--pv-inner)}
+  .pv-page-body{height:100%;overflow:hidden}
+  .pv-page p{margin:0;text-indent:1.7em;text-align:justify;white-space:normal;overflow-wrap:break-word;hyphens:auto}
+  .pv-page p.pv-continued{text-indent:0}
+  .pv-chapter-head{text-align:center;padding-top:11mm;margin-bottom:7mm;color:#161616}
+  .pv-chapter-head .pv-cnum{font:700 9pt/1.25 "Segoe UI",sans-serif;letter-spacing:2px;color:#161616;margin-bottom:4mm}
+  .pv-chapter-head h2{font:700 17pt/1.22 "Georgia","Times New Roman",serif;margin:0;color:#161616;overflow-wrap:break-word}
+  .pv-empty{color:#777;text-indent:0!important;text-align:center!important;font-style:italic}
+  .pv-page-number{position:absolute;left:0;right:0;bottom:5.5mm;text-align:center;font:9pt/1 "Georgia",serif;color:#333}
+  .pv-title-page{padding:24mm 21mm;text-align:center}
+  .pv-title-page .pv-page-body{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7mm;padding-top:14%}
+  .pv-title-page .pv-author{width:100%;font:11pt/1.35 "Georgia",serif;letter-spacing:.3px;text-align:center;white-space:normal;overflow-wrap:normal;word-break:normal}
+  .pv-title-page .pv-book-title{width:100%;font:700 25pt/1.2 "Georgia",serif;text-align:center;white-space:normal;overflow-wrap:normal;word-break:normal}
+  .pv-measure{position:absolute;left:-100000px;top:0;visibility:hidden;pointer-events:none}
+  .pv-measure .pv-sheet{zoom:1}
 
   /* ===================== МОДАЛКИ ===================== */
   .modal-back{position:fixed;inset:0;background:rgba(10,10,15,.5);z-index:50;display:flex;align-items:center;
@@ -402,9 +423,10 @@
   .map-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;
     align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
   .map-avatar img{width:100%;height:100%;object-fit:cover}
+  .map-copy{display:block;flex:1;min-width:0;overflow:hidden}
   .map-name{font-weight:700;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
     -webkit-line-clamp:2;-webkit-box-orient:vertical}
-  .map-role{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .map-role{display:block;width:100%;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .map-panel{height:calc(100vh - 148px);min-height:650px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
     overflow:hidden;display:flex;flex-direction:column}
   .map-panel-section{padding:14px;border-bottom:1px solid var(--line)}
@@ -452,6 +474,7 @@
     .lore-outline a{display:inline-block;margin-right:4px}
   }
   @media (max-width: 980px){
+    .overview-identity{grid-template-columns:1fr}
     .fld-grid.three{grid-template-columns:1fr}
     .plan-document-editor{padding-left:0;padding-right:0}
     .plan-document-head{align-items:flex-start;flex-direction:column;gap:10px}
@@ -473,6 +496,7 @@
     .wrap{--page-pad:18px}
     .lore-pagehead{align-items:flex-start}
     .lore-actions{flex-direction:column;align-items:stretch}
+    #preview{padding-left:10px;padding-right:10px}
   }
 
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);
@@ -614,7 +638,7 @@ const MAP_MIN_ZOOM=.65, MAP_MAX_ZOOM=2.2, MAP_ZOOM_STEP=.15;
 /* ============ ЛОКАЛИЗАЦИЯ ============ */
 const TEXT={
   appName:["Книжница","Knizhnitsa"], settings:["Настройки","Settings"], search:["Поиск","Search"], trash:["Корзина","Trash"],
-  allBooks:["Все книги","All books"], export:["Экспорт","Export"], preview:["Как в книге","Book view"], done:["Готово","Done"],
+  allBooks:["Все книги","All books"], export:["Экспорт","Export"], preview:["Макет книги","Book layout"], done:["Готово","Done"],
   cancel:["Отмена","Cancel"], close:["Закрыть","Close"], delete:["Удалить","Delete"], save:["Сохранить","Save"], add:["Добавить","Add"],
   cut:["Вырезать","Cut"], copy:["Копировать","Copy"], paste:["Вставить","Paste"], selectAll:["Выделить всё","Select all"], undo:["Отменить","Undo"], redo:["Повторить","Redo"],
   clipboardUnavailable:["Не удалось открыть буфер обмена","Could not access the clipboard"], clipboardEmpty:["В буфере обмена нет текста","There is no text in the clipboard"],
@@ -623,7 +647,7 @@ const TEXT={
   words:["слов","words"], pages:["стр.","pages"], pagesFull:["страниц","pages"], chaptersShort:["гл.","ch."], chapters:["глав","chapters"],
   characters:["персонажей","characters"], authorSheets:["авт. листов","author sheets"], authorSheetShort:["авт.л.","author sheets"],
   myBooks:["Мои книги","My books"], homeSub:["Открой книгу, чтобы продолжить, или начни новую.","Open a book to continue, or start a new one."],
-  newBook:["Новая книга","New book"], bookTitle:["Название книги","Book title"], bookTitlePh:["Например: Тень над городом","For example: The Shadow Over Town"],
+  newBook:["Новая книга","New book"], bookTitle:["Название книги","Book title"], bookTitlePh:["Например: Тень над городом","For example: The Shadow Over Town"], author:["Автор","Author"], authorPh:["Имя или псевдоним","Name or pen name"], defaultAuthor:["Автор новых книг","Default author"], defaultAuthorHint:["Автоматически подставляется при создании книги. В самой книге имя можно изменить — например, для псевдонима или соавторов.","Automatically filled in for new books. You can change it inside a book for a pen name or co-authors."],
   bookMoved:["Книга перемещена в корзину","Book moved to trash"], chapterMoved:["Глава перемещена в корзину","Chapter moved to trash"],
   characterMoved:["Персонаж перемещён в корзину","Character moved to trash"], loreMoved:["Заметка перемещена в корзину","World note moved to trash"],
   moveToTrash:["В корзину","To trash"], moveToTrashTitle:["Переместить в корзину?","Move to trash?"], moveChapterTitle:["Переместить главу в корзину?","Move chapter to trash?"],
@@ -640,7 +664,7 @@ const TEXT={
   versionFrom:["Версия от","Version from"], currentChangesTitle:["Изменения после последней сохранённой версии","Changes since the latest saved version"], versionTextTitle:["Текст версии от","Version text from"], comparedWithPrevious:["Что изменилось по сравнению с предыдущей сохранённой версией","What changed compared with the previous saved version"], backToList:["← К истории","← Back to history"], restoreThisText:["Восстановить этот текст","Restore this text"], restoreImpact:["Если заменить текущий текст этой версией","If the current text is replaced with this version"], willReturn:["вернётся","will return"], willDisappear:["исчезнет","will disappear"],
   reasonAuto:["Автоматическое сохранение","Automatic save"], reasonMove:["Перед переходом","Before switching"], reasonManual:["Сохранено вручную","Saved manually"], reasonBeforeImport:["До импорта","Before import"], reasonImportReplace:["Импорт: текст заменён","Import: text replaced"], reasonImportAppend:["Импорт: текст добавлен","Import: text appended"], reasonBeforeRestore:["До восстановления","Before restore"], reasonRestore:["Восстановление версии","Version restored"], changedSeveral:["Изменено несколько фрагментов текста.","Several parts of the text were changed."], addedLarge:["Добавлен большой фрагмент текста.","A large text fragment was added."], removedLarge:["Удалён большой фрагмент текста.","A large text fragment was removed."], replacedFragment:["Заменено","Replaced"], withFragment:["на","with"], addedFragment:["Добавлен фрагмент","Fragment added"], removedFragment:["Удалён фрагмент","Fragment removed"],
   importTextTitle:["Импорт текста","Import text"], importEmpty:["В выбранном документе нет текста.","The selected document contains no text."], importFailed:["Не удалось импортировать документ.","Could not import the document."], importInto:["Текст будет перенесён в","Text will be imported into"], appendText:["Добавить в конец","Append"], replaceText:["Заменить текущий текст","Replace current text"], textImported:["Текст импортирован","Text imported"], importedWords:["слов в документе","words in document"],
-  bookOverview:["Обзор и настройки книги","Book overview and settings"], book:["Книга","Book"], plan:["План","Plan"], characterMap:["Карта персонажей","Character map"],
+  bookOverview:["Обзор и настройка книги","Book overview and settings"], book:["Книга","Book"], plan:["План","Plan"], characterMap:["Карта персонажей","Character map"],
   chaptersGroup:["Главы","Chapters"], noChapters:["Глав пока нет","No chapters yet"], addChapter:["Добавить главу","Add chapter"],
   charactersGroup:["Персонажи","Characters"], noCharacters:["Персонажей пока нет","No characters yet"], addCharacter:["Добавить персонажа","Add character"],
   worldLore:["Мир и лор","World notes"], noLore:["Заметок пока нет","No notes yet"], addLore:["Добавить заметку","Add note"], worldNote:["Заметка мира","World note"],
@@ -670,7 +694,8 @@ const TEXT={
   loreNamePh:["Название места, события, термина...","Name of a place, event, term..."], type:["Тип","Type"], loreSummaryPh:["Суть в двух-трёх фразах...","The essence in two or three sentences..."],
   detailsPh:["История, правила, детали, важные факты...","History, rules, details, important facts..."], linksPh:["С какими персонажами, главами, местами или событиями связано...","Connected characters, chapters, places, or events..."], loreEmpty:["Заметка пока пустая. Нажми «Редактировать», чтобы заполнить.","This note is empty. Click Edit to fill it in."],
   wholeBookPlan:["Общий план книги","Overall book plan"], overallPlanTab:["Общий план","Overall plan"], chapterPlansTab:["Планы глав","Chapter plans"], characterArcsTab:["Арки персонажей","Character arcs"], selectChapter:["Выбрать главу","Select chapter"], selectCharacter:["Выбрать персонажа","Select character"], wholeBookPlanPh:["Пиши здесь весь план книги: сюжетные линии, повороты, сцены, финал и любые рабочие заметки...","Write the complete book plan here: storylines, turns, scenes, ending, and any working notes..."], chapterPlanPh:["Пиши здесь полный план выбранной главы — любого объёма...","Write the complete plan for the selected chapter here, at any length..."], characterArcPh:["Роль в сюжете, путь персонажа, ключевые решения, изменения, отношения и финал...","Role in the story, the character's journey, key decisions, changes, relationships, and ending..."], planEmpty:["Глав пока нет. Создай первую главу, чтобы написать её план.","There are no chapters yet. Create the first chapter to write its plan."], characterArcEmpty:["Персонажей пока нет. Создай первого персонажа, чтобы написать его арку.","There are no characters yet. Create the first character to write their arc."], openChapter:["Открыть главу","Open chapter"], openCharacter:["Открыть персонажа","Open character"], more:["ещё","more"],
-  overviewYear:["Год действия","Story year"], overviewYearPh:["напр. 1965","e.g. 1965"], overviewYearHint:["Используется, чтобы считать год рождения персонажей по возрасту","Used to calculate character birth year by age"], era:["Эпоха / период","Era / period"], eraPh:["напр. послевоенное время","e.g. postwar period"], place:["Место действия","Setting"], placePh:["Город, страна, мир…","City, country, world..."], synopsis:["Синопсис / о чём книга","Synopsis / what the book is about"], synopsisPh:["Краткое содержание, идея, замысел…","Short summary, idea, concept..."], authorSheetHelp:["Авторский лист = 40 000 знаков, принятая в издательствах единица объёма","Author sheet = 40,000 characters, a publishing volume unit"],
+  overviewYear:["Год действия","Story year"], overviewYearPh:["напр. 1965","e.g. 1965"], overviewYearHint:["Используется, чтобы считать год рождения персонажей по возрасту","Used to calculate character birth year by age"], era:["Эпоха / период","Era / period"], chooseEra:["— выбрать период —","— choose a period —"], customEra:["Другой период","Other period"], customEraPh:["Например: эпоха Великого переселения народов","For example: the Migration Period"], place:["Место действия","Setting"], placePh:["Город, страна, мир…","City, country, world..."], synopsis:["Синопсис / о чём книга","Synopsis / what the book is about"], synopsisPh:["Краткое содержание, идея, замысел…","Short summary, idea, concept..."], authorSheetHelp:["Авторский лист = 40 000 знаков, принятая в издательствах единица объёма","Author sheet = 40,000 characters, a publishing volume unit"], layoutFormat:["Формат","Format"], layoutView:["Вид","View"], formatCompact:["Компактная · 130×200","Compact · 130×200"], formatStandard:["Стандартная · 145×215","Standard · 145×215"], formatA5:["A5 · крупный текст","A5 · larger text"], viewSingle:["Страница","Single page"], viewSpread:["Разворот","Spread"],
+  textPages:["стр. текста","text pages"], titlePageShort:["+ титульная","+ title page"],
   theme:["Тема","Theme"], language:["Язык","Language"], switchToRussian:["Переключить на русский","Switch to Russian"], switchToEnglish:["Переключить на английский","Switch to English"], light:["Светлая","Light"], dark:["Тёмная","Dark"], appColor:["Цвет приложения","App color"], autoDash:["Умное тире","Smart dash"], autoDashHint:["Два пробела в начале строки превращаются в тире реплики, а после текста — в тире с пробелами.","Two spaces become a dialogue dash at the start of a line, or a spaced dash after text."], enabled:["Включено","On"], disabled:["Выключено","Off"], data:["Данные","Data"], saveBackup:["Сохранить резервную копию","Save backup"], loadBackup:["Загрузить из копии","Load backup"], dataHint:["Все книги хранятся в одном файле на твоём компьютере. Резервную копию полезно делать время от времени.","All books are stored in one file on your computer. It is useful to make a backup from time to time."],
   trashEmpty:["Корзина пуста.","Trash is empty."], clear:["Очистить","Empty"], withChaptersCharacters:["Со всеми главами и персонажами","With all chapters and characters"], fromBook:["Из книги","From book"], restoredBook:["Восстановленная книга","Restored book"], restored:["Восстановлено","Restored"], deleteForever:["Удалить окончательно","Delete permanently"], deleteForeverTitle:["Удалить окончательно?","Delete permanently?"], deleteForeverMsg:["После этого вернуть из корзины уже не получится.","After this, it cannot be restored from trash."], emptyTrashTitle:["Очистить корзину?","Empty trash?"], emptyTrashMsg:["Все элементы в корзине будут удалены окончательно.","All items in trash will be permanently deleted."],
   searchPh:["Имя, сцена, фраза, место...","Name, scene, phrase, place..."], searchMin:["Введите хотя бы 2 символа.","Enter at least 2 characters."], searchNothing:["Ничего не найдено.","Nothing found."], link:["Связь","Link"], lore:["Лор","Lore"],
@@ -685,6 +710,7 @@ const ENUM_LABELS={
   relations:{"Союз":"Alliance","Дружба":"Friendship","Семья":"Family","Любовь":"Love","Конфликт":"Conflict","Вражда":"Enmity","Тайна":"Secret","Наставник":"Mentor","Долг":"Debt","Другое":"Other","Связь":"Link"},
   patterns:{"Сплошная":"Solid","Пунктир":"Dashed","Точки":"Dotted","Мягкая":"Soft","Штрих-точка":"Dash-dot"},
   strengths:{"Слабая":"Weak","Обычная":"Normal","Сильная":"Strong"},
+  eras:{"Древний мир":"Ancient world","Средневековье":"Middle Ages","Раннее Новое время":"Early modern period","XIX век":"19th century","Начало XX века":"Early 20th century","Первая мировая война":"World War I","Межвоенный период":"Interwar period","Вторая мировая война":"World War II","Послевоенное время":"Postwar period","Вторая половина XX века":"Late 20th century","Наше время":"Present day","Ближайшее будущее":"Near future","Далёкое будущее":"Distant future","Альтернативная история":"Alternate history","Вымышленная эпоха":"Fictional era"},
   relationRoles:{"Мать":"Mother","Отец":"Father","Родитель":"Parent","Сын":"Son","Дочь":"Daughter","Ребёнок":"Child","Муж":"Husband","Жена":"Wife","Супруг":"Spouse","Супруга":"Spouse","Партнёр":"Partner","Брат":"Brother","Сестра":"Sister","Близнец":"Twin","Бабушка":"Grandmother","Дедушка":"Grandfather","Внук":"Grandson","Внучка":"Granddaughter","Тётя":"Aunt","Дядя":"Uncle","Племянник":"Nephew","Племянница":"Niece","Кузен":"Cousin","Кузина":"Cousin","Приёмная мать":"Foster mother","Приёмный отец":"Foster father","Приёмный ребёнок":"Foster child","Опекун":"Guardian","Подопечный":"Ward","Наставник":"Mentor","Ученик":"Student","Учитель":"Teacher","Друг":"Friend","Подруга":"Friend","Союзник":"Ally","Соперник":"Rival","Враг":"Enemy","Возлюбленный":"Loved one","Возлюбленная":"Loved one","Покровитель":"Patron","Должник":"Debtor","Кредитор":"Creditor","Брат / сестра":"Brother / sister","Друг / подруга":"Friend","Родственник":"Relative"},
   genders:{female:"Female",male:"Male"},
   accents:{"Изумруд":"Emerald","Бирюза":"Turquoise","Сапфир":"Sapphire","Индиго":"Indigo","Слива":"Plum","Бордо":"Burgundy","Роза":"Rose","Графит":"Graphite","Янтарь":"Amber","Лазурь":"Azure"}
@@ -692,13 +718,23 @@ const ENUM_LABELS={
 
 /* ============ ДАННЫЕ ============ */
 const WORDS_PER_PAGE=280, CHARS_PER_SHEET=40000, MAX_VERSIONS=60;
+const ERA_OPTIONS=["Древний мир","Средневековье","Раннее Новое время","XIX век","Начало XX века","Первая мировая война","Межвоенный период","Вторая мировая война","Послевоенное время","Вторая половина XX века","Наше время","Ближайшее будущее","Далёкое будущее","Альтернативная история","Вымышленная эпоха"];
+const BOOK_FORMATS={
+  compact:{width:130,height:200,top:16,outer:14,bottom:19,inner:18,font:10.5,leading:1.42},
+  standard:{width:145,height:215,top:17,outer:15,bottom:20,inner:20,font:10.5,leading:1.42},
+  a5:{width:148,height:210,top:18,outer:17,bottom:21,inner:21,font:11.5,leading:1.48}
+};
+const PREVIEW_MIN_ZOOM=.65,PREVIEW_MAX_ZOOM=1.35,PREVIEW_ZOOM_STEP=.1;
 const INITIAL_SETTINGS=window.__INITIAL_SETTINGS__||{};
 let state={ books:[], settings:{
   fontSize:INITIAL_SETTINGS.fontSize||19,
   theme:INITIAL_SETTINGS.theme==="dark"?"dark":"light",
   accent:INITIAL_SETTINGS.accent||DEFAULT_ACCENT,
   lang:INITIAL_SETTINGS.lang==="en"?"en":"ru",
-  autoDialogueDash:INITIAL_SETTINGS.autoDialogueDash!==false
+  autoDialogueDash:INITIAL_SETTINGS.autoDialogueDash!==false,
+  defaultAuthor:String(INITIAL_SETTINGS.defaultAuthor||""),
+  previewView:INITIAL_SETTINGS.previewView==="single"?"single":"spread",
+  previewZoom:Number(INITIAL_SETTINGS.previewZoom)||1
 } };
 let dialogueDashUndo=[],dialogueDashRedo=[];
 let route={ screen:"home", bookId:null, view:null, itemId:null, charMode:"view", charTab:"profile", planMode:"overall" };
@@ -919,6 +955,12 @@ async function boot(){
   if(!s.fontSize) s.fontSize=19;
   if(s.lang!=="en") s.lang="ru";
   if(s.autoDialogueDash!==false) s.autoDialogueDash=true;
+  if(typeof s.defaultAuthor!=="string"){
+    const known=[...new Set(state.books.map(book=>String(book.author||"").trim()).filter(Boolean))];
+    s.defaultAuthor=known.length===1?known[0]:"";
+  }
+  if(!["single","spread"].includes(s.previewView)) s.previewView="spread";
+  s.previewZoom=Math.min(PREVIEW_MAX_ZOOM,Math.max(PREVIEW_MIN_ZOOM,Number(s.previewZoom)||1));
   document.documentElement.lang=s.lang;
   if(!Array.isArray(s.roles)||!s.roles.length) s.roles=DEFAULT_ROLES.slice();
   editorFontSize=s.fontSize;
@@ -1003,6 +1045,8 @@ function ensureData(){
   state.trash.characters=Array.isArray(state.trash.characters)?state.trash.characters:[];
   state.trash.lore=Array.isArray(state.trash.lore)?state.trash.lore:[];
   state.books.forEach(b=>{
+    if(b.author===undefined) b.author="";
+    if(!BOOK_FORMATS[b.previewFormat]) b.previewFormat="standard";
     if(b.planText===undefined) b.planText="";
     if(!Array.isArray(b.planVersions)) b.planVersions=[];
     b.chapters=Array.isArray(b.chapters)?b.chapters:[];
@@ -1074,6 +1118,7 @@ function applyTheme(){
 function setTheme(t){ state.settings.theme=t; save(); applyTheme(); openSettings(); }
 function setAccent(h){ state.settings.accent=h; save(); applyTheme(); openSettings(); }
 function setAutoDialogueDash(on){ state.settings.autoDialogueDash=!!on; save(); openSettings(); }
+function setDefaultAuthor(value){ state.settings.defaultAuthor=String(value||"").trimStart(); save(); }
 function toggleLang(){
   setLang(isEn()?"ru":"en");
 }
@@ -1118,11 +1163,31 @@ function openCharacterMap(){ snapshotCurrent(); route.view="characterMap"; route
 function setCharacterTab(tab){ route.charTab=tab; renderMain(); }
 
 /* ============ КНИГИ ============ */
+function openNewBookForm(){
+  return new Promise(resolve=>{
+    const defaultAuthor=String(state.settings.defaultAuthor||"");
+    modal(`<h3>${t("newBook")}</h3><div class="mpad fld-stack">
+      <div class="fld"><label for="newBookTitle">${t("bookTitle")}</label><input id="newBookTitle" value="" placeholder="${escapeAttr(t("bookTitlePh"))}"></div>
+      <div class="fld"><label for="newBookAuthor">${t("author")}</label><input id="newBookAuthor" value="${escapeAttr(defaultAuthor)}" placeholder="${escapeAttr(t("authorPh"))}"></div>
+    </div><div class="mfoot"><button class="btn" id="newBookCancel">${t("cancel")}</button><button class="btn primary" id="newBookCreate">${t("create")}</button></div>`);
+    const title=document.getElementById("newBookTitle"),author=document.getElementById("newBookAuthor");
+    const done=value=>{ closeModal(); resolve(value); };
+    activeModalCancel=()=>done(null);
+    document.getElementById("newBookCancel").onclick=()=>done(null);
+    document.getElementById("newBookCreate").onclick=()=>done({title:title.value,author:author.value});
+    [title,author].forEach(input=>input.addEventListener("keydown",event=>{
+      if(event.key==="Enter"){ event.preventDefault(); done({title:title.value,author:author.value}); }
+    }));
+    queueMicrotask(()=>title.focus());
+  });
+}
 async function newBook(){
-  const title=await openInput({title:t("newBook"),label:t("bookTitle"),placeholder:t("bookTitlePh"),ok:t("create")});
-  if(title===null) return;
-  const b={id:uid(),title:(title.trim()||t("noTitle")),createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",planText:"",planVersions:[],chapters:[],characters:[],characterLinks:[],characterMapZoom:1,lore:[]};
+  const values=await openNewBookForm();
+  if(values===null) return;
+  const author=String(values.author||"").trim();
+  if(!String(state.settings.defaultAuthor||"").trim()&&author) state.settings.defaultAuthor=author;
+  const b={id:uid(),title:(String(values.title||"").trim()||t("noTitle")),createdAt:now(),updatedAt:now(),
+    author,previewFormat:"standard",year:"",era:"",place:"",synopsis:"",planText:"",planVersions:[],chapters:[],characters:[],characterLinks:[],characterMapZoom:1,lore:[]};
   state.books.unshift(b); save(); openBook(b.id);
 }
 async function deleteBook(id,ev){
@@ -1308,8 +1373,8 @@ function renderCharacterMap(main,b){
     return `<div class="map-node" data-character-id="${c.id}" style="left:${p.x}%;top:${p.y}%"
       onclick="openMapCharacter(event,'${c.id}')" onpointerdown="startMapNodeDrag(event,'${c.id}')">
       <span class="map-avatar">${avatar}</span>
-      <span style="min-width:0"><span class="map-name">${escapeHtml(nameOrFallback(c.name))}</span>
-        <span class="map-role">${escapeHtml(roleOrFallback(c.role))}</span></span>
+      <span class="map-copy"><span class="map-name" title="${escapeAttr(nameOrFallback(c.name))}">${escapeHtml(nameOrFallback(c.name))}</span>
+        <span class="map-role" title="${escapeAttr(roleOrFallback(c.role))}">${escapeHtml(roleOrFallback(c.role))}</span></span>
     </div>`;
   }).join("");
   const lines=links.map(link=>mapLinkSvg(b,link,pos)).join("");
@@ -2058,11 +2123,8 @@ function renderSidebar(){
       </span></div>`;
   }).join(""):`<div class="side-empty">${t("noLore")}</div>`;
   document.getElementById("sidebar").innerHTML=`
-    <div class="side-book ${route.view==='overview'?'active':''}" onclick="openOverview()">
-      <span class="bk-mark">${icon('book',17)}</span>
-      <span style="min-width:0"><div class="bk-name">${escapeHtml(titleOrFallback(b.title))}</div><div class="bk-sub">${t("bookOverview")}</div></span>
-    </div>
     <div class="side-group"><div class="side-head"><span>${t("book")}</span></div>
+      <div class="nav-item ${route.view==='overview'?'active':''}" onclick="openOverview()">${icon('book',16)}<span class="label">${t("bookOverview")}</span></div>
       <div class="nav-item ${route.view==='plan'?'active':''}" onclick="openPlan()">${icon('list',16)}<span class="label">${t("plan")}</span></div>
       <div class="nav-item ${route.view==='characterMap'?'active':''}" onclick="openCharacterMap()">${icon('map',16)}<span class="label">${t("characterMap")}</span></div>
     </div>
@@ -2674,10 +2736,36 @@ function renderPlan(main,b){
   planText.focus();
 }
 /* ---- обзор / настройки книги ---- */
+function eraSelect(b){
+  const current=String(b.era||""),known=ERA_OPTIONS.includes(current);
+  const legacy=current&&!known?`<option value="${escapeAttr(current)}" selected>${escapeHtml(current)}</option>`:"";
+  return `<select id="ovEra">
+    <option value="" ${!current?'selected':''}>${t("chooseEra")}</option>
+    ${legacy}${optionList(ERA_OPTIONS,"eras",current)}
+    <option value="__custom">${t("customOther")}</option>
+  </select>`;
+}
+async function onEraSelect(){
+  const sel=document.getElementById("ovEra"),b=curBook();
+  if(!sel||!b) return;
+  if(sel.value==="__custom"){
+    const value=await openInput({title:t("customEra"),label:t("era"),placeholder:t("customEraPh"),ok:t("add")});
+    if(value&&value.trim()) b.era=value.trim();
+    renderMain();
+  }else b.era=sel.value;
+  b.updatedAt=now(); save();
+}
 function renderOverview(main,b){
   const w=bookWordCount(b),pg=Math.max(0,Math.round(w/WORDS_PER_PAGE)),sheets=bookCharCount(b)/CHARS_PER_SHEET;
-  main.innerHTML=`<div class="wrap">
-    <input class="ed-title" id="ovTitle" value="${escapeAttr(b.title)}" placeholder="${escapeAttr(t("bookTitle"))}">
+  main.innerHTML=`<div class="wrap overview-wrap">
+    <div class="fld-grid overview-identity">
+      <div class="fld"><label for="ovTitle">${t("bookTitle")}</label>
+        <input class="overview-title-input" id="ovTitle" value="${escapeAttr(b.title)}" placeholder="${escapeAttr(t("bookTitlePh"))}">
+      </div>
+      <div class="fld"><label for="ovAuthor">${t("author")}</label>
+        <input class="overview-title-input" id="ovAuthor" value="${escapeAttr(b.author||"")}" placeholder="${escapeAttr(t("authorPh"))}">
+      </div>
+    </div>
     <div class="ovstats">
       <div class="ovstat"><div class="n">${fmt(w)}</div><div class="l">${t("words")}</div></div>
       <div class="ovstat"><div class="n">≈${fmt(pg)}</div><div class="l">${t("pagesFull")}</div></div>
@@ -2689,24 +2777,18 @@ function renderOverview(main,b){
       <div class="fld-grid">
         <div class="fld"><label>${t("overviewYear")}</label><input id="ovYear" value="${escapeAttr(b.year)}" placeholder="${escapeAttr(t("overviewYearPh"))}">
           <div class="hint">${t("overviewYearHint")}</div></div>
-        <div class="fld"><label>${t("era")}</label><input id="ovEra" value="${escapeAttr(b.era)}" placeholder="${escapeAttr(t("eraPh"))}"></div>
+        <div class="fld"><label for="ovEra">${t("era")}</label>${eraSelect(b)}</div>
       </div>
       <div class="fld"><label>${t("place")}</label><input id="ovPlace" value="${escapeAttr(b.place)}" placeholder="${escapeAttr(t("placePh"))}"></div>
       ${taField("ovSyn",t("synopsis"),b.synopsis,t("synopsisPh"))}
-    </div>
-    <div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button>
-      <button class="btn" onclick="openPlan()">${icon('list',16)} ${t("plan")}</button>
-      <button class="btn" onclick="addLore()">${icon('map',16)} ${t("worldNote")}</button>
-      <button class="btn" onclick="openExport()">${icon('download',16)} ${t("export")}</button>
-      <button class="btn" onclick="openPreview()">${icon('eye',16)} ${t("preview")}</button>
     </div>
   </div>`;
   const bind=(id,field,reflect)=>{ const el=document.getElementById(id);
     if(el.tagName==="TEXTAREA"){ autoGrow(el); el.addEventListener("input",()=>autoGrow(el)); }
     el.addEventListener("input",()=>{ b[field]=el.value; b.updatedAt=now(); save(); if(reflect){renderSidebar();renderTopbar();} }); };
-  bind("ovTitle","title",true); bind("ovYear","year",false); bind("ovEra","era",false);
+  bind("ovTitle","title",true); bind("ovAuthor","author",false); bind("ovYear","year",false);
   bind("ovPlace","place",false); bind("ovSyn","synopsis",false);
+  document.getElementById("ovEra").addEventListener("change",onEraSelect);
 }
 
 /* ============ ВЕРХНЯЯ ПАНЕЛЬ ============ */
@@ -2785,6 +2867,10 @@ function openSettings(){
   const sw=ACCENTS.map(a=>`<div class="swatch ${s.accent===a.h?'on':''}" style="background:${a.h}" title="${labelEnum("accents",a.n)}" onclick="setAccent('${a.h}')"><span class="nm">${labelEnum("accents",a.n)}</span></div>`).join("");
   modal(`<h3>${t("settings")}</h3>
     <div class="mbody" style="padding:0">
+      <div class="set-section"><div class="sh">${t("defaultAuthor")}</div>
+        <div class="fld"><input id="defaultAuthorInput" value="${escapeAttr(s.defaultAuthor||"")}" placeholder="${escapeAttr(t("authorPh"))}" oninput="setDefaultAuthor(this.value)"></div>
+        <div class="hint" style="margin-top:10px">${t("defaultAuthorHint")}</div>
+      </div>
       <div class="set-section"><div class="sh">${t("theme")}</div>${themeSeg}</div>
       <div class="set-section"><div class="sh">${t("language")}</div>${langSeg}</div>
       <div class="set-section"><div class="sh">${t("autoDash")}</div>${dashSeg}<div class="hint" style="margin-top:10px">${t("autoDashHint")}</div></div>
@@ -2852,7 +2938,7 @@ function ensureUniqueItemId(list,item){
 }
 function fallbackBookForTrash(title){
   const b={id:uid(),title:title||t("restoredBook"),createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",planText:"",planVersions:[],chapters:[],characters:[],characterLinks:[],lore:[]};
+    author:"",previewFormat:"standard",year:"",era:"",place:"",synopsis:"",planText:"",planVersions:[],chapters:[],characters:[],characterLinks:[],lore:[]};
   state.books.unshift(b);
   return b;
 }
@@ -3011,19 +3097,124 @@ async function exportTxt(){
 }
 
 /* ============ ПРЕДПРОСМОТР ============ */
+function previewFormatOptions(current){
+  return `<option value="compact" ${current==="compact"?'selected':''}>${t("formatCompact")}</option>
+    <option value="standard" ${current==="standard"?'selected':''}>${t("formatStandard")}</option>
+    <option value="a5" ${current==="a5"?'selected':''}>${t("formatA5")}</option>`;
+}
+function previewPageCountLabel(count){
+  return isEn()?`${fmt(count)} ${count===1?"text page":"text pages"} ${t("titlePageShort")}`:`${fmt(count)} ${t("textPages")} ${t("titlePageShort")}`;
+}
+function previewFormatOf(book){ return BOOK_FORMATS[book.previewFormat]||BOOK_FORMATS.standard; }
+function applyPreviewSheetFormat(sheet,format){
+  sheet.style.setProperty("--pv-width",`${format.width}mm`);
+  sheet.style.setProperty("--pv-height",`${format.height}mm`);
+  sheet.style.setProperty("--pv-top",`${format.top}mm`);
+  sheet.style.setProperty("--pv-outer",`${format.outer}mm`);
+  sheet.style.setProperty("--pv-bottom",`${format.bottom}mm`);
+  sheet.style.setProperty("--pv-inner",`${format.inner}mm`);
+  sheet.style.setProperty("--pv-font",`${format.font}pt`);
+  sheet.style.setProperty("--pv-leading",String(format.leading));
+}
+function createPreviewSheet(format,pageNumber=null,extraClass=""){
+  const sheet=document.createElement("div"); sheet.className=`pv-sheet ${extraClass}`.trim(); applyPreviewSheetFormat(sheet,format);
+  const page=document.createElement("div"); page.className=`pv-page${pageNumber!==null&&pageNumber%2===0?" pv-even":""}`;
+  const body=document.createElement("div"); body.className="pv-page-body"; page.appendChild(body);
+  if(pageNumber!==null){ const number=document.createElement("div"); number.className="pv-page-number"; number.textContent=fmt(pageNumber); page.appendChild(number); }
+  sheet.appendChild(page); return {sheet,page,body};
+}
+function previewOverflows(body){ return body.scrollHeight>body.clientHeight+1; }
+function fitPreviewParagraph(body,text,continued=false){
+  const source=String(text||"").replace(/\s+/g," ").trim();
+  if(!source) return {placed:true,remainder:""};
+  const hadParagraph=!!body.querySelector("p"),words=source.split(" "),p=document.createElement("p");
+  if(continued) p.className="pv-continued";
+  p.textContent=source; body.appendChild(p);
+  if(!previewOverflows(body)) return {placed:true,remainder:""};
+  let low=1,high=words.length,best=0;
+  while(low<=high){
+    const mid=Math.floor((low+high)/2); p.textContent=words.slice(0,mid).join(" ");
+    if(previewOverflows(body)) high=mid-1; else{ best=mid; low=mid+1; }
+  }
+  if(best===0&&!hadParagraph){
+    low=1; high=source.length;
+    while(low<=high){
+      const mid=Math.floor((low+high)/2); p.textContent=source.slice(0,mid);
+      if(previewOverflows(body)) high=mid-1; else{ best=mid; low=mid+1; }
+    }
+    if(best>0){ p.textContent=source.slice(0,best); return {placed:true,remainder:source.slice(best).trimStart()}; }
+  }
+  if(best===0){ p.remove(); return {placed:false,remainder:source}; }
+  p.textContent=words.slice(0,best).join(" ");
+  return {placed:true,remainder:words.slice(best).join(" ")};
+}
+function previewChapterHeading(chapter,index){
+  const head=document.createElement("div"); head.className="pv-chapter-head";
+  const number=document.createElement("div"); number.className="pv-cnum"; number.textContent=`${t("chapterUpper")} ${index+1}`;
+  const title=document.createElement("h2"); title.textContent=chapter.title||`${t("chapter")} ${index+1}`;
+  head.append(number,title); return head;
+}
+function renderPreviewPages(){
+  const book=curBook(),root=document.getElementById("pvPages"),measure=document.getElementById("pvMeasure");
+  if(!book||!root||!measure) return;
+  const format=previewFormatOf(book),sheets=[]; measure.innerHTML="";
+  const title=createPreviewSheet(format,null,"pv-title-sheet"); title.page.classList.add("pv-title-page");
+  if((book.author||"").trim()){ const author=document.createElement("div"); author.className="pv-author"; author.textContent=book.author.trim(); title.body.appendChild(author); }
+  const bookTitle=document.createElement("div"); bookTitle.className="pv-book-title"; bookTitle.textContent=titleOrFallback(book.title); title.body.appendChild(bookTitle);
+  sheets.push(title.sheet);
+  let pageNumber=0;
+  const newTextPage=()=>{ pageNumber+=1; const made=createPreviewSheet(format,pageNumber); measure.appendChild(made.sheet); sheets.push(made.sheet); return made; };
+  (book.chapters||[]).forEach((chapter,index)=>{
+    let current=newTextPage(); current.body.appendChild(previewChapterHeading(chapter,index));
+    const paragraphs=String(chapter.content||"").replace(/\r\n/g,"\n").replace(/\r/g,"\n").split(/\n+/).map(value=>value.trim()).filter(Boolean);
+    if(!paragraphs.length){ const empty=document.createElement("p"); empty.className="pv-empty"; empty.textContent=t("emptyChapter"); current.body.appendChild(empty); return; }
+    paragraphs.forEach(paragraph=>{
+      let remainder=paragraph,continued=false,guard=0;
+      while(remainder&&guard++<1000){
+        const fitted=fitPreviewParagraph(current.body,remainder,continued);
+        if(!fitted.placed){ current=newTextPage(); continue; }
+        remainder=fitted.remainder;
+        if(remainder){ current=newTextPage(); continued=true; }
+      }
+    });
+  });
+  root.innerHTML=""; root.className=`pv-pages ${state.settings.previewView==="single"?"single":"spread"}`;
+  root.style.setProperty("--pv-zoom",String(state.settings.previewZoom||1));
+  sheets.forEach(sheet=>root.appendChild(sheet)); measure.innerHTML="";
+  const count=document.getElementById("pvCount"),zoom=document.getElementById("pvZoomValue");
+  if(count) count.textContent=previewPageCountLabel(pageNumber);
+  if(zoom) zoom.textContent=`${Math.round((state.settings.previewZoom||1)*100)}%`;
+}
+function setPreviewFormat(value){
+  const book=curBook(); if(!book||!BOOK_FORMATS[value]) return;
+  book.previewFormat=value; book.updatedAt=now(); save(); renderPreviewPages();
+}
+function setPreviewView(value){
+  state.settings.previewView=value==="single"?"single":"spread"; save();
+  const root=document.getElementById("pvPages"); if(root) root.className=`pv-pages ${state.settings.previewView}`;
+}
+function setPreviewZoom(direction){
+  const current=Number(state.settings.previewZoom)||1;
+  state.settings.previewZoom=Math.min(PREVIEW_MAX_ZOOM,Math.max(PREVIEW_MIN_ZOOM,Number((current+direction*PREVIEW_ZOOM_STEP).toFixed(2))));
+  save(); const root=document.getElementById("pvPages"),value=document.getElementById("pvZoomValue");
+  if(root) root.style.setProperty("--pv-zoom",String(state.settings.previewZoom));
+  if(value) value.textContent=`${Math.round(state.settings.previewZoom*100)}%`;
+}
 function openPreview(){
   snapshotCurrent(); const b=curBook();
-  let html=`<div class="pv-toolbar"><button class="btn small primary" onclick="closePreview()">${icon('x',16)} ${t("close")}</button></div>
-    <div class="pv-page pv-title-page"><div class="tt">${escapeHtml(b.title)}</div>
-    <div class="ta">${bookWordCount(b)?'≈'+fmt(Math.max(1,Math.round(bookWordCount(b)/WORDS_PER_PAGE)))+' '+t("pagesFull"):''}</div></div>`;
-  b.chapters.forEach((c,i)=>{
-    const paras=(c.content||"").split(/\n+/).filter(p=>p.trim()).map(p=>`<p>${escapeHtml(p)}</p>`).join("");
-    html+=`<div class="pv-page"><div class="pv-cnum">${t("chapterUpper")} ${i+1}</div><h2>${escapeHtml(c.title||"")}</h2>
-      ${paras||`<p style="color:#bbb;text-indent:0">${t("emptyChapter")}</p>`}</div>`;
-  });
+  const format=BOOK_FORMATS[b.previewFormat]?b.previewFormat:"standard",view=state.settings.previewView==="single"?"single":"spread";
+  const html=`<div class="pv-toolbar">
+    <div class="pv-tool"><label for="pvFormat">${t("layoutFormat")}</label><select id="pvFormat" onchange="setPreviewFormat(this.value)">${previewFormatOptions(format)}</select></div>
+    <div class="pv-tool"><label for="pvView">${t("layoutView")}</label><select id="pvView" onchange="setPreviewView(this.value)"><option value="single" ${view==="single"?'selected':''}>${t("viewSingle")}</option><option value="spread" ${view==="spread"?'selected':''}>${t("viewSpread")}</option></select></div>
+    <div class="pv-zoom"><button type="button" title="${t("zoomOut")}" aria-label="${t("zoomOut")}" onclick="setPreviewZoom(-1)">−</button><span class="pv-zoom-value" id="pvZoomValue">100%</span><button type="button" title="${t("zoomIn")}" aria-label="${t("zoomIn")}" onclick="setPreviewZoom(1)">+</button></div>
+    <span class="pv-count" id="pvCount"></span>
+    <button class="btn small primary" onclick="closePreview()">${icon('x',16)} ${t("close")}</button>
+  </div><div class="pv-pages ${view}" id="pvPages"></div><div class="pv-measure" id="pvMeasure"></div>`;
   const pv=document.getElementById("preview"); pv.innerHTML=html; pv.classList.remove("hidden");
+  const fontsReady=document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve();
+  fontsReady.then(()=>requestAnimationFrame(renderPreviewPages));
 }
-function closePreview(){ document.getElementById("preview").classList.add("hidden"); }
+function closePreview(){ const pv=document.getElementById("preview"); pv.classList.add("hidden"); pv.innerHTML=""; }
 
 /* ============ РЕЗЕРВНЫЕ КОПИИ ============ */
 async function exportBackup(){
@@ -3044,10 +3235,16 @@ async function importBackup(){
   snapshotCurrent();
   const backup=await a.backup_state(JSON.stringify(state,null,1),t("beforeImport"),lang());
   if(!apiOk(backup)) return openInfo(t("failTitle"),apiError(backup,t("oldBackupFail")));
-  state=d; if(!state.settings) state.settings={fontSize:19,theme:"light",accent:DEFAULT_ACCENT};
+  state=d; ensureData(); if(!state.settings) state.settings={fontSize:19,theme:"light",accent:DEFAULT_ACCENT};
   if(!state.settings.accent) state.settings.accent=DEFAULT_ACCENT;
   if(state.settings.lang!=="en") state.settings.lang="ru";
   if(state.settings.autoDialogueDash!==false) state.settings.autoDialogueDash=true;
+  if(typeof state.settings.defaultAuthor!=="string"){
+    const known=[...new Set(state.books.map(book=>String(book.author||"").trim()).filter(Boolean))];
+    state.settings.defaultAuthor=known.length===1?known[0]:"";
+  }
+  if(!["single","spread"].includes(state.settings.previewView)) state.settings.previewView="spread";
+  state.settings.previewZoom=Math.min(PREVIEW_MAX_ZOOM,Math.max(PREVIEW_MIN_ZOOM,Number(state.settings.previewZoom)||1));
   document.documentElement.lang=state.settings.lang;
   applyTheme(); save(); goHome(); toast(t("backupLoaded"));
 }
