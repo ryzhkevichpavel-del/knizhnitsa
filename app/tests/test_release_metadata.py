@@ -52,6 +52,9 @@ class ReleaseMetadataTests(unittest.TestCase):
         self.assertIn("OutputBaseFilename=Knizhnitsa-Setup", installer)
         self.assertIn("python -m unittest discover", workflow)
         self.assertIn("python -m PyInstaller", workflow)
+        self.assertIn("actions/checkout@v7", workflow)
+        self.assertIn("actions/setup-python@v7", workflow)
+        self.assertNotIn("FORCE_JAVASCRIPT_ACTIONS_TO_NODE24", workflow)
 
     def test_release_dependencies_are_fully_pinned(self):
         requirements = (APP_DIR / "requirements.txt").read_text(encoding="utf-8")
