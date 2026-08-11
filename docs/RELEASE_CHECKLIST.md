@@ -48,10 +48,19 @@ samples only. Do not test with private manuscripts.
 ## Plan
 
 - [ ] Open the book plan.
-- [ ] Edit chapter status.
-- [ ] Edit chapter summary.
-- [ ] Edit chapter notes.
+- [ ] Edit the overall book plan.
+- [ ] Switch between chapter plans and edit more than one chapter plan.
+- [ ] Switch between character arcs and edit more than one character arc.
+- [ ] Confirm plan and arc history, import, and restore work like chapter history.
 - [ ] Confirm plan changes appear in search.
+
+## World notes
+
+- [ ] Create and edit a world note.
+- [ ] Confirm long note text uses the available window width.
+- [ ] Confirm headings, bold, italic, lists, dividers, and the contents outline render correctly.
+- [ ] Confirm pasted HTML is displayed as harmless text and is never executed.
+- [ ] Confirm the full note title is available from the sidebar even when it is visually shortened.
 
 ## Search
 

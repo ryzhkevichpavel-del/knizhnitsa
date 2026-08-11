@@ -117,8 +117,8 @@
   .main::-webkit-scrollbar-thumb{background:rgba(131,131,139,.38);border:2px solid transparent;
     background-clip:content-box;border-radius:999px}
   .main::-webkit-scrollbar-thumb:hover{background:rgba(131,131,139,.68);background-clip:content-box}
-  .wrap{max-width:780px;width:100%;margin:0 auto;padding:36px 32px 140px;flex:1}
-  .chapter-wrap{max-width:1120px}
+  .wrap{--page-pad:clamp(24px,3.2vw,58px);max-width:none;width:100%;margin:0;padding:36px var(--page-pad) 140px;flex:1}
+  .chapter-wrap{max-width:none}
   .ed-title{width:100%;border:none;background:transparent;font-size:28px;font-weight:700;color:var(--ink);
     outline:none;margin-bottom:8px;font-family:inherit;letter-spacing:-.4px}
   .ed-meta{display:flex;gap:13px;align-items:center;color:var(--muted);font-size:13px;margin-bottom:22px;
@@ -152,10 +152,10 @@
     display:flex;align-items:center;justify-content:center;color:var(--muted)}
   .portrait img{width:100%;height:auto;display:block}
   .portrait.empty{aspect-ratio:4/5}
-  .character-wrap{max-width:1180px}
+  .character-wrap{max-width:none}
   .character-layout{display:grid;grid-template-columns:minmax(300px,420px) minmax(0,1fr);gap:28px;align-items:start}
   .character-photo-panel{width:100%;position:sticky;top:28px}
-  .character-main{min-width:0;max-width:690px}
+  .character-main{min-width:0;max-width:none}
   .portrait.large{width:100%;aspect-ratio:4/5;min-height:360px;background:#101014;border-color:#25252b}
   .portrait.large img{width:100%;height:100%;object-fit:contain}
   .portrait-button{padding:0;cursor:zoom-in;text-align:inherit}
@@ -177,6 +177,51 @@
   .section h4{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:0 0 8px;font-weight:700}
   .section p{margin:0;font-size:15.5px;line-height:1.7;white-space:pre-wrap}
   .empty-note{color:var(--muted);font-style:italic;opacity:.8}
+  .lore-wrap{padding-top:0}
+  .lore-pagehead{position:sticky;top:0;z-index:12;display:flex;align-items:center;justify-content:space-between;gap:22px;
+    margin:0 calc(0px - var(--page-pad)) 28px;padding:18px var(--page-pad);
+    border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(12px)}
+  .lore-heading{min-width:0}
+  .lore-heading h1{margin:0;font-size:clamp(25px,2.2vw,34px);line-height:1.16;letter-spacing:-.45px;overflow-wrap:anywhere}
+  .lore-view-heading{display:flex;align-items:center;gap:12px;flex:1;flex-wrap:wrap}
+  .lore-view-heading h1{min-width:0}
+  .lore-view-heading .badge{height:28px;padding:0 12px;line-height:1;align-items:center;justify-content:center;transform:translateY(3px)}
+  .lore-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px;color:var(--muted);font-size:13px}
+  .lore-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .lore-summary{margin:0 0 28px;padding:16px 18px;border-left:3px solid var(--accent);border-radius:0 12px 12px 0;
+    background:var(--accent-soft);font-size:16px;line-height:1.68;white-space:pre-wrap}
+  .lore-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,250px);gap:clamp(28px,3.5vw,58px);align-items:start}
+  .lore-layout.without-outline{grid-template-columns:minmax(0,1fr)}
+  .lore-document{min-width:0;font-family:"Georgia","Times New Roman",serif;font-size:18px;line-height:1.78;overflow-wrap:anywhere}
+  .lore-document>:first-child{margin-top:0}
+  .lore-document>:last-child{margin-bottom:0}
+  .lore-document h1,.lore-document h2,.lore-document h3,.lore-document h4{font-family:"Segoe UI",Roboto,system-ui,sans-serif;
+    line-height:1.22;letter-spacing:-.25px;scroll-margin-top:112px}
+  .lore-document h1{font-size:30px;margin:40px 0 16px}
+  .lore-document h2{font-size:25px;margin:36px 0 14px}
+  .lore-document h3{font-size:21px;margin:30px 0 12px}
+  .lore-document h4{font-size:18px;margin:26px 0 10px}
+  .lore-document p{margin:0 0 20px;white-space:normal}
+  .lore-document strong{font-weight:750}
+  .lore-document em{font-style:italic}
+  .lore-document ul,.lore-document ol{margin:0 0 22px;padding-left:28px}
+  .lore-document li{margin:6px 0;padding-left:3px}
+  .lore-document blockquote{margin:24px 0;padding:3px 0 3px 18px;border-left:3px solid var(--line);color:var(--muted)}
+  .lore-document code{font-family:Consolas,"Courier New",monospace;font-size:.9em;background:var(--panel2);padding:2px 5px;border-radius:5px}
+  .lore-document hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+  .lore-outline{position:sticky;top:104px;border-left:1px solid var(--line);padding-left:18px}
+  .lore-outline-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:750;margin-bottom:10px}
+  .lore-outline a{display:block;color:var(--muted);text-decoration:none;font-size:13px;line-height:1.35;padding:6px 8px;border-radius:8px;overflow-wrap:anywhere}
+  .lore-outline a:hover{color:var(--accent);background:var(--accent-soft)}
+  .lore-outline a.level-3{padding-left:18px}.lore-outline a.level-4{padding-left:28px}
+  .lore-edit-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(220px,1fr);gap:16px;margin-bottom:22px}
+  .lore-text-field textarea{min-height:52vh;font-family:"Georgia","Times New Roman",serif;font-size:17px;line-height:1.72}
+  .format-toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:0 0 8px;padding:6px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel)}
+  .format-toolbar button{min-width:34px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:14px;font-weight:700}
+  .format-toolbar button:hover{background:var(--accent-soft);color:var(--accent)}
+  .format-toolbar .format-divider{width:1px;height:20px;background:var(--line);margin:0 3px}
+  .format-hint{margin-left:auto;color:var(--muted);font-size:12px;padding:0 7px;font-weight:400}
   .relationship-list{display:flex;flex-direction:column;gap:10px}
   .relationship-card{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);
     background:var(--panel);border-radius:12px;padding:12px 14px}
@@ -296,13 +341,13 @@
   .sr-snippet{font-size:13px;color:var(--muted);line-height:1.45;margin-top:8px}
   .sr-snippet mark{background:var(--accent-soft);color:var(--ink);border-radius:4px;padding:0 2px}
 
-  .plan-wrap{max-width:1280px;padding-top:18px}
+  .plan-wrap{max-width:none;padding-top:18px}
   .plan-tabs{display:flex;gap:4px;margin:0 0 28px;border-bottom:1px solid var(--line)}
   .plan-tab{border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);
     padding:11px 15px;font-size:14px;font-weight:650;cursor:pointer}
   .plan-tab:hover{color:var(--accent);background:var(--accent-soft)}
   .plan-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:transparent}
-  .plan-document-editor{max-width:1000px;margin:0 auto;padding:18px 22px 70px}
+  .plan-document-editor{max-width:none;margin:0;padding:18px 0 70px}
   .plan-document-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:18px;
     border-bottom:1px solid var(--line)}
   .plan-document-title{margin:0;font-size:23px;letter-spacing:-.25px;min-width:0}
@@ -403,6 +448,11 @@
       linear-gradient(180deg,#1b1b1f,#18181b)}
   [data-theme="dark"] .map-node{background:rgba(32,32,35,.96);box-shadow:0 10px 30px rgba(0,0,0,.28)}
   [data-theme="dark"] .map-line-shadow{stroke:rgba(0,0,0,.42);opacity:.34}
+  @media (max-width: 1500px){
+    .lore-layout{grid-template-columns:1fr}
+    .lore-outline{position:static;order:-1;border-left:0;border-bottom:1px solid var(--line);padding:0 0 14px}
+    .lore-outline a{display:inline-block;margin-right:4px}
+  }
   @media (max-width: 980px){
     .fld-grid.three{grid-template-columns:1fr}
     .plan-document-editor{padding-left:0;padding-right:0}
@@ -414,11 +464,18 @@
     .quick-grid{grid-template-columns:1fr}
     .relationship-card{grid-template-columns:48px minmax(0,1fr)}
     .relationship-actions{grid-column:1 / -1}
+    .lore-edit-grid{grid-template-columns:1fr}
     .map-wrap{padding:18px 16px 46px}
     .map-studio{grid-template-columns:1fr}
     .map-board,.map-panel{height:auto;min-height:560px}
     .map-panel{min-height:0}
     .map-node{width:120px}
+  }
+  @media (max-width: 680px){
+    .wrap{--page-pad:18px}
+    .lore-pagehead{align-items:flex-start}
+    .lore-actions{flex-direction:column;align-items:stretch}
+    .format-hint{width:100%;margin-left:0}
   }
 
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);
@@ -590,6 +647,8 @@ const TEXT={
   chaptersGroup:["Главы","Chapters"], noChapters:["Глав пока нет","No chapters yet"], addChapter:["Добавить главу","Add chapter"],
   charactersGroup:["Персонажи","Characters"], noCharacters:["Персонажей пока нет","No characters yet"], addCharacter:["Добавить персонажа","Add character"],
   worldLore:["Мир и лор","World notes"], noLore:["Заметок пока нет","No notes yet"], addLore:["Добавить заметку","Add note"], worldNote:["Заметка мира","World note"],
+  noteText:["Текст заметки","Note text"], contents:["Содержание","Contents"], inBook:["В книге","In book"], inNote:["В заметке","In note"],
+  formatting:["Оформление","Formatting"], heading2:["Заголовок","Heading"], bold:["Жирный","Bold"], italic:["Курсив","Italic"], bulletList:["Список","List"], divider:["Разделитель","Divider"],
   mapEmpty:["Сначала добавь персонажей, а потом связывай их на карте.","Add characters first, then connect them on the map."],
   zoomOut:["Отдалить","Zoom out"], zoomIn:["Приблизить","Zoom in"], showWholeMap:["Показать всю карту","Show full map"], familyTree:["Семейное древо","Family tree"], mapHelp:["Колесо — масштаб · потяни пустое место — перемещение","Wheel — zoom · drag empty space — move"], newLink:["Новая связь","New link"], legend:["Условные обозначения","Legend"],
   links:["Связи","Links"], noLinks:["Связей пока нет.","No links yet."], setupLink:["Настроить связь","Edit link"], deleteLink:["Удалить связь","Delete link"],
@@ -1959,7 +2018,7 @@ function renderSidebar(){
     const active=route.view==="chapter"&&route.itemId===c.id?"active":"";
     return `<div class="nav-item chapter-item ${active}" data-chapter-id="${c.id}" onclick="openChapterFromSidebar(event,'${c.id}')"
       onpointerdown="startChapterDrag(event,'${c.id}')">
-      <span class="num">${i+1}</span><span class="label">${escapeHtml(titleOrFallback(c.title))}</span>
+      <span class="num">${i+1}</span><span class="label" title="${escapeAttr(titleOrFallback(c.title))}">${escapeHtml(titleOrFallback(c.title))}</span>
       <span class="chapter-order-actions">
         <button type="button" title="${t("moveUp")}" aria-label="${t("moveUp")}" ${i===0?'disabled':''} onclick="moveChapter('${c.id}',-1,event)">${icon('up',13)}</button>
         <button type="button" title="${t("moveDown")}" aria-label="${t("moveDown")}" ${i===b.chapters.length-1?'disabled':''} onclick="moveChapter('${c.id}',1,event)">${icon('down',13)}</button>
@@ -1972,11 +2031,11 @@ function renderSidebar(){
   const chrItems=b.characters.length?b.characters.map(c=>{
     const active=route.view==="character"&&route.itemId===c.id?"active":"";
     const av=c.photo?`<img class="avatar" src="${c.photo}">`:`<span class="avatar">${icon('user',14)}</span>`;
-    return `<div class="nav-item ${active}" onclick="openCharacterFromSidebar('${c.id}')">${av}<span class="label">${escapeHtml(nameOrFallback(c.name))}</span></div>`;
+    return `<div class="nav-item ${active}" onclick="openCharacterFromSidebar('${c.id}')">${av}<span class="label" title="${escapeAttr(nameOrFallback(c.name))}">${escapeHtml(nameOrFallback(c.name))}</span></div>`;
   }).join(""):`<div class="side-empty">${t("noCharacters")}</div>`;
   const loreItems=(b.lore||[]).length?b.lore.map(item=>{
     const active=route.view==="lore"&&route.itemId===item.id?"active":"";
-    return `<div class="nav-item ${active}" onclick="selectItem('lore','${item.id}')">${icon('map',15)}<span class="label">${escapeHtml(titleOrFallback(item.title))}</span></div>`;
+    return `<div class="nav-item ${active}" onclick="selectItem('lore','${item.id}')">${icon('map',15)}<span class="label" title="${escapeAttr(titleOrFallback(item.title))}">${escapeHtml(titleOrFallback(item.title))}</span></div>`;
   }).join(""):`<div class="side-empty">${t("noLore")}</div>`;
   document.getElementById("sidebar").innerHTML=`
     <div class="side-book ${route.view==='overview'?'active':''}" onclick="openOverview()">
@@ -2366,49 +2425,135 @@ let savedToastT=null;
 function flagSavedToast(){ /* тихое автосохранение, без визуального шума */ }
 
 /* ---- мир и лор ---- */
+function loreWordCount(item){ return countWords([item&&item.summary,item&&item.details,item&&item.links].filter(Boolean).join(" ")); }
+function renderLoreInline(value){
+  let safe=escapeHtml(String(value||""));
+  safe=safe.replace(/`([^`\n]+)`/g,"<code>$1</code>");
+  safe=safe.replace(/\*\*([^*\n]+)\*\*/g,"<strong>$1</strong>");
+  safe=safe.replace(/__([^_\n]+)__/g,"<strong>$1</strong>");
+  safe=safe.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,"$1<em>$2</em>");
+  safe=safe.replace(/(^|[^_])_([^_\n]+)_(?!_)/g,"$1<em>$2</em>");
+  return safe;
+}
+function renderLoreMarkdown(value){
+  const lines=String(value||"").replace(/\r\n?/g,"\n").split("\n"),html=[],headings=[];
+  let paragraph=[],listType="";
+  const flushParagraph=()=>{ if(paragraph.length){ html.push(`<p>${paragraph.join("<br>")}</p>`); paragraph=[]; } };
+  const closeList=()=>{ if(listType){ html.push(`</${listType}>`); listType=""; } };
+  const flushAll=()=>{ flushParagraph(); closeList(); };
+  lines.forEach(line=>{
+    const trimmed=line.trim();
+    if(!trimmed){ flushAll(); return; }
+    const heading=trimmed.match(/^(#{1,4})\s+(.+)$/);
+    if(heading){
+      flushAll();
+      const level=heading[1].length,id=`lore-heading-${headings.length+1}`;
+      const plain=heading[2].replace(/[*_`]/g,"").trim();
+      headings.push({id,level,text:plain});
+      html.push(`<h${level} id="${id}">${renderLoreInline(heading[2])}</h${level}>`);
+      return;
+    }
+    if(/^(?:-{3,}|\*{3,}|_{3,})$/.test(trimmed)){ flushAll(); html.push("<hr>"); return; }
+    const unordered=trimmed.match(/^[-*+]\s+(.+)$/),ordered=trimmed.match(/^\d+[.)]\s+(.+)$/);
+    if(unordered||ordered){
+      flushParagraph();
+      const nextType=ordered?"ol":"ul";
+      if(listType!==nextType){ closeList(); listType=nextType; html.push(`<${listType}>`); }
+      html.push(`<li>${renderLoreInline((ordered||unordered)[1])}</li>`);
+      return;
+    }
+    if(trimmed.startsWith(">")){
+      flushAll(); html.push(`<blockquote>${renderLoreInline(trimmed.replace(/^>\s?/,""))}</blockquote>`); return;
+    }
+    closeList(); paragraph.push(renderLoreInline(trimmed));
+  });
+  flushAll();
+  return {html:html.join(""),headings};
+}
+function scrollLoreSection(event,id){
+  if(event) event.preventDefault();
+  const target=document.getElementById(id); if(target) target.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function loreOutline(headings){
+  if(!headings||headings.length<2) return "";
+  return `<nav class="lore-outline" aria-label="${escapeAttr(t("contents"))}"><div class="lore-outline-title">${t("contents")}</div>
+    ${headings.map(h=>`<a class="level-${h.level}" href="#${h.id}" onclick="scrollLoreSection(event,'${h.id}')">${escapeHtml(h.text)}</a>`).join("")}</nav>`;
+}
+function setLoreTextareaValue(el,value,start,end){
+  el.value=value; el.selectionStart=start; el.selectionEnd=end; el.focus(); autoGrow(el);
+  el.dispatchEvent(new Event("input",{bubbles:true}));
+}
+function applyLoreFormat(kind){
+  const el=document.getElementById("loreDetails"); if(!el) return;
+  const start=el.selectionStart,end=el.selectionEnd,value=el.value,selected=value.slice(start,end);
+  if(kind==="bold"||kind==="italic"){
+    const marker=kind==="bold"?"**":"*",sample=selected||(lang()==="ru"?"текст":"text");
+    const inserted=marker+sample+marker,next=value.slice(0,start)+inserted+value.slice(end);
+    const selStart=start+marker.length,selEnd=selStart+sample.length;
+    setLoreTextareaValue(el,next,selStart,selEnd); return;
+  }
+  if(kind==="divider"){
+    const before=start>0&&!value.slice(0,start).endsWith("\n")?"\n":"",after=end<value.length&&!value.slice(end).startsWith("\n")?"\n":"";
+    const inserted=`${before}---${after}`;
+    setLoreTextareaValue(el,value.slice(0,start)+inserted+value.slice(end),start+inserted.length,start+inserted.length); return;
+  }
+  const lineStart=value.lastIndexOf("\n",start-1)+1,lineEndRaw=value.indexOf("\n",end),lineEnd=lineEndRaw<0?value.length:lineEndRaw;
+  const block=value.slice(lineStart,lineEnd),prefix=kind==="heading"?"## ":"- ";
+  const changed=block.split("\n").map(line=>line.trim()?prefix+line.replace(kind==="heading"?/^(?:#{1,4}\s+)?/:/^(?:[-*+]\s+)?/,""):line).join("\n");
+  setLoreTextareaValue(el,value.slice(0,lineStart)+changed+value.slice(lineEnd),lineStart,lineStart+changed.length);
+}
 function renderLoreView(main,b){
   const item=(b.lore||[]).find(x=>x.id===route.itemId);
   if(!item){ route.view="overview"; return renderMain(); }
   normalizeLore(item);
-  const sec=(title,val)=>val&&val.trim()?`<div class="section"><h4>${title}</h4><p>${escapeHtml(val)}</p></div>`:"";
   const hasText=[item.summary,item.details,item.links].some(v=>v&&v.trim());
-  main.innerHTML=`<div class="wrap">
-    <div class="pagehead">
-      <div></div>
-      <button class="btn" onclick="editLore()">${icon('edit',16)} ${t("edit")}</button>
-    </div>
-    <div class="profile-top">
-      <div class="portrait empty" style="width:126px;aspect-ratio:1">${icon('map',46)}</div>
-      <div class="profile-id">
-        <h1 class="pname">${escapeHtml(titleOrFallback(item.title))}</h1>
+  const rendered=renderLoreMarkdown(item.details),links=renderLoreMarkdown(item.links),outline=loreOutline(rendered.headings);
+  const documentHtml=`${rendered.html}${item.links&&item.links.trim()?`<section><h2>${t("links")}</h2>${links.html}</section>`:""}`;
+  main.innerHTML=`<div class="wrap lore-wrap">
+    <header class="lore-pagehead lore-view-pagehead">
+      <div class="lore-heading lore-view-heading">
+        <h1>${escapeHtml(titleOrFallback(item.title))}</h1>
         <span class="badge">${escapeHtml(labelEnum("lore",item.type||"Заметка"))}</span>
       </div>
-    </div>
-    ${sec(t("profileShort"),item.summary)}
-    ${sec(t("details"),item.details)}
-    ${sec(t("links"),item.links)}
-    ${!hasText?`<div class="section"><p class="empty-note">${t("loreEmpty")}</p></div>`:""}
+      <div class="lore-actions">
+        <button class="btn" onclick="editLore()">${icon('edit',16)} ${t("edit")}</button>
+      </div>
+    </header>
+    ${item.summary&&item.summary.trim()?`<div class="lore-summary">${escapeHtml(item.summary)}</div>`:""}
+    ${hasText?`<div class="lore-layout ${outline?"":"without-outline"}"><article class="lore-document">${documentHtml}</article>${outline}</div>`:
+      `<div class="section"><p class="empty-note">${t("loreEmpty")}</p></div>`}
   </div>`;
 }
 function renderLoreEdit(main,b){
   const item=(b.lore||[]).find(x=>x.id===route.itemId);
   if(!item){ route.view="overview"; return renderMain(); }
   normalizeLore(item);
-  main.innerHTML=`<div class="wrap">
-    <div class="pagehead">
-      <button class="btn ghost" onclick="doneLore()">${icon('back',16)} ${t("done")}</button>
-      <button class="btn ghost small" onclick="deleteLore('${item.id}')">${icon('trash',16)} ${t("delete")}</button>
-    </div>
-    <div class="profile-top">
-      <div class="portrait empty" style="width:126px;aspect-ratio:1">${icon('map',46)}</div>
-      <div class="profile-id" style="padding-top:0;display:flex;flex-direction:column;gap:14px">
-        <div class="fld"><label>${t("title")}</label><input id="loreTitle" value="${escapeAttr(item.title)}" placeholder="${escapeAttr(t("loreNamePh"))}"></div>
-        <div class="fld"><label>${t("type")}</label><select id="loreType">${optionList(LORE_TYPES,"lore",item.type)}</select></div>
+  main.innerHTML=`<div class="wrap lore-wrap">
+    <header class="lore-pagehead">
+      <div class="lore-heading"><h1>${escapeHtml(titleOrFallback(item.title))}</h1><div class="lore-meta"><span>${t("formatting")}</span></div></div>
+      <div class="lore-actions">
+        <button class="btn" onclick="doneLore()">${icon('back',16)} ${t("done")}</button>
+        <button class="btn ghost small" onclick="deleteLore('${item.id}')">${icon('trash',16)} ${t("delete")}</button>
       </div>
+    </header>
+    <div class="lore-edit-grid">
+      <div class="fld"><label>${t("title")}</label><input id="loreTitle" value="${escapeAttr(item.title)}" placeholder="${escapeAttr(t("loreNamePh"))}"></div>
+      <div class="fld"><label>${t("type")}</label><select id="loreType">${optionList(LORE_TYPES,"lore",item.type)}</select></div>
     </div>
-    <div class="fld-stack" style="margin-top:24px">
+    <div class="fld-stack">
       ${taField("loreSummary",t("profileShort"),item.summary,t("loreSummaryPh"))}
-      ${taField("loreDetails",t("details"),item.details,t("detailsPh"))}
+      <div class="fld lore-text-field"><label>${t("noteText")}</label>
+        <div class="format-toolbar" role="toolbar" aria-label="${escapeAttr(t("formatting"))}">
+          <button type="button" title="${escapeAttr(t("heading2"))}" onclick="applyLoreFormat('heading')">H2</button>
+          <button type="button" title="${escapeAttr(t("bold"))}" onclick="applyLoreFormat('bold')">B</button>
+          <button type="button" title="${escapeAttr(t("italic"))}" onclick="applyLoreFormat('italic')"><i>I</i></button>
+          <span class="format-divider"></span>
+          <button type="button" title="${escapeAttr(t("bulletList"))}" onclick="applyLoreFormat('list')">•</button>
+          <button type="button" title="${escapeAttr(t("divider"))}" onclick="applyLoreFormat('divider')">—</button>
+          <span class="format-hint">${t("heading2")} · ${t("bold")} · ${t("italic")} · ${t("bulletList")}</span>
+        </div>
+        <textarea id="loreDetails" placeholder="${escapeAttr(t("detailsPh"))}">${escapeHtml(item.details)}</textarea>
+      </div>
       ${taField("loreLinks",t("links"),item.links,t("linksPh"))}
     </div>
   </div>`;
@@ -2556,7 +2701,10 @@ function renderTopbar(){
     L.innerHTML=`<button class="btn icon ghost" title="${t("allBooks")}" onclick="goHome()">${icon('back',18)}</button>
       <span class="tb-title" onclick="openOverview()">${escapeHtml(titleOrFallback(b.title))}</span>`;
     const w=bookWordCount(b),pg=Math.max(0,Math.round(w/WORDS_PER_PAGE));
-    const stat=route.view==="overview"?"":`<span class="stat">${fmt(w)} ${t("words")} · ≈${fmt(pg)} ${t("pages")}</span>`;
+    const lore=route.view==="lore"?(b.lore||[]).find(item=>item.id===route.itemId):null;
+    const stat=route.view==="overview"?"":lore?
+      `<span class="stat">${t("inNote")}: ${fmt(loreWordCount(lore))} ${t("words")}</span>`:
+      `<span class="stat">${t("inBook")}: ${fmt(w)} ${t("words")} · ≈${fmt(pg)} ${t("pages")}</span>`;
     R.innerHTML=`${stat}
       ${searchBtn}
       ${trashBtn}

@@ -52,6 +52,39 @@ class UiContractTests(unittest.TestCase):
         self.assertIn("a.check_for_updates(lang())", self.html)
         self.assertNotIn("setInterval(checkForUpdates", self.html)
 
+    def test_working_text_views_use_available_width(self):
+        self.assertIn(".wrap{--page-pad:", self.html)
+        self.assertIn(";max-width:none", self.html)
+        self.assertIn(".chapter-wrap{max-width:none}", self.html)
+        self.assertIn(".character-wrap{max-width:none}", self.html)
+        self.assertIn(".plan-document-editor{max-width:none", self.html)
+
+    def test_lore_markdown_is_escaped_before_formatting(self):
+        self.assertIn("function renderLoreMarkdown", self.html)
+        self.assertIn('let safe=escapeHtml(String(value||""))', self.html)
+        self.assertIn('safe=safe.replace(/\\*\\*([^*\\n]+)\\*\\*/g,"<strong>$1</strong>")', self.html)
+        self.assertIn('html.push("<hr>")', self.html)
+
+    def test_lore_reader_has_compact_header_outline_and_contextual_count(self):
+        self.assertIn('class="wrap lore-wrap"', self.html)
+        self.assertIn('class="lore-pagehead"', self.html)
+        self.assertIn('class="lore-heading lore-view-heading"', self.html)
+        self.assertIn('.lore-view-heading .badge{height:28px;padding:0 12px;line-height:1;align-items:center;justify-content:center;transform:translateY(3px)}', self.html)
+        self.assertIn('<span class="badge">${escapeHtml(labelEnum("lore",item.type||"Заметка"))}</span>', self.html)
+        self.assertNotIn('<div class="lore-meta"><span class="badge">', self.html)
+        self.assertIn('function loreOutline', self.html)
+        self.assertIn('class="lore-document"', self.html)
+        self.assertIn('t("inNote")', self.html)
+        self.assertNotIn('style="width:126px;aspect-ratio:1"', self.html)
+
+    def test_lore_editor_offers_basic_formatting_controls(self):
+        for command in ("heading", "bold", "italic", "list", "divider"):
+            self.assertIn(f"applyLoreFormat('{command}')", self.html)
+        self.assertIn('id="loreDetails"', self.html)
+
+    def test_truncated_sidebar_labels_expose_the_full_name(self):
+        self.assertIn('class="label" title="${escapeAttr(titleOrFallback(item.title))}"', self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
