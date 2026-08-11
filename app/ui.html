@@ -111,14 +111,20 @@
   .chapter-item.dragging{z-index:5;background:var(--panel);box-shadow:var(--shadow);transition:none}
   .side-empty{color:var(--muted);font-size:13px;padding:8px 11px;font-style:italic;opacity:.8}
 
-  .main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .main{flex:1;overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(131,131,139,.42) transparent}
+  .main::-webkit-scrollbar{width:9px}
+  .main::-webkit-scrollbar-track{background:transparent}
+  .main::-webkit-scrollbar-thumb{background:rgba(131,131,139,.38);border:2px solid transparent;
+    background-clip:content-box;border-radius:999px}
+  .main::-webkit-scrollbar-thumb:hover{background:rgba(131,131,139,.68);background-clip:content-box}
   .wrap{max-width:780px;width:100%;margin:0 auto;padding:36px 32px 140px;flex:1}
+  .chapter-wrap{max-width:1120px}
   .ed-title{width:100%;border:none;background:transparent;font-size:28px;font-weight:700;color:var(--ink);
     outline:none;margin-bottom:8px;font-family:inherit;letter-spacing:-.4px}
   .ed-meta{display:flex;gap:13px;align-items:center;color:var(--muted);font-size:13px;margin-bottom:22px;
     border-bottom:1px solid var(--line);padding-bottom:16px;flex-wrap:wrap}
   .ed-meta .saved{color:var(--ok);display:inline-flex;align-items:center;gap:5px}
-  .ed-body{width:100%;min-height:58vh;border:none;background:transparent;outline:none;resize:none;
+  .ed-body{display:block;width:100%;min-height:58vh;border:none;background:transparent;outline:none;resize:none;overflow-y:hidden;
     font-family:"Georgia","Times New Roman",serif;font-size:var(--ed-size,19px);line-height:1.85;color:var(--ink)}
   .placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;
     color:var(--muted);text-align:center;gap:14px;padding:40px}
@@ -132,6 +138,7 @@
   .fld textarea{resize:none;overflow:hidden;line-height:1.6;min-height:46px}
   .fld select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2383838b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 13px center;padding-right:38px}
   .fld-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .fld-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
   .fld-stack{display:flex;flex-direction:column;gap:18px}
   .hint{font-size:12px;color:var(--muted);margin-top:6px}
   .ovstats{display:flex;gap:30px;flex-wrap:wrap;margin:14px 0 30px;padding-bottom:24px;border-bottom:1px solid var(--line)}
@@ -213,6 +220,7 @@
   .modal{background:var(--panel);border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:520px;max-height:88vh;
     display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line)}
   .modal.wide{max-width:680px}
+  .modal.history{max-width:920px}
   .modal h3{margin:0;padding:24px 26px 4px;font-size:19px;font-weight:680;letter-spacing:-.3px}
   .mpad{padding:16px 26px 6px}
   .mmsg{color:var(--muted);font-size:14px;line-height:1.55;padding-bottom:8px}
@@ -239,11 +247,37 @@
   .swatch.on{border-color:var(--ink)}
   .swatch .nm{font-size:10px;color:#fff;opacity:0;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.4)}
   .swatch.on .nm,.swatch:hover .nm{opacity:1}
-  .ver-row{display:flex;align-items:center;gap:12px;padding:13px 26px;border-bottom:1px solid var(--line)}
-  .ver-row:hover{background:var(--accent-soft)}
-  .ver-row .vinfo{flex:1;min-width:0}
-  .ver-row .vt{font-size:14px}
-  .ver-row .vp{color:var(--muted);font-size:12px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .history-current{margin:10px 16px 6px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--accent),var(--line) 58%);
+    border-radius:13px;background:color-mix(in srgb,var(--accent-soft),var(--paper) 58%);display:flex;align-items:center;
+    justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .history-current-main{display:flex;flex-direction:column;gap:3px}.history-current-main strong{font-size:14px}
+  .history-current-main span{color:var(--muted);font-size:12px}
+  .history-current-side{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .history-section-title{padding:12px 18px 2px;color:var(--muted);font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.65px}
+  .history-list{padding:8px 16px 18px;display:flex;flex-direction:column;gap:10px}
+  .ver-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:11px 18px;padding:15px 16px;
+    border:1px solid var(--line);border-radius:13px;background:var(--paper)}
+  .ver-row .vinfo{min-width:0}
+  .ver-row .vt{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:700}
+  .ver-reason{font-size:12px;font-weight:500;color:var(--muted)}
+  .ver-delta{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:700}
+  .ver-row .vt>.ver-delta{margin-left:auto;justify-content:flex-end}
+  .delta-add{color:#21845e}.delta-del{color:#b64d59}.delta-none{color:var(--muted)}
+  .ver-summary{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.5}
+  .ver-actions{display:flex;align-items:center;gap:8px;align-self:center;flex-wrap:wrap;justify-content:flex-end}
+  .btn[disabled]{opacity:.55;cursor:default;pointer-events:none}
+  .diff-legend{display:flex;gap:16px;flex-wrap:wrap;padding:8px 26px 14px;color:var(--muted);font-size:12px}
+  .diff-legend span{display:inline-flex;align-items:center;gap:6px}.diff-legend i{width:11px;height:11px;border-radius:3px}
+  .diff-legend .add i{background:rgba(42,163,115,.25)}.diff-legend .del i{background:rgba(207,78,91,.24)}
+  .diff-body{margin:0 26px 12px;padding:18px 20px;border:1px solid var(--line);border-radius:13px;background:var(--paper);
+    font-family:Georgia,"Times New Roman",serif;font-size:16px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+  .diff-add{background:rgba(42,163,115,.22);color:var(--ink);border-radius:3px;padding:1px 2px;text-decoration:none}
+  .diff-del{background:rgba(207,78,91,.2);color:var(--muted);border-radius:3px;padding:1px 2px;text-decoration:line-through}
+  .diff-note{margin:0 26px 12px;color:var(--muted);font-size:13px;line-height:1.5}
+  .restore-impact{margin:0 26px 8px;padding:12px 14px;border-radius:11px;background:var(--panel2);color:var(--muted);font-size:13px}
+  .import-preview{margin:10px 26px 4px;max-height:44vh;overflow:auto;padding:16px 18px;border:1px solid var(--line);
+    border-radius:13px;background:var(--paper);font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:1.65;white-space:pre-wrap}
+  .import-meta{padding:8px 26px;color:var(--muted);font-size:13px}
 
   .search-box{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--paper);
     border-radius:14px;padding:12px 14px}
@@ -262,18 +296,27 @@
   .sr-snippet{font-size:13px;color:var(--muted);line-height:1.45;margin-top:8px}
   .sr-snippet mark{background:var(--accent-soft);color:var(--ink);border-radius:4px;padding:0 2px}
 
-  .plan-list{display:flex;flex-direction:column;gap:14px;margin-top:22px}
-  .plan-card{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px;
-    box-shadow:0 1px 2px rgba(20,20,30,.04)}
-  .plan-card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-  .plan-num{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
-    display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
-  .plan-title{flex:1;min-width:0;border:none;background:transparent;color:var(--ink);font-size:18px;font-weight:680;
-    outline:none;font-family:inherit}
-  .plan-status{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;
-    padding:7px 30px 7px 12px;font-size:13px;outline:none}
-  .plan-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .plan-fields textarea{min-height:80px}
+  .plan-wrap{max-width:1280px;padding-top:18px}
+  .plan-tabs{display:flex;gap:4px;margin:0 0 28px;border-bottom:1px solid var(--line)}
+  .plan-tab{border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);
+    padding:11px 15px;font-size:14px;font-weight:650;cursor:pointer}
+  .plan-tab:hover{color:var(--accent);background:var(--accent-soft)}
+  .plan-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:transparent}
+  .plan-document-editor{max-width:1000px;margin:0 auto;padding:18px 22px 70px}
+  .plan-document-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:18px;
+    border-bottom:1px solid var(--line)}
+  .plan-document-title{margin:0;font-size:23px;letter-spacing:-.25px;min-width:0}
+  .plan-document-meta{display:flex;align-items:center;justify-content:flex-end;gap:16px;color:var(--muted);
+    font-size:13px;flex-wrap:wrap;margin-left:auto}
+  .plan-document-meta .saved{color:var(--ok);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .plan-item-select{max-width:260px;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    border-radius:10px;padding:7px 36px 7px 11px;font-size:13px;outline:none;text-overflow:ellipsis}
+  .plan-item-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .plan-document-body{display:block;width:100%;min-height:62vh;border:none;background:transparent;color:var(--ink);
+    padding:27px 0 44px;outline:none;resize:none;overflow:hidden;font-family:"Georgia","Times New Roman",serif;
+    font-size:18px;line-height:1.82;white-space:pre-wrap}
+  .plan-document-body::placeholder{color:var(--muted);opacity:.72}
+  .plan-empty{min-height:430px}
   .trash-list{padding:4px 14px 16px;display:flex;flex-direction:column;gap:8px;min-height:160px}
   .trash-card{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:13px 14px}
   .trash-head{display:flex;align-items:baseline;gap:10px;min-height:20px}
@@ -286,19 +329,24 @@
   .map-pagehead h1{font-size:24px;line-height:1.15;margin:0;letter-spacing:0}
   .map-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .zoom-pill{min-width:58px;text-align:center;color:var(--muted);font-size:13px;font-weight:650}
-  .map-studio{display:grid;grid-template-columns:minmax(560px,1fr) 312px;gap:14px;align-items:stretch}
+  .map-studio{display:grid;grid-template-columns:minmax(540px,1fr) 360px;gap:14px;align-items:stretch}
   .map-board{position:relative;height:calc(100vh - 148px);min-height:650px;border:1px solid var(--line);border-radius:16px;
     background:
       radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--muted),transparent 82%) 1px,transparent 1.5px),
       linear-gradient(180deg,color-mix(in srgb,var(--panel),var(--bg) 20%),var(--paper));
     background-size:26px 26px,100% 100%;overflow:hidden;margin-top:0;cursor:grab;touch-action:none}
   .map-board.panning{cursor:grabbing}
+  .map-help{position:absolute;left:14px;bottom:12px;z-index:7;padding:7px 10px;border:1px solid var(--line);
+    border-radius:9px;background:color-mix(in srgb,var(--panel),transparent 10%);color:var(--muted);font-size:11px;
+    pointer-events:none;box-shadow:0 4px 18px rgba(20,24,38,.08)}
   .map-canvas{position:absolute;left:0;top:0;width:calc(100% / var(--map-world-scale,1));
     height:calc(100% / var(--map-world-scale,1));transform:translate(var(--map-pan-x,0px),var(--map-pan-y,0px)) scale(var(--map-zoom,1));
     transform-origin:0 0;transition:transform .16s ease}
   .map-board.panning .map-canvas,.map-node.dragging{transition:none}
   .map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto}
-  .map-line{fill:none;stroke-width:1.9;opacity:.9;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
+  .map-line{fill:none;stroke-width:1.9;opacity:.9;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none;
+    transition:opacity .14s,filter .14s}
+  .map-line.selected{opacity:1!important;filter:drop-shadow(0 0 4px var(--thread-color))}
   .map-line-shadow{fill:none;stroke:rgba(0,0,0,.12);stroke-width:5;opacity:.26;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
   .map-link-hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:help}
   .map-node{position:absolute;width:156px;min-height:72px;transform:translate(-50%,-50%);border:1px solid var(--line);
@@ -320,39 +368,46 @@
   .map-panel-section:last-child{border-bottom:none}
   .map-panel-title{font-size:12px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
   .legend-grid{display:flex;flex-direction:column;gap:8px}
+  .legend-subtitle{font-size:10px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.65px;margin:10px 0 6px}
+  .legend-subtitle:first-child{margin-top:0}
   .legend-row{display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center;font-size:12px;color:var(--ink);min-height:22px}
   .legend-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .link-list{display:flex;flex-direction:column;gap:9px;overflow-y:auto;padding:14px;min-height:0}
   .link-card{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:14px;
     padding:12px 14px}
-  .map-panel .link-card{background:var(--paper);padding:11px 12px;display:grid;grid-template-columns:58px minmax(0,1fr) 30px 30px;
-    grid-template-rows:auto auto;align-items:center;gap:7px 8px}
-  .map-panel .thread-sample{grid-column:1;grid-row:1}
+  .map-panel .link-card{background:var(--paper);padding:11px 12px;display:grid;grid-template-columns:64px minmax(0,1fr) 30px 30px;
+    grid-template-rows:auto auto;align-items:center;gap:7px 8px;cursor:pointer;transition:border-color .14s,background .14s}
+  .map-panel .link-card:hover,.map-panel .link-card.selected{border-color:var(--thread-color);background:color-mix(in srgb,var(--thread-color),var(--paper) 94%)}
+  .map-panel .link-visual{grid-column:1;grid-row:1 / 3;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:7px}
   .map-panel .rel-badge{grid-column:2;grid-row:1;justify-self:start;min-width:76px}
-  .map-panel .link-main{grid-column:1 / 3;grid-row:2}
+  .map-panel .auto-relation{grid-column:3 / 5;grid-row:1;justify-self:end}
+  .map-panel .link-main{grid-column:2 / 3;grid-row:2}
   .map-panel .link-card button{padding:6px;width:28px;height:28px;justify-content:center}
   .link-main{flex:1;min-width:0}
-  .link-title{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .link-title{font-size:13px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+  .link-roles{font-size:12px;font-weight:750;color:var(--thread-color);margin-top:4px;line-height:1.35}
   .link-note{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .strength-indicator{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:10px;white-space:nowrap}
+  .strength-dots{display:flex;align-items:flex-end;gap:2px;height:10px}
+  .strength-dots i{display:block;width:4px;height:4px;border-radius:999px;background:var(--line)}
+  .strength-dots i:nth-child(2){height:7px}.strength-dots i:nth-child(3){height:10px}
+  .strength-dots i.on{background:var(--thread-color)}
+  .auto-relation{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:10px;font-weight:700}
   .rel-badge{min-width:92px;text-align:center;border:1px solid color-mix(in srgb,var(--thread-color),#fff 58%);
     border-radius:999px;padding:6px 10px;color:var(--thread-color);background:color-mix(in srgb,var(--thread-color),transparent 88%);
     font-size:12px;font-weight:750;white-space:nowrap}
   .thread-sample{width:58px;height:14px;flex-shrink:0;display:flex;align-items:center}
   .thread-sample svg{width:58px;height:14px;overflow:visible}
-  .chapter-characters{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-  .char-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--panel);
-    color:var(--ink);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:650;max-width:190px}
-  .char-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .char-chip b{color:var(--muted);font-weight:650}
   [data-theme="dark"] .map-board{background:
       radial-gradient(circle at 1px 1px,rgba(150,158,178,.18) 1px,transparent 1.5px),
       linear-gradient(180deg,#1b1b1f,#18181b)}
   [data-theme="dark"] .map-node{background:rgba(32,32,35,.96);box-shadow:0 10px 30px rgba(0,0,0,.28)}
   [data-theme="dark"] .map-line-shadow{stroke:rgba(0,0,0,.42);opacity:.34}
   @media (max-width: 980px){
-    .plan-fields{grid-template-columns:1fr}
-    .plan-card-head{align-items:flex-start;flex-wrap:wrap}
-    .plan-title{min-width:220px}
+    .fld-grid.three{grid-template-columns:1fr}
+    .plan-document-editor{padding-left:0;padding-right:0}
+    .plan-document-head{align-items:flex-start;flex-direction:column;gap:10px}
+    .plan-document-meta{justify-content:flex-start;margin-left:0}
     .character-layout{grid-template-columns:1fr}
     .character-photo-panel{position:static;max-width:420px}
     .portrait.large{min-height:0}
@@ -370,6 +425,14 @@
     color:var(--bg);padding:11px 20px;border-radius:13px;font-size:14px;z-index:60;opacity:0;transition:.25s;
     pointer-events:none;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .text-context-menu{position:fixed;z-index:100;min-width:210px;padding:5px;background:var(--panel);color:var(--ink);
+    border:1px solid var(--line);border-radius:11px;box-shadow:0 14px 42px rgba(0,0,0,.22);user-select:none}
+  .text-context-menu button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:22px;border:none;
+    border-radius:7px;background:transparent;color:inherit;padding:8px 10px;font:13px/1.2 inherit;text-align:left;cursor:pointer}
+  .text-context-menu button:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+  .text-context-menu button:disabled{color:var(--muted);opacity:.48;cursor:default}
+  .text-context-menu kbd{font:11px/1.2 "Segoe UI",sans-serif;color:var(--muted);background:transparent}
+  .text-context-separator{height:1px;background:var(--line);margin:4px 5px}
   .size-ctl{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
   .size-ctl button{border:none;background:var(--panel);padding:5px 11px;color:var(--muted);font-size:14px;font-weight:600}
   .size-ctl button:hover{color:var(--accent)}
@@ -392,6 +455,7 @@
 
 <div id="preview" class="hidden"></div>
 <div id="modalRoot"></div>
+<div id="contextMenuRoot"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -413,6 +477,8 @@ const ICONS={
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
   search:'<circle cx="11" cy="11" r="7"/><line x1="16.65" y1="16.65" x2="21" y2="21"/>',
   map:'<polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>',
+  maximize:'<polyline points="8 3 3 3 3 8"/><line x1="3" y1="3" x2="9" y2="9"/><polyline points="16 3 21 3 21 8"/><line x1="21" y1="3" x2="15" y2="9"/><polyline points="8 21 3 21 3 16"/><line x1="3" y1="21" x2="9" y2="15"/><polyline points="16 21 21 21 21 16"/><line x1="21" y1="21" x2="15" y2="15"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
   upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
   x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
@@ -433,9 +499,15 @@ const ACCENTS=[
 ];
 const DEFAULT_ACCENT="#3f4ea3";
 const DEFAULT_ROLES=["Главный герой","Протагонист","Антагонист","Второстепенный персонаж","Эпизодический персонаж","Наставник","Союзник","Соперник","Любовная линия","Рассказчик","Резонёр"];
-const PLAN_STATUSES=["Задумка","Черновик","Готово","Переписать"];
 const LORE_TYPES=["Заметка","Место","Организация","Событие","Термин","Предмет","Правило мира"];
 const RELATION_TYPES=["Союз","Дружба","Семья","Любовь","Конфликт","Вражда","Тайна","Наставник","Долг","Другое"];
+const RELATION_ROLES=[
+  "Мать","Отец","Родитель","Сын","Дочь","Ребёнок","Муж","Жена","Супруг","Супруга","Партнёр",
+  "Брат","Сестра","Близнец","Бабушка","Дедушка","Внук","Внучка","Тётя","Дядя","Племянник","Племянница","Кузен","Кузина",
+  "Приёмная мать","Приёмный отец","Приёмный ребёнок","Опекун","Подопечный","Наставник","Ученик","Учитель","Друг","Подруга",
+  "Союзник","Соперник","Враг","Возлюбленный","Возлюбленная","Покровитель","Должник","Кредитор","Брат / сестра","Друг / подруга","Родственник"
+];
+const CHARACTER_GENDERS=["female","male"];
 const RELATION_STYLES={
   "Союз":{color:"#2f8f79",pattern:"solid"},
   "Дружба":{color:"#2f75b8",pattern:"soft"},
@@ -456,9 +528,9 @@ const THREAD_PATTERNS={
   chain:{name:"Штрих-точка",dash:"13 5 2 5",width:1.9}
 };
 const RELATION_STRENGTHS={
-  weak:{name:"Слабая",width:1.35},
-  normal:{name:"Обычная",width:1.9},
-  strong:{name:"Сильная",width:3.05}
+  weak:{name:"Слабая",width:1.35,level:1,opacity:.58},
+  normal:{name:"Обычная",width:2.35,level:2,opacity:.82},
+  strong:{name:"Сильная",width:4.2,level:3,opacity:1}
 };
 const THREAD_COLORS=[
   {name:"Зелёная",value:"#2f8f79"},
@@ -477,6 +549,8 @@ const TEXT={
   appName:["Книжница","Knizhnitsa"], settings:["Настройки","Settings"], search:["Поиск","Search"], trash:["Корзина","Trash"],
   allBooks:["Все книги","All books"], export:["Экспорт","Export"], preview:["Как в книге","Book view"], done:["Готово","Done"],
   cancel:["Отмена","Cancel"], close:["Закрыть","Close"], delete:["Удалить","Delete"], save:["Сохранить","Save"], add:["Добавить","Add"],
+  cut:["Вырезать","Cut"], copy:["Копировать","Copy"], paste:["Вставить","Paste"], selectAll:["Выделить всё","Select all"],
+  clipboardUnavailable:["Не удалось открыть буфер обмена","Could not access the clipboard"],
   create:["Создать","Create"], restore:["Вернуть","Restore"], edit:["Редактировать","Edit"], rename:["Переименовать","Rename"],
   noTitle:["Без названия","Untitled"], noName:["Без имени","Unnamed"], noRole:["Без роли","No role"], noNote:["Без заметки","No note"],
   words:["слов","words"], pages:["стр.","pages"], pagesFull:["страниц","pages"], chaptersShort:["гл.","ch."], chapters:["глав","chapters"],
@@ -490,28 +564,31 @@ const TEXT={
   canRestoreFromTrash:["можно будет вернуть из корзины.","can be restored from trash."], canRestoreToBook:["можно будет вернуть в эту книгу.","can be restored to this book."],
   renameBook:["Переименовать книгу","Rename book"], renameChapter:["Переименовать главу","Rename chapter"], title:["Название","Title"],
   newChapter:["Новая глава","New chapter"], chapter:["Глава","Chapter"], chapterTitle:["Название главы","Chapter title"], chooseChapter:["Выбери главу слева — или создай новую.","Choose a chapter on the left, or create a new one."],
-  saveVersion:["Сохранить версию","Save version"], history:["История","History"], saved:["Сохранено","Saved"], saving:["Сохранение…","Saving..."], notSaved:["Не сохранено","Not saved"],
-  chapterBodyPh:["Здесь начинается глава…","The chapter starts here..."], current:["текущая","current"], empty:["(пусто)","(empty)"],
-  noVersions:["Пока нет сохранённых версий. Они создаются автоматически при переходе между главами и по кнопке «Сохранить версию».","No saved versions yet. Versions are created automatically when switching chapters and with the Save version button."],
-  chapterHistory:["История главы","Chapter history"], restoreVersionTitle:["Вернуть эту версию?","Restore this version?"], restoreVersionMsg:["Текущий текст сначала сохранится в историю, затем заменится выбранной версией.","Current text will be saved to history first, then replaced with the selected version."],
-  versionRestored:["Версия восстановлена","Version restored"], versionSaved:["Версия сохранена","Version saved"], noVersionChanges:["Изменений нет — версия не создана","No changes, version was not created"],
-  versionFrom:["Версия от","Version from"], backToList:["← К списку","← Back to list"], restoreThisText:["Вернуть этот текст","Restore this text"],
+  history:["История","History"], importDocument:["Импорт","Import"], saved:["Сохранено","Saved"], saving:["Сохранение…","Saving..."], notSaved:["Не сохранено","Not saved"],
+  chapterBodyPh:["Здесь начинается глава…","The chapter starts here..."], current:["Сейчас","Now"], empty:["(пусто)","(empty)"],
+  noVersions:["История пока пуста. Первая версия появится после изменения текста или перехода к другому документу.","History is empty. The first version will appear after editing or switching documents."],
+  documentHistory:["История текста","Text history"], savedVersions:["Сохранённые версии","Saved versions"], currentText:["Текущий текст","Current text"], currentMatchesLatest:["Совпадает с последней сохранённой версией.","Matches the latest saved version."], currentHasChanges:["Есть изменения после последней сохранённой версии.","There are changes since the latest saved version."], compareCurrent:["Сравнить с последней версией","Compare with latest version"], showChanges:["Сравнить с предыдущей","Compare with previous"], viewVersionText:["Посмотреть текст","View text"], alreadyOpen:["Уже открыт","Already open"], versionAlreadyOpen:["Эта версия уже открыта в редакторе.","This version is already open in the editor."], added:["Добавлено","Added"], removed:["Удалено","Removed"], noTextChanges:["Текст не изменился","No text changes"], firstSavedVersion:["Первая доступная версия","Earliest available version"], textSize:["объём","size"], firstVersionHelp:["Более ранней версии нет, поэтому сравнивать её не с чем.","There is no earlier version to compare it with."],
+  restoreVersionTitle:["Вернуть текст к этому моменту?","Restore the text to this point?"], restoreVersionMsg:["Текущий текст сначала сохранится в истории. После этого он будет заменён выбранной версией.","The current text will be saved to history first, then replaced with the selected version."],
+  versionRestored:["Текст восстановлен","Text restored"], versionSaved:["Версия сохранена","Version saved"], noVersionChanges:["Изменений нет — версия не создана","No changes, version was not created"],
+  versionFrom:["Версия от","Version from"], currentChangesTitle:["Изменения после последней сохранённой версии","Changes since the latest saved version"], versionTextTitle:["Текст версии от","Version text from"], comparedWithPrevious:["Что изменилось по сравнению с предыдущей сохранённой версией","What changed compared with the previous saved version"], backToList:["← К истории","← Back to history"], restoreThisText:["Восстановить этот текст","Restore this text"], restoreImpact:["Если заменить текущий текст этой версией","If the current text is replaced with this version"], willReturn:["вернётся","will return"], willDisappear:["исчезнет","will disappear"],
+  reasonAuto:["Автоматическое сохранение","Automatic save"], reasonMove:["Перед переходом","Before switching"], reasonManual:["Сохранено вручную","Saved manually"], reasonBeforeImport:["До импорта","Before import"], reasonImportReplace:["Импорт: текст заменён","Import: text replaced"], reasonImportAppend:["Импорт: текст добавлен","Import: text appended"], reasonBeforeRestore:["До восстановления","Before restore"], reasonRestore:["Восстановление версии","Version restored"], changedSeveral:["Изменено несколько фрагментов текста.","Several parts of the text were changed."], addedLarge:["Добавлен большой фрагмент текста.","A large text fragment was added."], removedLarge:["Удалён большой фрагмент текста.","A large text fragment was removed."], replacedFragment:["Заменено","Replaced"], withFragment:["на","with"], addedFragment:["Добавлен фрагмент","Fragment added"], removedFragment:["Удалён фрагмент","Fragment removed"],
+  importTextTitle:["Импорт текста","Import text"], importEmpty:["В выбранном документе нет текста.","The selected document contains no text."], importFailed:["Не удалось импортировать документ.","Could not import the document."], importInto:["Текст будет перенесён в","Text will be imported into"], appendText:["Добавить в конец","Append"], replaceText:["Заменить текущий текст","Replace current text"], textImported:["Текст импортирован","Text imported"], importedWords:["слов в документе","words in document"],
   bookOverview:["Обзор и настройки книги","Book overview and settings"], book:["Книга","Book"], plan:["План","Plan"], characterMap:["Карта персонажей","Character map"],
   chaptersGroup:["Главы","Chapters"], noChapters:["Глав пока нет","No chapters yet"], addChapter:["Добавить главу","Add chapter"],
   charactersGroup:["Персонажи","Characters"], noCharacters:["Персонажей пока нет","No characters yet"], addCharacter:["Добавить персонажа","Add character"],
   worldLore:["Мир и лор","World notes"], noLore:["Заметок пока нет","No notes yet"], addLore:["Добавить заметку","Add note"], worldNote:["Заметка мира","World note"],
   mapEmpty:["Сначала добавь персонажей, а потом связывай их на карте.","Add characters first, then connect them on the map."],
-  zoomOut:["Отдалить","Zoom out"], zoomIn:["Приблизить","Zoom in"], newLink:["Новая связь","New link"], legend:["Условные обозначения","Legend"],
+  zoomOut:["Отдалить","Zoom out"], zoomIn:["Приблизить","Zoom in"], showWholeMap:["Показать всю карту","Show full map"], familyTree:["Семейное древо","Family tree"], mapHelp:["Колесо — масштаб · потяни пустое место — перемещение","Wheel — zoom · drag empty space — move"], newLink:["Новая связь","New link"], legend:["Условные обозначения","Legend"],
   links:["Связи","Links"], noLinks:["Связей пока нет.","No links yet."], setupLink:["Настроить связь","Edit link"], deleteLink:["Удалить связь","Delete link"],
   needCharacters:["Нужны персонажи","Characters needed"], needTwoCharacters:["Для связи нужны хотя бы два персонажа.","At least two characters are needed for a link."],
-  firstCharacter:["Первый персонаж","First character"], secondCharacter:["Второй персонаж","Second character"], linkMeaning:["Смысл связи","Link meaning"], linkStrength:["Сила связи","Link strength"],
-  note:["Заметка","Note"], linkNotePh:["Например: скрытая вражда, давний долг, семейная тайна...","For example: hidden rivalry, old debt, family secret..."],
+  firstCharacter:["Первый персонаж","First character"], secondCharacter:["Второй персонаж","Second character"], firstRole:["Кем первый приходится второму","First character's role to second"], secondRole:["Ответная роль","Reciprocal role"], roleNotSet:["— роль не указана —","— role not set —"], roleAutomatic:["Определяется автоматически","Set automatically"], linkMeaning:["Смысл связи","Link meaning"], linkStrength:["Сила связи","Link strength"], strengthLegend:["Сила линии","Line strength"], meaningLegend:["Цвет и вид линии","Line color and style"],
+  note:["Заметка","Note"], linkNotePh:["Например: скрытая вражда, давний долг, семейная тайна...","For example: hidden rivalry, old debt, family secret..."], automaticRelation:["Автоматически","Automatic"], automaticFamilyNote:["Общий родитель — родство определено автоматически","Shared parent — relationship inferred automatically"], familyLayoutDone:["Персонажи расположены как семейное древо","Characters arranged as a family tree"], familyRolesNeeded:["Сначала укажи в семейных связях, кто кому мать, отец, сын, дочь и так далее","First set family roles such as mother, father, son, or daughter"],
   chooseDifferentCharacters:["Выбери двух разных персонажей","Choose two different characters"], linkUpdated:["Связь обновлена","Link updated"], linkAdded:["Связь добавлена","Link added"],
   deleteLinkTitle:["Удалить связь?","Delete link?"], deleteLinkMsg:["Персонажи останутся на месте, удалится только линия между ними.","Characters will stay; only the line between them will be removed."],
   profile:["Профиль","Profile"], details:["Описание","Description"], relations:["Связи","Relations"], map:["Карта","Map"], photoAlt:["Фото персонажа","Character photo"],
   openPhoto:["Открыть фото крупно","Open large photo"], replacePhoto:["Заменить фото","Replace photo"], addPhoto:["Добавить фото","Add photo"], remove:["Убрать","Remove"], photoAdded:["Фото добавлено","Photo added"],
   profileShort:["Коротко","Summary"], profileEmpty:["Профиль пока пустой.","Profile is empty."], name:["Имя","Name"], characterName:["Имя персонажа","Character name"],
-  role:["Роль в книге","Role in the book"], age:["Возраст","Age"], agePh:["напр. 34","e.g. 34"], birthYear:["год рождения ≈","birth year ≈"], birthYearHint:["укажи год действия в обзоре книги, чтобы видеть год рождения","set the story year in the book overview to see birth year"],
+  role:["Роль в книге","Role in the book"], gender:["Пол","Gender"], genderFemale:["Женский","Female"], genderMale:["Мужской","Male"], genderHint:["Нужен для автоматических ролей: дочь, сын, сестра, брат","Used for automatic roles such as daughter, son, sister, or brother"], age:["Возраст","Age"], agePh:["напр. 34","e.g. 34"], birthYear:["год рождения ≈","birth year ≈"], birthYearHint:["укажи год действия в обзоре книги, чтобы видеть год рождения","set the story year in the book overview to see birth year"],
   aliases:["Варианты имени","Name variants"], aliasesPh:["Фамилия, прозвище, отчество, склонения...","Surname, nickname, patronymic, inflections..."], aliasesHint:["По этим словам приложение само найдёт персонажа в главах. Можно писать через запятую или с новой строки.","The app will use these words to find the character in chapters. Separate with commas or new lines."],
   appearance:["Внешность","Appearance"], appearancePh:["Рост, телосложение, лицо, одежда, особые приметы…","Height, build, face, clothes, distinctive marks..."], personality:["Характер","Personality"], personalityPh:["Темперамент, привычки, сильные и слабые стороны…","Temperament, habits, strengths and weaknesses..."],
   biography:["Биография","Biography"], biographyPh:["Откуда родом, ключевые события, что сформировало персонажа…","Origin, key events, what shaped the character..."], goals:["Цели и мотивация","Goals and motivation"], goalsPh:["Чего хочет, чего боится, что им движет…","What they want, fear, and what drives them..."],
@@ -523,7 +600,7 @@ const TEXT={
   notSpecified:["— не указана —","— not set —"], customOther:["＋ Другое…","＋ Other..."], customRole:["Своя роль","Custom role"], customRolePh:["например, Хранитель тайны","for example, Keeper of Secrets"],
   newLore:["Новая заметка мира","New world note"], loreTitlePh:["например: Северный порт","for example: Northern Harbor"], loreNamePh:["Название места, события, термина...","Name of a place, event, term..."], type:["Тип","Type"], loreSummaryPh:["Суть в двух-трёх фразах...","The essence in two or three sentences..."],
   detailsPh:["История, правила, детали, важные факты...","History, rules, details, important facts..."], linksPh:["С какими персонажами, главами, местами или событиями связано...","Connected characters, chapters, places, or events..."], loreEmpty:["Заметка пока пустая. Нажми «Редактировать», чтобы заполнить.","This note is empty. Click Edit to fill it in."],
-  bookPlan:["План книги","Book plan"], planHint:["Собери книгу по главам: статус, суть сцены и рабочие заметки.","Build the book by chapter: status, scene summary, and working notes."], whatHappens:["Что происходит","What happens"], planSummaryPh:["Коротко: сцена, конфликт, поворот...","Briefly: scene, conflict, twist..."], chapterNotes:["Заметки к главе","Chapter notes"], chapterNotesPh:["Что не забыть, что проверить, что переписать...","What to remember, check, or rewrite..."], openChapter:["Открыть главу","Open chapter"], openCharacter:["Открыть персонажа","Open character"], up:["Выше","Up"], down:["Ниже","Down"], planEmpty:["Глав пока нет. Создай первую главу, и она появится в плане.","No chapters yet. Create the first chapter and it will appear in the plan."], more:["ещё","more"],
+  wholeBookPlan:["Общий план книги","Overall book plan"], overallPlanTab:["Общий план","Overall plan"], chapterPlansTab:["Планы глав","Chapter plans"], characterArcsTab:["Арки персонажей","Character arcs"], selectChapter:["Выбрать главу","Select chapter"], selectCharacter:["Выбрать персонажа","Select character"], wholeBookPlanPh:["Пиши здесь весь план книги: сюжетные линии, повороты, сцены, финал и любые рабочие заметки...","Write the complete book plan here: storylines, turns, scenes, ending, and any working notes..."], chapterPlanPh:["Пиши здесь полный план выбранной главы — любого объёма...","Write the complete plan for the selected chapter here, at any length..."], characterArcPh:["Роль в сюжете, путь персонажа, ключевые решения, изменения, отношения и финал...","Role in the story, the character's journey, key decisions, changes, relationships, and ending..."], planEmpty:["Глав пока нет. Создай первую главу, чтобы написать её план.","There are no chapters yet. Create the first chapter to write its plan."], characterArcEmpty:["Персонажей пока нет. Создай первого персонажа, чтобы написать его арку.","There are no characters yet. Create the first character to write their arc."], openChapter:["Открыть главу","Open chapter"], openCharacter:["Открыть персонажа","Open character"], more:["ещё","more"],
   overviewYear:["Год действия","Story year"], overviewYearPh:["напр. 1965","e.g. 1965"], overviewYearHint:["Используется, чтобы считать год рождения персонажей по возрасту","Used to calculate character birth year by age"], era:["Эпоха / период","Era / period"], eraPh:["напр. послевоенное время","e.g. postwar period"], place:["Место действия","Setting"], placePh:["Город, страна, мир…","City, country, world..."], synopsis:["Синопсис / о чём книга","Synopsis / what the book is about"], synopsisPh:["Краткое содержание, идея, замысел…","Short summary, idea, concept..."], authorSheetHelp:["Авторский лист = 40 000 знаков, принятая в издательствах единица объёма","Author sheet = 40,000 characters, a publishing volume unit"],
   theme:["Тема","Theme"], language:["Язык","Language"], switchToRussian:["Переключить на русский","Switch to Russian"], switchToEnglish:["Переключить на английский","Switch to English"], light:["Светлая","Light"], dark:["Тёмная","Dark"], appColor:["Цвет приложения","App color"], autoDash:["Умное тире","Smart dash"], autoDashHint:["Два пробела в начале строки превращаются в тире реплики, а после текста — в тире с пробелами.","Two spaces become a dialogue dash at the start of a line, or a spaced dash after text."], enabled:["Включено","On"], disabled:["Выключено","Off"], data:["Данные","Data"], saveBackup:["Сохранить резервную копию","Save backup"], loadBackup:["Загрузить из копии","Load backup"], dataHint:["Все книги хранятся в одном файле на твоём компьютере. Резервную копию полезно делать время от времени.","All books are stored in one file on your computer. It is useful to make a backup from time to time."],
   trashEmpty:["Корзина пуста.","Trash is empty."], clear:["Очистить","Empty"], withChaptersCharacters:["Со всеми главами и персонажами","With all chapters and characters"], fromBook:["Из книги","From book"], restoredBook:["Восстановленная книга","Restored book"], restored:["Восстановлено","Restored"], deleteForever:["Удалить окончательно","Delete permanently"], deleteForeverTitle:["Удалить окончательно?","Delete permanently?"], deleteForeverMsg:["После этого вернуть из корзины уже не получится.","After this, it cannot be restored from trash."], emptyTrashTitle:["Очистить корзину?","Empty trash?"], emptyTrashMsg:["Все элементы в корзине будут удалены окончательно.","All items in trash will be permanently deleted."],
@@ -533,11 +610,12 @@ const TEXT={
 };
 const ENUM_LABELS={
   roles:{"Главный герой":"Main character","Протагонист":"Protagonist","Антагонист":"Antagonist","Второстепенный персонаж":"Supporting character","Эпизодический персонаж":"Minor character","Наставник":"Mentor","Союзник":"Ally","Соперник":"Rival","Любовная линия":"Love interest","Рассказчик":"Narrator","Резонёр":"Reasoner"},
-  plan:{"Задумка":"Idea","Черновик":"Draft","Готово":"Done","Переписать":"Rewrite"},
   lore:{"Заметка":"Note","Место":"Place","Организация":"Organization","Событие":"Event","Термин":"Term","Предмет":"Item","Правило мира":"World rule","Лор":"Lore"},
   relations:{"Союз":"Alliance","Дружба":"Friendship","Семья":"Family","Любовь":"Love","Конфликт":"Conflict","Вражда":"Enmity","Тайна":"Secret","Наставник":"Mentor","Долг":"Debt","Другое":"Other","Связь":"Link"},
   patterns:{"Сплошная":"Solid","Пунктир":"Dashed","Точки":"Dotted","Мягкая":"Soft","Штрих-точка":"Dash-dot"},
   strengths:{"Слабая":"Weak","Обычная":"Normal","Сильная":"Strong"},
+  relationRoles:{"Мать":"Mother","Отец":"Father","Родитель":"Parent","Сын":"Son","Дочь":"Daughter","Ребёнок":"Child","Муж":"Husband","Жена":"Wife","Супруг":"Spouse","Супруга":"Spouse","Партнёр":"Partner","Брат":"Brother","Сестра":"Sister","Близнец":"Twin","Бабушка":"Grandmother","Дедушка":"Grandfather","Внук":"Grandson","Внучка":"Granddaughter","Тётя":"Aunt","Дядя":"Uncle","Племянник":"Nephew","Племянница":"Niece","Кузен":"Cousin","Кузина":"Cousin","Приёмная мать":"Foster mother","Приёмный отец":"Foster father","Приёмный ребёнок":"Foster child","Опекун":"Guardian","Подопечный":"Ward","Наставник":"Mentor","Ученик":"Student","Учитель":"Teacher","Друг":"Friend","Подруга":"Friend","Союзник":"Ally","Соперник":"Rival","Враг":"Enemy","Возлюбленный":"Loved one","Возлюбленная":"Loved one","Покровитель":"Patron","Должник":"Debtor","Кредитор":"Creditor","Брат / сестра":"Brother / sister","Друг / подруга":"Friend","Родственник":"Relative"},
+  genders:{female:"Female",male:"Male"},
   accents:{"Изумруд":"Emerald","Бирюза":"Turquoise","Сапфир":"Sapphire","Индиго":"Indigo","Слива":"Plum","Бордо":"Burgundy","Роза":"Rose","Графит":"Graphite","Янтарь":"Amber","Лазурь":"Azure"}
 };
 
@@ -552,7 +630,7 @@ let state={ books:[], settings:{
   autoDialogueDash:INITIAL_SETTINGS.autoDialogueDash!==false
 } };
 let dialogueDashUndo=[],dialogueDashRedo=[];
-let route={ screen:"home", bookId:null, view:null, itemId:null, charMode:"view", charTab:"profile" };
+let route={ screen:"home", bookId:null, view:null, itemId:null, charMode:"view", charTab:"profile", planMode:"overall" };
 let editorFontSize=19, saveTimer=null, snapTimer=null;
 
 function api(){ return (window.pywebview&&window.pywebview.api)?window.pywebview.api:null; }
@@ -562,6 +640,104 @@ function lang(){ return state.settings&&state.settings.lang==="en"?"en":"ru"; }
 function isEn(){ return lang()==="en"; }
 function t(key){ const v=TEXT[key]; return v ? v[isEn()?1:0] : key; }
 function tx(ru,en){ return isEn()?en:ru; }
+
+/* ============ МЕНЮ ПРАВОЙ КНОПКИ ДЛЯ ТЕКСТА ============ */
+let textContextTarget=null;
+function editableTextTarget(node){
+  const el=node&&node.closest?node.closest("textarea,input,[contenteditable='true']"):null;
+  if(!el||el.disabled||el.readOnly) return null;
+  if(el.tagName==="INPUT"&&!['text','search','email','url','tel','password'].includes((el.type||'text').toLowerCase())) return null;
+  return el;
+}
+function selectedEditableText(el){
+  if(el.tagName==="INPUT"||el.tagName==="TEXTAREA"){
+    const start=Number.isInteger(el.selectionStart)?el.selectionStart:0,end=Number.isInteger(el.selectionEnd)?el.selectionEnd:start;
+    return el.value.slice(start,end);
+  }
+  const selection=window.getSelection();
+  if(!selection||!selection.rangeCount||selection.isCollapsed) return "";
+  const range=selection.getRangeAt(0);
+  return el.contains(range.commonAncestorContainer)?selection.toString():"";
+}
+function selectAllEditableText(el){
+  el.focus();
+  if(el.tagName==="INPUT"||el.tagName==="TEXTAREA"){ el.select(); return; }
+  const range=document.createRange(); range.selectNodeContents(el);
+  const selection=window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+}
+function replaceEditableSelection(el,text,inputType){
+  el.focus();
+  if(document.execCommand&&document.execCommand("insertText",false,text)) return;
+  if(el.tagName==="INPUT"||el.tagName==="TEXTAREA"){
+    const start=Number.isInteger(el.selectionStart)?el.selectionStart:el.value.length,end=Number.isInteger(el.selectionEnd)?el.selectionEnd:start;
+    el.setRangeText(text,start,end,"end");
+  }else{
+    const selection=window.getSelection();
+    if(!selection||!selection.rangeCount) return;
+    const range=selection.getRangeAt(0); range.deleteContents();
+    const node=document.createTextNode(text); range.insertNode(node); range.setStartAfter(node); range.collapse(true);
+    selection.removeAllRanges(); selection.addRange(range);
+  }
+  el.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:inputType||"insertText",data:text}));
+}
+async function writeSystemClipboard(text){
+  const a=api();
+  if(a&&a.clipboard_write_text){
+    try{ if(apiOk(await a.clipboard_write_text(text,lang()))) return true; }catch(e){}
+  }
+  try{ await navigator.clipboard.writeText(text); return true; }catch(e){ return false; }
+}
+async function readSystemClipboard(){
+  const a=api();
+  if(a&&a.clipboard_read_text){
+    try{ const res=await a.clipboard_read_text(lang()); if(apiOk(res)) return String(res.text||""); }catch(e){}
+  }
+  try{ return await navigator.clipboard.readText(); }catch(e){ return null; }
+}
+async function runTextContextCommand(command,target){
+  if(!target||!document.contains(target)) return;
+  if(command==="selectAll"){ selectAllEditableText(target); return; }
+  if(command==="paste"){
+    const text=await readSystemClipboard();
+    if(text===null){ toast(t("clipboardUnavailable")); return; }
+    if(text) replaceEditableSelection(target,text,"insertFromPaste");
+    return;
+  }
+  const text=selectedEditableText(target);
+  if(!text) return;
+  if(!await writeSystemClipboard(text)){ toast(t("clipboardUnavailable")); return; }
+  if(command==="cut") replaceEditableSelection(target,"","deleteByCut");
+}
+function closeTextContextMenu(){
+  const root=document.getElementById("contextMenuRoot"),wasOpen=!!(root&&root.firstChild);
+  if(root) root.innerHTML="";
+  textContextTarget=null;
+  return wasOpen;
+}
+function showTextContextMenu(event,target){
+  const root=document.getElementById("contextMenuRoot"),hasSelection=!!selectedEditableText(target);
+  textContextTarget=target;
+  root.innerHTML=`<div class="text-context-menu" role="menu">
+    <button type="button" data-command="cut" ${hasSelection?'':'disabled'}><span>${t("cut")}</span><kbd>Ctrl+X</kbd></button>
+    <button type="button" data-command="copy" ${hasSelection?'':'disabled'}><span>${t("copy")}</span><kbd>Ctrl+C</kbd></button>
+    <button type="button" data-command="paste"><span>${t("paste")}</span><kbd>Ctrl+V</kbd></button>
+    <div class="text-context-separator"></div>
+    <button type="button" data-command="selectAll"><span>${t("selectAll")}</span><kbd>Ctrl+A</kbd></button>
+  </div>`;
+  const menu=root.firstElementChild;
+  menu.style.left="0px"; menu.style.top="0px";
+  const left=Math.max(8,Math.min(event.clientX,window.innerWidth-menu.offsetWidth-8));
+  const top=Math.max(8,Math.min(event.clientY,window.innerHeight-menu.offsetHeight-8));
+  menu.style.left=left+"px"; menu.style.top=top+"px";
+  menu.querySelectorAll("button").forEach(button=>{
+    button.addEventListener("pointerdown",e=>e.preventDefault());
+    button.addEventListener("click",()=>{
+      const command=button.dataset.command,current=textContextTarget;
+      closeTextContextMenu();
+      runTextContextCommand(command,current);
+    });
+  });
+}
 function labelEnum(group,value){ return isEn()&&ENUM_LABELS[group]&&ENUM_LABELS[group][value]?ENUM_LABELS[group][value]:value; }
 function optionList(values,group,current){
   return values.map(v=>`<option value="${escapeAttr(v)}" ${current===v?'selected':''}>${escapeHtml(labelEnum(group,v))}</option>`).join("");
@@ -606,6 +782,17 @@ function now(){ return Date.now(); }
 function countWords(t){ t=(t||"").trim(); return t?t.split(/\s+/).length:0; }
 function countChars(t){ return (t||"").length; }
 function fmt(n){ return n.toLocaleString(dateLocale()); }
+function fitChapterBody(body,followEnd=false){
+  if(!body) return;
+  const scroller=body.closest(".main"),scrollTop=scroller?scroller.scrollTop:0;
+  const bottomGap=scroller?Math.max(0,scroller.scrollHeight-scroller.clientHeight-scrollTop):0;
+  const followBottom=followEnd&&scroller&&body.selectionStart===body.value.length&&body.selectionEnd===body.value.length&&
+    bottomGap<=Math.max(240,scroller.clientHeight*.4);
+  body.style.height="auto";
+  body.style.height=body.scrollHeight+"px";
+  if(scroller) scroller.scrollTop=followBottom?
+    Math.max(0,scroller.scrollHeight-scroller.clientHeight-bottomGap):scrollTop;
+}
 function uniqueClean(list){
   const seen=new Set(),out=[];
   (list||[]).forEach(v=>{
@@ -641,10 +828,6 @@ function characterChapterAppearances(b,c){
     return {chapter:ch,index:i,count:mentions.length,first:mentions[0]||null};
   }).filter(x=>x.count>0);
 }
-function chapterCharacterMentions(b,ch){
-  return (b.characters||[]).map(c=>({character:c,count:characterMentionsInText(c,ch.content||"").length}))
-    .filter(x=>x.count>0);
-}
 function mentionSnippet(text,mention){
   const src=text||"",start=Math.max(0,mention.index-70),end=Math.min(src.length,mention.index+mention.term.length+90);
   const before=(start>0?"…":"")+src.slice(start,mention.index);
@@ -668,6 +851,8 @@ function ensureData(){
   state.trash.characters=Array.isArray(state.trash.characters)?state.trash.characters:[];
   state.trash.lore=Array.isArray(state.trash.lore)?state.trash.lore:[];
   state.books.forEach(b=>{
+    if(b.planText===undefined) b.planText="";
+    if(!Array.isArray(b.planVersions)) b.planVersions=[];
     b.chapters=Array.isArray(b.chapters)?b.chapters:[];
     b.characters=Array.isArray(b.characters)?b.characters:[];
     b.characterLinks=Array.isArray(b.characterLinks)?b.characterLinks:[];
@@ -679,14 +864,21 @@ function ensureData(){
   });
 }
 function normalizeChapter(ch){
-  if(!ch.planStatus) ch.planStatus="Задумка";
   if(ch.planSummary===undefined) ch.planSummary="";
   if(ch.planNotes===undefined) ch.planNotes="";
+  if(ch.planText===undefined){
+    const legacy=[ch.planSummary,ch.planNotes].map(v=>String(v||"").trim()).filter(Boolean);
+    ch.planText=legacy.join("\n\n");
+  }
   if(!Array.isArray(ch.versions)) ch.versions=[];
+  if(!Array.isArray(ch.planVersions)) ch.planVersions=[];
   return ch;
 }
 function cloneData(v){ return JSON.parse(JSON.stringify(v)); }
 function normalizeCharacter(c){
+  if(!CHARACTER_GENDERS.includes(c.gender)) c.gender="";
+  if(c.arcText===undefined) c.arcText="";
+  if(!Array.isArray(c.arcVersions)) c.arcVersions=[];
   if(c.aliases===undefined) c.aliases=[];
   if(typeof c.aliases==="string") c.aliases=parseAliases(c.aliases);
   if(!Array.isArray(c.aliases)) c.aliases=[];
@@ -706,6 +898,8 @@ function normalizeCharacterLink(link){
   if(!link.from) link.from="";
   if(!link.to) link.to="";
   if(!link.type) link.type="Связь";
+  if(link.fromRole===undefined) link.fromRole="";
+  if(link.toRole===undefined) link.toRole="";
   if(link.note===undefined) link.note="";
   if(!RELATION_STRENGTHS[link.strength]) link.strength="normal";
   const st=RELATION_STYLES[link.type]||RELATION_STYLES["Другое"];
@@ -739,16 +933,35 @@ function setLang(next){
 }
 
 /* ============ НАВИГАЦИЯ ============ */
-function goHome(){ route={screen:"home",bookId:null,view:null,itemId:null,charMode:"view",charTab:"profile"}; render(); }
+function goHome(){ snapshotCurrent(); route={screen:"home",bookId:null,view:null,itemId:null,charMode:"view",charTab:"profile",planMode:"overall"}; render(); }
 function openBook(id){
+  snapshotCurrent();
   const b=getBook(id); if(!b) return;
   let view="overview",itemId=null;
   if(b.chapters.length){ view="chapter"; itemId=b.chapters[0].id; }
-  route={screen:"book",bookId:id,view,itemId,charMode:"view",charTab:"profile"}; render();
+  route={screen:"book",bookId:id,view,itemId,charMode:"view",charTab:"profile",planMode:"overall"}; render();
 }
 function selectItem(view,itemId){ snapshotCurrent(); route.view=view; route.itemId=itemId; route.charMode="view"; if(view==="character") route.charTab=route.charTab||"profile"; render(); }
 function openOverview(){ snapshotCurrent(); route.view="overview"; route.itemId=null; render(); }
-function openPlan(){ snapshotCurrent(); route.view="plan"; route.itemId=null; route.charMode="view"; render(); }
+function openPlan(){ snapshotCurrent(); route.view="plan"; route.itemId=null; route.charMode="view"; route.planMode="overall"; render(); }
+function openOverallPlan(){ snapshotCurrent(); route.view="plan"; route.itemId=null; route.planMode="overall"; render(); }
+function openChapterPlans(){
+  const b=curBook();
+  snapshotCurrent();
+  route.view="plan"; route.planMode="chapter";
+  if(!b.chapters.some(ch=>ch.id===route.itemId)) route.itemId=b.chapters[0]?b.chapters[0].id:null;
+  render();
+}
+function openChapterPlan(id){ snapshotCurrent(); route.view="plan"; route.planMode="chapter"; route.itemId=id; route.charMode="view"; render(); }
+function openCharacterArcs(){
+  const b=curBook();
+  snapshotCurrent();
+  route.view="plan"; route.planMode="character";
+  if(!b.characters.some(c=>c.id===route.itemId)) route.itemId=b.characters[0]?b.characters[0].id:null;
+  render();
+}
+function openCharacterArc(id){ snapshotCurrent(); route.view="plan"; route.planMode="character"; route.itemId=id; route.charMode="view"; render(); }
+function openCharacterFromSidebar(id){ selectItem("character",id); }
 function openCharacterMap(){ snapshotCurrent(); route.view="characterMap"; route.itemId=null; route.charMode="view"; render(); }
 function setCharacterTab(tab){ route.charTab=tab; renderMain(); }
 
@@ -757,7 +970,7 @@ async function newBook(){
   const title=await openInput({title:t("newBook"),label:t("bookTitle"),placeholder:t("bookTitlePh"),ok:t("create")});
   if(title===null) return;
   const b={id:uid(),title:(title.trim()||t("noTitle")),createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],characterLinks:[],characterMapZoom:1,lore:[]};
+    year:"",era:"",place:"",synopsis:"",planText:"",planVersions:[],chapters:[],characters:[],characterLinks:[],characterMapZoom:1,lore:[]};
   state.books.unshift(b); save(); openBook(b.id);
 }
 async function deleteBook(id,ev){
@@ -777,7 +990,7 @@ async function renameBook(id,ev){
 /* ============ ГЛАВЫ ============ */
 function addChapter(){
   const b=curBook();
-  const ch={id:uid(),title:t("chapter")+" "+(b.chapters.length+1),content:"",updatedAt:now(),versions:[],planStatus:"Задумка",planSummary:"",planNotes:""};
+  const ch={id:uid(),title:t("chapter")+" "+(b.chapters.length+1),content:"",updatedAt:now(),versions:[],planSummary:"",planNotes:"",planText:"",planVersions:[]};
   b.chapters.push(ch); b.updatedAt=now(); save(); selectItem("chapter",ch.id);
 }
 async function deleteChapter(id,ev){
@@ -787,7 +1000,13 @@ async function deleteChapter(id,ev){
   ensureData();
   state.trash.chapters.unshift({id:uid(),deletedAt:now(),bookId:b.id,bookTitle:b.title,data:cloneData(ch)});
   b.chapters=b.chapters.filter(c=>c.id!==id); save();
-  if(route.itemId===id){ if(b.chapters.length){route.itemId=b.chapters[0].id;route.view="chapter";} else {route.view="overview";route.itemId=null;} }
+  if(route.itemId===id){
+    if(route.view==="plan"){
+      route.itemId=b.chapters[0]?b.chapters[0].id:null;
+      if(!route.itemId) route.planMode="overall";
+    }else if(b.chapters.length){ route.itemId=b.chapters[0].id; route.view="chapter"; }
+    else{ route.view="overview"; route.itemId=null; }
+  }
   toast(t("chapterMoved"));
   render();
 }
@@ -871,7 +1090,7 @@ function cleanupChapterDragStyles(){
 /* ============ ПЕРСОНАЖИ ============ */
 function addCharacter(){
   const b=curBook();
-  const c={id:uid(),name:"",aliases:[],role:"",photo:"",age:"",appearance:"",personality:"",background:"",goals:"",relationships:"",notes:""};
+  const c={id:uid(),name:"",aliases:[],role:"",gender:"",photo:"",age:"",appearance:"",personality:"",background:"",goals:"",relationships:"",notes:"",arcText:"",arcVersions:[]};
   b.characters.push(c); save(); snapshotCurrent(); route.view="character"; route.itemId=c.id; route.charMode="edit"; route.charTab="profile"; render();
 }
 async function deleteCharacter(id){
@@ -881,7 +1100,13 @@ async function deleteCharacter(id){
   state.trash.characters.unshift({id:uid(),deletedAt:now(),bookId:b.id,bookTitle:b.title,data:cloneData(c)});
   b.characters=b.characters.filter(x=>x.id!==id); save();
   toast(t("characterMoved"));
-  if(route.itemId===id){route.view="overview";route.itemId=null;} render();
+  if(route.itemId===id){
+    if(route.view==="plan"&&route.planMode==="character"){
+      route.itemId=b.characters[0]?b.characters[0].id:null;
+      if(!route.itemId) route.planMode="overall";
+    }else{ route.view="overview"; route.itemId=null; }
+  }
+  render();
 }
 async function pickCharPhoto(id){
   const a=api(); if(!a) return;
@@ -914,7 +1139,7 @@ function renderCharacterMap(main,b){
     </div>`;
     return;
   }
-  const pos=characterMapPositions(b),links=validCharacterLinks(b);
+  const pos=characterMapPositions(b),links=displayCharacterLinks(b);
   const zoomPct=Math.round(b.characterMapZoom*100);
   const worldScale=mapWorldScale(b.characterMapZoom);
   const panX=Number(b.characterMapPanX)||0,panY=Number(b.characterMapPanY)||0;
@@ -938,7 +1163,8 @@ function renderCharacterMap(main,b){
         <button class="btn small icon" title="${t("zoomOut")}" onclick="setCharacterMapZoom(-1)">${icon('minus',16)}</button>
         <span class="zoom-pill">${zoomPct}%</span>
         <button class="btn small icon" title="${t("zoomIn")}" onclick="setCharacterMapZoom(1)">${icon('plus',16)}</button>
-        <button class="btn small ghost" onclick="resetCharacterMapZoom()">100%</button>
+        <button class="btn small ghost" onclick="fitCharacterMap()">${icon('maximize',15)} ${t("showWholeMap")}</button>
+        <button class="btn small ghost" onclick="applyFamilyTreeLayout()">${icon('users',15)} ${t("familyTree")}</button>
         ${b.characters.length>1?`<button class="btn primary" onclick="openAddCharacterLink()">${icon('plus',16)} ${t("newLink")}</button>`:""}
       </div>
     </div>
@@ -948,11 +1174,13 @@ function renderCharacterMap(main,b){
           <svg class="map-svg" id="characterMapSvg" viewBox="0 0 100 100" preserveAspectRatio="none">${lines}</svg>
           ${nodes}
         </div>
+        <div class="map-help">${t("mapHelp")}</div>
       </div>
       <div class="map-panel">
         <div class="map-panel-section">
           <div class="map-panel-title">${t("legend")}</div>
-          <div class="legend-grid">${renderMapLegend(b)}</div>
+          <div class="legend-grid"><div class="legend-subtitle">${t("meaningLegend")}</div>${renderMapLegend(b)}
+            <div class="legend-subtitle">${t("strengthLegend")}</div>${renderStrengthLegend()}</div>
         </div>
         <div class="map-panel-section" style="padding-bottom:0;border-bottom:none">
           <div class="map-panel-title">${t("links")}</div>
@@ -973,6 +1201,44 @@ function setCharacterMapZoom(dir){
 function resetCharacterMapZoom(){
   const b=curBook(); if(!b) return;
   b.characterMapZoom=1; b.characterMapPanX=0; b.characterMapPanY=0; b.updatedAt=now(); save(); renderMain();
+}
+function fitCharacterMap(){ resetCharacterMapZoom(); }
+function familyGenerationDelta(fromRole,toRole){
+  const parents=new Set(["Мать","Отец","Родитель","Приёмная мать","Приёмный отец","Опекун"]);
+  const children=new Set(["Сын","Дочь","Ребёнок","Приёмный ребёнок","Подопечный"]);
+  const grandparents=new Set(["Бабушка","Дедушка"]),grandchildren=new Set(["Внук","Внучка"]);
+  if(grandparents.has(fromRole)&&grandchildren.has(toRole)) return 2;
+  if(grandchildren.has(fromRole)&&grandparents.has(toRole)) return -2;
+  if(parents.has(fromRole)&&children.has(toRole)) return 1;
+  if(children.has(fromRole)&&parents.has(toRole)) return -1;
+  return 0;
+}
+function applyFamilyTreeLayout(){
+  const b=curBook(); if(!b) return;
+  const family=validCharacterLinks(b).filter(link=>link.type==="Семья"&&(link.fromRole||link.toRole));
+  if(!family.length){ toast(t("familyRolesNeeded")); return; }
+  const ranks=new Map((b.characters||[]).map(c=>[c.id,0])),familyIds=new Set();
+  family.forEach(link=>{ familyIds.add(link.from); familyIds.add(link.to); });
+  for(let pass=0;pass<12;pass++) family.forEach(link=>{
+    const delta=familyGenerationDelta(link.fromRole,link.toRole);
+    if(delta>0) ranks.set(link.to,Math.max(ranks.get(link.to)||0,(ranks.get(link.from)||0)+delta));
+    else if(delta<0) ranks.set(link.from,Math.max(ranks.get(link.from)||0,(ranks.get(link.to)||0)-delta));
+  });
+  family.forEach(link=>{
+    if(familyGenerationDelta(link.fromRole,link.toRole)!==0) return;
+    const same=Math.max(ranks.get(link.from)||0,ranks.get(link.to)||0);
+    ranks.set(link.from,same); ranks.set(link.to,same);
+  });
+  const familyCharacters=(b.characters||[]).filter(c=>familyIds.has(c.id));
+  const levels=[...new Set(familyCharacters.map(c=>ranks.get(c.id)||0))].sort((a,c)=>a-c);
+  levels.forEach((level,row)=>{
+    const chars=familyCharacters.filter(c=>(ranks.get(c.id)||0)===level);
+    const y=levels.length===1?45:16+(row*(62/(levels.length-1)));
+    chars.forEach((c,i)=>{ c.mapX=Number((((i+1)*100)/(chars.length+1)).toFixed(2)); c.mapY=Number(y.toFixed(2)); });
+  });
+  const others=(b.characters||[]).filter(c=>!familyIds.has(c.id));
+  others.forEach((c,i)=>{ c.mapX=Number((((i+1)*100)/(others.length+1)).toFixed(2)); c.mapY=90; });
+  b.characterMapZoom=1; b.characterMapPanX=0; b.characterMapPanY=0; b.updatedAt=now(); save(); renderMain(); toast(t("familyLayoutDone"));
 }
 function onCharacterMapWheel(ev){
   ev.preventDefault();
@@ -998,6 +1264,73 @@ function validCharacterLinks(b){
   const ids=new Set((b.characters||[]).map(c=>c.id));
   return (b.characterLinks||[]).map(normalizeCharacterLink).filter(l=>ids.has(l.from)&&ids.has(l.to)&&l.from!==l.to);
 }
+function genderFromRole(role){
+  if(["Мать","Дочь","Жена","Супруга","Сестра","Бабушка","Внучка","Тётя","Племянница","Кузина","Приёмная мать","Подруга","Возлюбленная"].includes(role)) return "female";
+  if(["Отец","Сын","Муж","Супруг","Брат","Дедушка","Внук","Дядя","Племянник","Кузен","Приёмный отец","Друг","Возлюбленный"].includes(role)) return "male";
+  return "";
+}
+function effectiveCharacterGender(book,id){
+  const c=(book.characters||[]).find(x=>x.id===id);
+  if(c&&CHARACTER_GENDERS.includes(c.gender)) return c.gender;
+  for(const link of validCharacterLinks(book)){
+    const role=link.from===id?link.fromRole:link.to===id?link.toRole:"";
+    const inferred=genderFromRole(role);
+    if(inferred) return inferred;
+  }
+  return "";
+}
+function genderedRole(gender,female,male,neutral){ return gender==="female"?female:gender==="male"?male:neutral; }
+function reciprocalRelationRole(role,otherGender){
+  const exact={
+    "Мать":"Ребёнок","Отец":"Ребёнок","Родитель":"Ребёнок","Приёмная мать":"Приёмный ребёнок","Приёмный отец":"Приёмный ребёнок","Опекун":"Подопечный",
+    "Сын":"Родитель","Дочь":"Родитель","Ребёнок":"Родитель","Приёмный ребёнок":"Родитель","Подопечный":"Опекун",
+    "Наставник":"Ученик","Учитель":"Ученик","Ученик":"Наставник","Покровитель":"Подопечный","Должник":"Кредитор","Кредитор":"Должник",
+    "Союзник":"Союзник","Соперник":"Соперник","Враг":"Враг","Партнёр":"Партнёр","Близнец":"Близнец"
+  };
+  if(["Мать","Отец","Родитель"].includes(role)) return genderedRole(otherGender,"Дочь","Сын","Ребёнок");
+  if(["Сын","Дочь","Ребёнок"].includes(role)) return genderedRole(otherGender,"Мать","Отец","Родитель");
+  if(["Бабушка","Дедушка"].includes(role)) return genderedRole(otherGender,"Внучка","Внук","Ребёнок");
+  if(["Внучка","Внук"].includes(role)) return genderedRole(otherGender,"Бабушка","Дедушка","Родитель");
+  if(["Брат","Сестра","Брат / сестра"].includes(role)) return genderedRole(otherGender,"Сестра","Брат","Брат / сестра");
+  if(["Муж","Жена","Супруг","Супруга"].includes(role)) return genderedRole(otherGender,"Жена","Муж","Супруг");
+  if(["Тётя","Дядя"].includes(role)) return genderedRole(otherGender,"Племянница","Племянник","Ребёнок");
+  if(["Племянница","Племянник"].includes(role)) return genderedRole(otherGender,"Тётя","Дядя","Родственник");
+  if(["Друг","Подруга","Друг / подруга"].includes(role)) return genderedRole(otherGender,"Подруга","Друг","Друг / подруга");
+  if(["Возлюбленный","Возлюбленная"].includes(role)) return genderedRole(otherGender,"Возлюбленная","Возлюбленный","Партнёр");
+  return exact[role]||role||"";
+}
+function parentChildFromLink(link){
+  const parentRoles=new Set(["Мать","Отец","Родитель","Приёмная мать","Приёмный отец","Опекун"]);
+  const childRoles=new Set(["Сын","Дочь","Ребёнок","Приёмный ребёнок","Подопечный"]);
+  if(parentRoles.has(link.fromRole)&&childRoles.has(link.toRole)) return {parent:link.from,child:link.to};
+  if(childRoles.has(link.fromRole)&&parentRoles.has(link.toRole)) return {parent:link.to,child:link.from};
+  return null;
+}
+function derivedSiblingLinks(book){
+  const explicit=validCharacterLinks(book),childrenByParent=new Map(),explicitFamilyPairs=new Set();
+  explicit.forEach(link=>{
+    if(link.type==="Семья") explicitFamilyPairs.add([link.from,link.to].sort().join("|"));
+    const pair=link.type==="Семья"?parentChildFromLink(link):null;
+    if(!pair) return;
+    if(!childrenByParent.has(pair.parent)) childrenByParent.set(pair.parent,new Set());
+    childrenByParent.get(pair.parent).add(pair.child);
+  });
+  const siblingPairs=new Map();
+  childrenByParent.forEach((children,parent)=>{
+    const ids=[...children];
+    for(let i=0;i<ids.length;i++) for(let j=i+1;j<ids.length;j++){
+      const pair=[ids[i],ids[j]].sort(),key=pair.join("|");
+      if(!explicitFamilyPairs.has(key)&&!siblingPairs.has(key)) siblingPairs.set(key,{ids:pair,parent});
+    }
+  });
+  return [...siblingPairs.values()].map(({ids,parent})=>({
+    id:"autoSibling"+ids.join("_"),from:ids[0],to:ids[1],type:"Семья",strength:"normal",derived:true,derivedFrom:parent,
+    fromRole:genderedRole(effectiveCharacterGender(book,ids[0]),"Сестра","Брат","Брат / сестра"),
+    toRole:genderedRole(effectiveCharacterGender(book,ids[1]),"Сестра","Брат","Брат / сестра"),
+    note:t("automaticFamilyNote"),color:RELATION_STYLES["Семья"].color,pattern:RELATION_STYLES["Семья"].pattern
+  }));
+}
+function displayCharacterLinks(b){ return [...validCharacterLinks(b),...derivedSiblingLinks(b)]; }
 function mapLinkSvg(book,link,pos){
   const a=pos[link.from],b=pos[link.to]; if(!a||!b) return "";
   const st=relationStyle(link),path=mapCurvePath(a,b);
@@ -1006,7 +1339,7 @@ function mapLinkSvg(book,link,pos){
     <path id="mapHit${link.id}" class="map-link-hit" d="${path}"><title>${escapeHtml(tip)}</title></path>
     <path id="mapShadow${link.id}" class="map-line-shadow" d="${path}"></path>
     <path id="mapLine${link.id}" class="map-line" d="${path}"
-      style="stroke:${st.color};stroke-width:${st.width};${st.dash?`stroke-dasharray:${st.dash};`:''}"></path>
+      style="--thread-color:${st.color};stroke:${st.color};stroke-width:${st.width};opacity:${st.opacity};${st.dash?`stroke-dasharray:${st.dash};`:''}"></path>
   </g>`;
 }
 function mapCurvePath(a,b){
@@ -1020,17 +1353,26 @@ function renderCharacterLinkCard(b,link){
   const from=characterName(b,link.from),to=characterName(b,link.to);
   const st=relationStyle(link);
   const note=link.note&&link.note.trim()?link.note.trim():t("noNote");
-  return `<div class="link-card" style="--thread-color:${st.color}" title="${escapeAttr(note)}">
-    <span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
-      stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" ${st.dash?`stroke-dasharray="${st.dash}"`:''}></line></svg></span>
+  const roles=relationRoleSummary(link);
+  return `<div class="link-card" data-link-id="${link.id}" style="--thread-color:${st.color}" title="${escapeAttr(note)}" onclick="selectMapLink(event,'${link.id}')">
+    <span class="link-visual"><span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
+      stroke="${st.color}" stroke-width="${st.width}" stroke-opacity="${st.opacity}" stroke-linecap="round" ${st.dash?`stroke-dasharray="${st.dash}"`:''}></line></svg></span>${strengthIndicator(link,false)}</span>
     <span class="rel-badge">${escapeHtml(labelEnum("relations",link.type||"Связь"))}</span>
+    ${link.derived?`<span class="auto-relation">${icon('restore',12)} ${t("automaticRelation")}</span>`:""}
     <div class="link-main">
       <div class="link-title">${escapeHtml(from)} — ${escapeHtml(to)}</div>
+      ${roles?`<div class="link-roles">${escapeHtml(roles)}</div>`:""}
+      ${strengthIndicator(link,true)}
       <div class="link-note">${escapeHtml(note)}</div>
     </div>
-    <button class="btn small ghost" title="${t("setupLink")}" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
-    <button class="btn small ghost" title="${t("deleteLink")}" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
+    ${link.derived?"":`<button class="btn small ghost" title="${t("setupLink")}" onclick="event.stopPropagation();openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
+    <button class="btn small ghost" title="${t("deleteLink")}" onclick="event.stopPropagation();deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>`}
   </div>`;
+}
+function selectMapLink(ev,id){
+  if(ev&&ev.target.closest("button")) return;
+  document.querySelectorAll(".link-card").forEach(el=>el.classList.toggle("selected",el.dataset.linkId===id));
+  document.querySelectorAll(".map-line").forEach(el=>el.classList.toggle("selected",el.id==="mapLine"+id));
 }
 function characterName(b,id){
   const c=(b.characters||[]).find(x=>x.id===id);
@@ -1041,7 +1383,24 @@ function relationStyle(linkOrType){
   const base=RELATION_STYLES[link.type]||RELATION_STYLES["Другое"];
   const pattern=THREAD_PATTERNS[base.pattern]||THREAD_PATTERNS.solid;
   const strength=RELATION_STRENGTHS[link.strength]||RELATION_STRENGTHS.normal;
-  return {color:base.color,dash:pattern.dash,width:strength.width,pattern:base.pattern,strength:link.strength||"normal"};
+  return {color:base.color,dash:pattern.dash,width:strength.width,opacity:strength.opacity,level:strength.level,pattern:base.pattern,strength:link.strength||"normal"};
+}
+function relationRoleLabel(role){ return role?labelEnum("relationRoles",role):""; }
+function relationRoleSummary(link){
+  const from=relationRoleLabel(link.fromRole),to=relationRoleLabel(link.toRole);
+  if(from&&to) return `${from} ↔ ${to}`;
+  return from||to||"";
+}
+function relationRoleSummaryFor(link,characterId){
+  if(link.from===characterId) return relationRoleSummary(link);
+  const from=relationRoleLabel(link.toRole),to=relationRoleLabel(link.fromRole);
+  if(from&&to) return `${from} ↔ ${to}`;
+  return from||to||"";
+}
+function strengthIndicator(link,showName=true){
+  const st=relationStyle(link),name=labelEnum("strengths",(RELATION_STRENGTHS[st.strength]||RELATION_STRENGTHS.normal).name);
+  const dots=[1,2,3].map(n=>`<i class="${n<=st.level?'on':''}"></i>`).join("");
+  return `<span class="strength-indicator" title="${escapeAttr(name)}"><span class="strength-dots">${dots}</span>${showName?`<span>${escapeHtml(name)}</span>`:""}</span>`;
 }
 function threadSample(st){
   return `<span class="thread-sample"><svg viewBox="0 0 58 14"><line x1="3" y1="7" x2="55" y2="7"
@@ -1049,7 +1408,7 @@ function threadSample(st){
 }
 function renderMapLegend(b){
   const seen=new Map();
-  validCharacterLinks(b).forEach(link=>{
+  displayCharacterLinks(b).forEach(link=>{
     const key=(link.type||"Связь")+"|"+(link.color||"")+"|"+(link.pattern||"");
     if(!seen.has(key)) seen.set(key,link);
   });
@@ -1058,6 +1417,12 @@ function renderMapLegend(b){
   return rows.map(link=>{
     const st=relationStyle(link);
     return `<div class="legend-row" style="--thread-color:${st.color}">${threadSample(st)}<span class="legend-name">${escapeHtml(labelEnum("relations",link.type||"Связь"))}</span></div>`;
+  }).join("");
+}
+function renderStrengthLegend(){
+  return Object.keys(RELATION_STRENGTHS).map(key=>{
+    const link={type:"Другое",strength:key},st=relationStyle(link),name=labelEnum("strengths",RELATION_STRENGTHS[key].name);
+    return `<div class="legend-row" style="--thread-color:${st.color}">${threadSample(st)}<span class="legend-name">${escapeHtml(name)}</span></div>`;
   }).join("");
 }
 function openMapCharacter(ev,id){
@@ -1162,7 +1527,7 @@ function cancelMapNodeDrag(ev){
 function updateCharacterMapLines(){
   const b=curBook(); if(!b) return;
   const pos=characterMapPositions(b);
-  validCharacterLinks(b).forEach(link=>{
+  displayCharacterLinks(b).forEach(link=>{
     const a=pos[link.from],c=pos[link.to],line=document.getElementById("mapLine"+link.id),shadow=document.getElementById("mapShadow"+link.id),hit=document.getElementById("mapHit"+link.id);
     if(!a||!c||!line) return;
     const path=mapCurvePath(a,c);
@@ -1170,6 +1535,11 @@ function updateCharacterMapLines(){
     if(shadow) shadow.setAttribute("d",path);
     if(hit) hit.setAttribute("d",path);
   });
+}
+function relationRoleOptions(current){
+  const roles=current&&!RELATION_ROLES.includes(current)?[current,...RELATION_ROLES]:RELATION_ROLES;
+  return `<option value="">${escapeHtml(t("roleNotSet"))}</option>`+roles.map(role=>
+    `<option value="${escapeAttr(role)}" ${role===current?'selected':''}>${escapeHtml(labelEnum("relationRoles",role))}</option>`).join("");
 }
 function openAddCharacterLink(editId,fromId){
   const b=curBook(); if(!b||b.characters.length<2){ openInfo(t("needCharacters"),t("needTwoCharacters")); return; }
@@ -1185,6 +1555,10 @@ function openAddCharacterLink(editId,fromId){
       <div class="fld"><label>${t("linkMeaning")}</label><select id="linkType">${typeOpts}</select></div>
       <div class="fld"><label>${t("linkStrength")}</label><select id="linkStrength">${strengthOpts}</select></div>
     </div>
+    <div class="fld-grid">
+      <div class="fld"><label>${t("firstRole")}</label><select id="linkFromRole">${relationRoleOptions(editing&&editing.fromRole)}</select></div>
+      <div class="fld"><label>${t("secondRole")}</label><select id="linkToRole" disabled>${relationRoleOptions(editing&&editing.toRole)}</select><div class="hint" id="linkRoleAutoHint">${t("roleAutomatic")}</div></div>
+    </div>
     <div class="fld"><label>${t("note")}</label><textarea id="linkNote" placeholder="${escapeAttr(t("linkNotePh"))}"></textarea></div>
   </div><div class="mfoot"><button class="btn" id="mCancel">${t("cancel")}</button><button class="btn primary" id="mOk">${editing?t("save"):t("add")}</button></div>`);
   if(editing){
@@ -1192,12 +1566,20 @@ function openAddCharacterLink(editId,fromId){
     document.getElementById("linkTo").value=editing.to;
     document.getElementById("linkType").value=editing.type;
     document.getElementById("linkStrength").value=editing.strength||"normal";
+    document.getElementById("linkFromRole").value=editing.fromRole||"";
+    document.getElementById("linkToRole").value=editing.toRole||"";
     document.getElementById("linkNote").value=editing.note||"";
   }else if(fromId){
     document.getElementById("linkFrom").value=fromId;
     const other=b.characters.find(c=>c.id!==fromId);
     if(other) document.getElementById("linkTo").value=other.id;
   }else if(b.characters[1]) document.getElementById("linkTo").value=b.characters[1].id;
+  const syncReciprocalRole=()=>{
+    const fromRole=document.getElementById("linkFromRole").value,toId=document.getElementById("linkTo").value;
+    document.getElementById("linkToRole").value=reciprocalRelationRole(fromRole,effectiveCharacterGender(b,toId));
+  };
+  ["linkFrom","linkTo","linkFromRole"].forEach(id=>document.getElementById(id).addEventListener("change",syncReciprocalRole));
+  syncReciprocalRole();
   const done=()=>closeModal();
   document.getElementById("mCancel").onclick=done;
   document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
@@ -1206,7 +1588,13 @@ function openAddCharacterLink(editId,fromId){
     if(from===to){ toast(t("chooseDifferentCharacters")); return; }
     const data=normalizeCharacterLink({id:editing?editing.id:uid(),from,to,type:document.getElementById("linkType").value,
       strength:document.getElementById("linkStrength").value,
+      fromRole:document.getElementById("linkFromRole").value,
+      toRole:document.getElementById("linkToRole").value,
       note:document.getElementById("linkNote").value.trim()});
+    const fromCharacter=b.characters.find(c=>c.id===from),toCharacter=b.characters.find(c=>c.id===to);
+    const fromGender=genderFromRole(data.fromRole),toGender=genderFromRole(data.toRole);
+    if(fromCharacter&&!fromCharacter.gender&&fromGender) fromCharacter.gender=fromGender;
+    if(toCharacter&&!toCharacter.gender&&toGender) toCharacter.gender=toGender;
     if(editing) Object.assign(editing,data);
     else { b.characterLinks=b.characterLinks||[]; b.characterLinks.push(data); }
     b.updatedAt=now(); save(); closeModal(); renderMain(); toast(editing?t("linkUpdated"):t("linkAdded"));
@@ -1239,47 +1627,199 @@ async function deleteLore(id){
 function editLore(){ route.charMode="edit"; renderMain(); }
 function doneLore(){ route.charMode="view"; renderMain(); renderSidebar(); }
 
-/* ============ ИСТОРИЯ ВЕРСИЙ ============ */
-function snapshotChapter(ch,manual){
-  if(!ch) return false; ch.versions=ch.versions||[];
-  const last=ch.versions[ch.versions.length-1];
-  if(last&&last.content===ch.content){ if(manual) toast(t("noVersionChanges")); return false; }
-  if(!manual&&!ch.content.trim()) return false;
-  ch.versions.push({ts:now(),content:ch.content});
-  if(ch.versions.length>MAX_VERSIONS) ch.versions=ch.versions.slice(-MAX_VERSIONS);
-  save(); return true;
+/* ============ ПОНЯТНАЯ ИСТОРИЯ ТЕКСТА ============ */
+let historyDocument=null,pendingImport=null;
+function currentTextDocument(){
+  const b=curBook(); if(!b) return null;
+  if(route.view==="chapter"){
+    const ch=b.chapters.find(item=>item.id===route.itemId); if(!ch) return null; normalizeChapter(ch);
+    return {id:`chapter:${ch.id}`,book:b,owner:ch,field:"content",versionsField:"versions",title:titleOrFallback(ch.title)};
+  }
+  if(route.view!=="plan") return null;
+  if(route.planMode==="chapter"){
+    const ch=b.chapters.find(item=>item.id===route.itemId); if(!ch) return null; normalizeChapter(ch);
+    const index=b.chapters.findIndex(item=>item.id===ch.id);
+    return {id:`chapter-plan:${ch.id}`,book:b,owner:ch,field:"planText",versionsField:"planVersions",title:planChapterHeading(ch,index)};
+  }
+  if(route.planMode==="character"){
+    const character=b.characters.find(item=>item.id===route.itemId); if(!character) return null; normalizeCharacter(character);
+    return {id:`character-arc:${character.id}`,book:b,owner:character,field:"arcText",versionsField:"arcVersions",title:nameOrFallback(character.name)};
+  }
+  return {id:`book-plan:${b.id}`,book:b,owner:b,field:"planText",versionsField:"planVersions",title:t("wholeBookPlan")};
 }
-function snapshotCurrent(){ if(route.view==="chapter"){ const b=curBook(),ch=b&&b.chapters.find(c=>c.id===route.itemId); if(ch) snapshotChapter(ch,false); } }
-function manualSnapshot(){ const b=curBook(),ch=b.chapters.find(c=>c.id===route.itemId); if(ch&&snapshotChapter(ch,true)) toast(t("versionSaved")); }
-function openHistory(){
-  const b=curBook(),ch=b.chapters.find(c=>c.id===route.itemId); if(!ch) return;
-  const vers=(ch.versions||[]).slice().reverse();
-  const rows=vers.length?vers.map((v,i)=>{
-    const idx=ch.versions.length-1-i,d=new Date(v.ts);
-    const when=d.toLocaleString(dateLocale(),{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
-    const preview=(v.content||"").replace(/\s+/g," ").slice(0,70)||t("empty");
-    const isCur=i===0&&v.content===ch.content;
-    return `<div class="ver-row"><div class="vinfo">
-      <div class="vt">${when}${isCur?` · <span style="color:var(--ok)">${t("current")}</span>`:''} · ${fmt(countWords(v.content))} ${t("words")}</div>
-      <div class="vp">${escapeHtml(preview)}</div></div>
-      <button class="btn small ghost" onclick="previewVersion('${ch.id}',${idx})">${icon('eye',16)}</button>
-      <button class="btn small" onclick="restoreVersion('${ch.id}',${idx})">${t("restore")}</button></div>`;
-  }).join(""):`<div class="mpad mmsg" style="padding:30px 26px">${t("noVersions")}</div>`;
-  modal(`<h3>${t("chapterHistory")} «${escapeHtml(ch.title)}»</h3><div class="mbody">${rows}</div><div class="mfoot"><button class="btn" onclick="closeModal()">${t("close")}</button></div>`,"wide");
+function documentText(doc){ return String(doc&&doc.owner&&doc.owner[doc.field]||""); }
+function documentVersions(doc){
+  if(!doc||!doc.owner) return [];
+  if(!Array.isArray(doc.owner[doc.versionsField])) doc.owner[doc.versionsField]=[];
+  return doc.owner[doc.versionsField];
 }
-async function restoreVersion(chId,idx){
-  const b=curBook(),ch=b.chapters.find(c=>c.id===chId); if(!ch) return;
-  const v=ch.versions[idx]; if(!v) return;
-  if(!await openConfirm({title:t("restoreVersionTitle"),message:t("restoreVersionMsg"),ok:t("restore"),danger:false})) return;
-  snapshotChapter(ch,false); ch.content=v.content; ch.updatedAt=now(); save(); render(); toast(t("versionRestored"));
+function touchDocument(doc){
+  if(doc.owner!==doc.book) doc.owner.updatedAt=now();
+  doc.book.updatedAt=now();
 }
-function previewVersion(chId,idx){
-  const b=curBook(),ch=b.chapters.find(c=>c.id===chId); if(!ch) return;
-  const v=ch.versions[idx]; if(!v) return;
-  const d=new Date(v.ts).toLocaleString(dateLocale());
-  modal(`<h3>${t("versionFrom")} ${d}</h3><div class="mbody" style="padding:18px 26px;font-family:Georgia,serif;line-height:1.7;white-space:pre-wrap">${escapeHtml(v.content)||t("empty")}</div>
-    <div class="mfoot"><button class="btn" onclick="openHistory()">${t("backToList")}</button>
-    <button class="btn primary" onclick="restoreVersion('${ch.id}',${idx})">${t("restoreThisText")}</button></div>`,"wide");
+function setDocumentText(doc,text){ doc.owner[doc.field]=String(text||""); touchDocument(doc); }
+function snapshotDocument(doc,reason="auto",manual=false){
+  if(!doc) return false;
+  const versions=documentVersions(doc),content=documentText(doc),last=versions[versions.length-1];
+  if(last&&last.content===content){ if(manual&&reason==="manual") toast(t("noVersionChanges")); return false; }
+  if(!manual&&!last&&!content.trim()) return false;
+  versions.push({ts:now(),content,reason});
+  if(versions.length>MAX_VERSIONS) doc.owner[doc.versionsField]=versions.slice(-MAX_VERSIONS);
+  touchDocument(doc); save(); return true;
+}
+function snapshotCurrent(reason="move"){
+  clearTimeout(snapTimer);
+  return snapshotDocument(currentTextDocument(),reason,false);
+}
+function manualSnapshot(){ if(snapshotDocument(currentTextDocument(),"manual",true)) toast(t("versionSaved")); }
+function scheduleAutoSnapshot(doc){ clearTimeout(snapTimer); snapTimer=setTimeout(()=>snapshotDocument(doc,"auto",false),180000); }
+
+function diffTokens(text){ return String(text||"").match(/\s+|[\p{L}\p{N}_]+|[^\s\p{L}\p{N}_]/gu)||[]; }
+function isWordToken(token){ return /[\p{L}\p{N}_]/u.test(token); }
+function mergeDiffOps(ops){
+  const merged=[];
+  ops.forEach(op=>{ if(!op.text) return; const last=merged[merged.length-1]; if(last&&last.type===op.type) last.text+=op.text; else merged.push({...op}); });
+  return merged;
+}
+function textDiff(before,after){
+  const a=diffTokens(before),b=diffTokens(after); let prefix=0,suffix=0;
+  while(prefix<a.length&&prefix<b.length&&a[prefix]===b[prefix]) prefix++;
+  while(suffix<a.length-prefix&&suffix<b.length-prefix&&a[a.length-1-suffix]===b[b.length-1-suffix]) suffix++;
+  const am=a.slice(prefix,a.length-suffix),bm=b.slice(prefix,b.length-suffix),ops=[];
+  if(prefix) ops.push({type:"equal",text:a.slice(0,prefix).join("")});
+  if(am.length&&bm.length&&am.length*bm.length<=350000&&am.length<=1200&&bm.length<=1200){
+    const width=bm.length+1,matrix=new Uint16Array((am.length+1)*width);
+    for(let i=am.length-1;i>=0;i--) for(let j=bm.length-1;j>=0;j--){
+      matrix[i*width+j]=am[i]===bm[j]?matrix[(i+1)*width+j+1]+1:Math.max(matrix[(i+1)*width+j],matrix[i*width+j+1]);
+    }
+    let i=0,j=0;
+    while(i<am.length&&j<bm.length){
+      if(am[i]===bm[j]){ ops.push({type:"equal",text:am[i]}); i++; j++; }
+      else if(matrix[(i+1)*width+j]>=matrix[i*width+j+1]){ ops.push({type:"del",text:am[i++]}); }
+      else ops.push({type:"add",text:bm[j++]});
+    }
+    while(i<am.length) ops.push({type:"del",text:am[i++]});
+    while(j<bm.length) ops.push({type:"add",text:bm[j++]});
+  }else{
+    if(am.length) ops.push({type:"del",text:am.join("")});
+    if(bm.length) ops.push({type:"add",text:bm.join("")});
+  }
+  if(suffix) ops.push({type:"equal",text:a.slice(a.length-suffix).join("")});
+  const merged=mergeDiffOps(ops);
+  const added=merged.filter(op=>op.type==="add").reduce((sum,op)=>sum+diffTokens(op.text).filter(isWordToken).length,0);
+  const removed=merged.filter(op=>op.type==="del").reduce((sum,op)=>sum+diffTokens(op.text).filter(isWordToken).length,0);
+  return {ops:merged,added,removed};
+}
+function renderDiffHtml(diff){
+  if(!diff.added&&!diff.removed) return `<span class="delta-none">${t("noTextChanges")}</span>`;
+  return diff.ops.map(op=>{
+    const text=escapeHtml(op.text);
+    if(op.type==="add") return `<mark class="diff-add">${text}</mark>`;
+    if(op.type==="del") return `<del class="diff-del">${text}</del>`;
+    return text;
+  }).join("");
+}
+function wordUnit(n){
+  if(lang()!=="ru") return Number(n)===1?"word":"words";
+  const value=Math.abs(Number(n)||0),last=value%10,lastTwo=value%100;
+  if(last===1&&lastTwo!==11) return "слово";
+  if(last>=2&&last<=4&&(lastTwo<12||lastTwo>14)) return "слова";
+  return "слов";
+}
+function wordAmount(n){ return `${fmt(n)} ${wordUnit(n)}`; }
+function diffDeltaHtml(diff){
+  const items=[];
+  if(diff.added) items.push(`<span class="delta-add">${t("added")}: ${wordAmount(diff.added)}</span>`);
+  if(diff.removed) items.push(`<span class="delta-del">${t("removed")}: ${wordAmount(diff.removed)}</span>`);
+  return items.join("")||`<span class="delta-none">${t("noTextChanges")}</span>`;
+}
+function cleanChangedText(ops,type){
+  return ops.filter(op=>op.type===type&&op.text.trim()).map(op=>op.text.replace(/\s+/g," ").trim());
+}
+function quotedFragment(text){
+  const clean=String(text||"").replace(/[.!?…]+$/u,"").trim()||String(text||"").trim();
+  return `«${escapeHtml(clean)}»`;
+}
+function changeSummary(diff){
+  if(!diff.added&&!diff.removed) return t("noTextChanges");
+  const added=cleanChangedText(diff.ops,"add"),removed=cleanChangedText(diff.ops,"del");
+  if(added.length===1&&removed.length===1&&diff.added<=12&&diff.removed<=12&&added[0].length<=140&&removed[0].length<=140){
+    return `${t("replacedFragment")} ${quotedFragment(removed[0])} ${t("withFragment")} ${quotedFragment(added[0])}.`;
+  }
+  if(added.length===1&&!removed.length&&diff.added<=18&&added[0].length<=180) return `${t("addedFragment")}: ${quotedFragment(added[0])}.`;
+  if(removed.length===1&&!added.length&&diff.removed<=18&&removed[0].length<=180) return `${t("removedFragment")}: ${quotedFragment(removed[0])}.`;
+  if(diff.added&&!diff.removed) return t("addedLarge");
+  if(diff.removed&&!diff.added) return t("removedLarge");
+  return t("changedSeveral");
+}
+function versionReason(reason){
+  const key={auto:"reasonAuto",move:"reasonMove",manual:"reasonManual",before_import:"reasonBeforeImport",import_replace:"reasonImportReplace",import_append:"reasonImportAppend",before_restore:"reasonBeforeRestore",restore:"reasonRestore"}[reason];
+  return key?t(key):"";
+}
+function versionMoment(ts){ return new Date(ts||now()).toLocaleString(dateLocale(),{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); }
+function historyCard(doc,index){
+  const versions=documentVersions(doc),version=versions[index],first=index===0,currentText=documentText(doc);
+  const diff=first?null:textDiff(versions[index-1].content,version.content),sameAsCurrent=version.content===currentText;
+  const reason=versionReason(version.reason);
+  const delta=first?`<span class="delta-none">${t("firstSavedVersion")}; ${t("textSize")}: ${wordAmount(countWords(version.content))}</span>`:diffDeltaHtml(diff);
+  const summary=first?t("firstVersionHelp"):changeSummary(diff);
+  return `<div class="ver-row"><div class="vinfo">
+    <div class="vt"><span>${versionMoment(version.ts)}</span>${reason?`<span class="ver-reason">${reason}</span>`:""}<span class="ver-delta">${delta}</span></div>
+    <div class="ver-summary">${summary}</div></div>
+    <div class="ver-actions"><button class="btn small ghost" onclick="showDocumentChanges(${index})">${first?t("viewVersionText"):t("showChanges")}</button>
+    ${sameAsCurrent?`<button class="btn small" disabled>${t("alreadyOpen")}</button>`:`<button class="btn small" onclick="restoreDocumentVersion(${index})">${t("restoreThisText")}</button>`}</div></div>`;
+}
+function openDocumentHistory(doc=currentTextDocument()){
+  if(!doc) return; historyDocument=doc;
+  const versions=documentVersions(doc),current=documentText(doc),last=versions[versions.length-1];
+  const hasChanges=!!last&&last.content!==current,currentDiff=hasChanges?textDiff(last.content,current):null,rows=[];
+  for(let i=versions.length-1;i>=0;i--) rows.push(historyCard(doc,i));
+  const currentState=last?`<div class="history-current"><div class="history-current-main"><strong>${t("currentText")}</strong><span>${hasChanges?t("currentHasChanges"):t("currentMatchesLatest")}</span></div>
+    ${hasChanges?`<div class="history-current-side"><div class="ver-delta">${diffDeltaHtml(currentDiff)}</div><button class="btn small" onclick="showDocumentChanges(-1)">${t("compareCurrent")}</button></div>`:""}</div>`:"";
+  modal(`<h3>${t("documentHistory")}: ${escapeHtml(doc.title)}</h3><div class="mbody">${currentState}<div class="history-section-title">${t("savedVersions")}</div>
+    <div class="history-list">${rows.join("")||`<div class="mmsg">${t("noVersions")}</div>`}</div></div>
+    <div class="mfoot"><button class="btn" onclick="closeModal()">${t("close")}</button></div>`,"history");
+}
+function showDocumentChanges(index){
+  const doc=historyDocument;if(!doc) return;
+  const versions=documentVersions(doc),currentView=index<0,version=currentView?{ts:now(),content:documentText(doc)}:versions[index]; if(!version) return;
+  const first=!currentView&&index===0,before=currentView?(versions[versions.length-1]?.content||""):(first?null:versions[index-1].content);
+  const diff=first?null:textDiff(before,version.content),sameAsCurrent=!currentView&&version.content===documentText(doc);
+  const impact=!currentView&&!sameAsCurrent?textDiff(documentText(doc),version.content):null;
+  const title=currentView?t("currentChangesTitle"):(first?`${t("versionTextTitle")} ${versionMoment(version.ts)}`:`${t("versionFrom")} ${versionMoment(version.ts)}`);
+  const context=diff&&!currentView?`<div class="diff-note">${t("comparedWithPrevious")}</div>`:"";
+  const legend=diff?`<div class="diff-legend">${diff.added?`<span class="add"><i></i>${t("added")}: ${wordAmount(diff.added)}</span>`:""}${diff.removed?`<span class="del"><i></i>${t("removed")}: ${wordAmount(diff.removed)}</span>`:""}${!diff.added&&!diff.removed?`<span class="delta-none">${t("noTextChanges")}</span>`:""}</div>`:"";
+  const body=first?`<div class="diff-note">${t("firstVersionHelp")}</div><div class="diff-body">${escapeHtml(version.content)||t("empty")}</div>`:`<div class="diff-body">${renderDiffHtml(diff)}</div>`;
+  const note=sameAsCurrent?`<div class="restore-impact">${t("versionAlreadyOpen")}</div>`:(impact?`<div class="restore-impact">${t("restoreImpact")}: <span class="delta-add">${t("willReturn")} ${wordAmount(impact.added)}</span>; <span class="delta-del">${t("willDisappear")} ${wordAmount(impact.removed)}</span>.</div>`:"");
+  modal(`<h3>${title}</h3>${context}${legend}<div class="mbody">${body}${note}</div>
+    <div class="mfoot"><button class="btn" onclick="openDocumentHistory()">${t("backToList")}</button>${currentView?"":sameAsCurrent?`<button class="btn" disabled>${t("alreadyOpen")}</button>`:`<button class="btn primary" onclick="restoreDocumentVersion(${index})">${t("restoreThisText")}</button>`}</div>`,"history");
+  if(diff&&(diff.added||diff.removed)) requestAnimationFrame(()=>document.querySelector(".modal .diff-add,.modal .diff-del")?.scrollIntoView({block:"center"}));
+}
+async function restoreDocumentVersion(index){
+  const doc=historyDocument,version=doc&&documentVersions(doc)[index]; if(!doc||!version) return;
+  if(!await openConfirm({title:t("restoreVersionTitle"),message:t("restoreVersionMsg"),ok:t("restoreThisText"),danger:false})){ openDocumentHistory(doc); return; }
+  snapshotDocument(doc,"before_restore",true); setDocumentText(doc,version.content); snapshotDocument(doc,"restore",true); closeModal(); render(); toast(t("versionRestored"));
+}
+
+async function importIntoCurrentDocument(){
+  const doc=currentTextDocument(),a=api(); if(!doc||!a||!a.import_text_document) return;
+  const res=await a.import_text_document(lang());
+  if(res&&res.cancelled) return;
+  if(!apiOk(res)){ await openInfo(t("failTitle"),apiError(res,t("importFailed"))); return; }
+  const text=String(res.text||"");
+  if(!text.trim()){ await openInfo(t("importTextTitle"),t("importEmpty")); return; }
+  pendingImport={doc,text,name:res.name||""};
+  const preview=text.length>30000?text.slice(0,30000)+"\n\n…":text;
+  modal(`<h3>${t("importTextTitle")}</h3><div class="import-meta">${escapeHtml(res.name||"")} · ${fmt(countWords(text))} ${t("importedWords")}<br>${t("importInto")}: <b>${escapeHtml(doc.title)}</b></div>
+    <div class="import-preview">${escapeHtml(preview)}</div><div class="mfoot"><button class="btn" onclick="closeModal()">${t("cancel")}</button>
+    <button class="btn" onclick="applyImportedText('append')">${t("appendText")}</button><button class="btn primary" onclick="applyImportedText('replace')">${t("replaceText")}</button></div>`,"history");
+}
+function applyImportedText(mode){
+  const item=pendingImport;if(!item) return; const doc=item.doc,current=documentText(doc);
+  snapshotDocument(doc,"before_import",true);
+  const next=mode==="append"&&current.trim()?current.replace(/\s+$/g,"")+"\n\n"+item.text.replace(/^\s+/g,""):item.text;
+  setDocumentText(doc,next); snapshotDocument(doc,mode==="append"?"import_append":"import_replace",true);
+  pendingImport=null; closeModal(); save(); render(); toast(t("textImported"));
 }
 
 /* ============ РЕНДЕР ============ */
@@ -1331,7 +1871,7 @@ function renderSidebar(){
   const chrItems=b.characters.length?b.characters.map(c=>{
     const active=route.view==="character"&&route.itemId===c.id?"active":"";
     const av=c.photo?`<img class="avatar" src="${c.photo}">`:`<span class="avatar">${icon('user',14)}</span>`;
-    return `<div class="nav-item ${active}" onclick="selectItem('character','${c.id}')">${av}<span class="label">${escapeHtml(nameOrFallback(c.name))}</span></div>`;
+    return `<div class="nav-item ${active}" onclick="openCharacterFromSidebar('${c.id}')">${av}<span class="label">${escapeHtml(nameOrFallback(c.name))}</span></div>`;
   }).join(""):`<div class="side-empty">${t("noCharacters")}</div>`;
   const loreItems=(b.lore||[]).length?b.lore.map(item=>{
     const active=route.view==="lore"&&route.itemId===item.id?"active":"";
@@ -1367,13 +1907,14 @@ function renderMain(){
 function renderChapterEditor(main,b){
   const ch=b.chapters.find(c=>c.id===route.itemId);
   if(!ch){ route.view="overview"; return renderMain(); }
-  main.innerHTML=`<div class="wrap">
+  const doc=currentTextDocument();
+  main.innerHTML=`<div class="wrap chapter-wrap">
     <input class="ed-title" id="edTitle" value="${escapeAttr(ch.title)}" placeholder="${escapeAttr(t("chapterTitle"))}">
     <div class="ed-meta">
       <span id="edCount"></span>
       <span class="size-ctl"><button onclick="setFont(-1)">A-</button><button onclick="setFont(1)">A+</button></span>
-      <button class="btn small ghost" onclick="manualSnapshot()">${icon('clock',16)} ${t("saveVersion")}</button>
-      <button class="btn small ghost" onclick="openHistory()">${icon('restore',16)} ${t("history")}</button>
+      <button class="btn small ghost" onclick="openDocumentHistory()">${icon('restore',16)} ${t("history")}</button>
+      <button class="btn small ghost" onclick="importIntoCurrentDocument()">${icon('upload',16)} ${t("importDocument")}</button>
       <span style="flex:1"></span>
       <span class="saved" id="edSaved">${icon('clock',14)} ${t("saved")}</span>
       <button class="btn small ghost" onclick="deleteChapter('${ch.id}')">${icon('trash',16)}</button>
@@ -1381,12 +1922,13 @@ function renderChapterEditor(main,b){
     <textarea class="ed-body" id="edBody" placeholder="${escapeAttr(t("chapterBodyPh"))}" style="--ed-size:${editorFontSize}px">${escapeHtml(ch.content)}</textarea>
   </div>`;
   const title=document.getElementById("edTitle"),body=document.getElementById("edBody");
+  fitChapterBody(body);
   const updCount=()=>{ const w=countWords(body.value),pg=Math.max(1,Math.round(w/WORDS_PER_PAGE));
     document.getElementById("edCount").innerHTML=`<b>${fmt(w)}</b> ${t("words")} · ≈${fmt(pg)} ${t("pages")}`; };
   updCount();
   title.addEventListener("input",()=>{ ch.title=title.value; ch.updatedAt=now(); flagSaving(); save(); renderSidebar(); renderTopbar(); });
-  const syncBody=()=>{ ch.content=body.value; ch.updatedAt=now(); b.updatedAt=now(); updCount(); flagSaving(); save(); renderTopbar(); scheduleAutoSnapshot(ch); };
-  body.addEventListener("input",e=>{ applyDialogueDash(body,e); syncBody(); });
+  const syncBody=()=>{ ch.content=body.value; ch.updatedAt=now(); b.updatedAt=now(); updCount(); flagSaving(); save(); renderTopbar(); scheduleAutoSnapshot(doc); };
+  body.addEventListener("input",e=>{ applyDialogueDash(body,e); fitChapterBody(body,true); syncBody(); });
   body.addEventListener("keydown",e=>{ if(handleDialogueDashHistory(body,e)){ e.preventDefault(); syncBody(); } });
   body.focus();
 }
@@ -1426,7 +1968,6 @@ function handleDialogueDashHistory(body,event){
   }
   return false;
 }
-function scheduleAutoSnapshot(ch){ clearTimeout(snapTimer); snapTimer=setTimeout(()=>snapshotChapter(ch,false),180000); }
 let savingTimer=null;
 function flagSaving(){
   const el=document.getElementById("edSaved"); if(!el) return;
@@ -1506,6 +2047,12 @@ function renderCharacterEdit(main,b){
     el.addEventListener("input",()=>{ c[field]=el.value; flagSavedToast(); save(); if(reflect) renderSidebar(); }); };
   bind("cName","name",true);
   bind("cAge","age",false);
+  const genderEl=document.getElementById("cGender");
+  if(genderEl) genderEl.addEventListener("change",()=>{
+    c.gender=genderEl.value;
+    validCharacterLinks(b).forEach(link=>{ if(link.to===c.id&&link.fromRole) link.toRole=reciprocalRelationRole(link.fromRole,c.gender); });
+    flagSavedToast(); save(); renderMain();
+  });
   const ageEl=document.getElementById("cAge");
   if(ageEl) ageEl.addEventListener("input",()=>{ const yy=birthYear(b,c),hint=document.getElementById("byHint");
     if(hint) hint.textContent=yy!==null?`${t("birthYear")} ${yy}`:t("birthYearHint"); });
@@ -1535,6 +2082,7 @@ function renderCharacterTabs(){
 }
 function renderCharacterIdentity(b,c){
   const by=birthYear(b,c),meta=[];
+  if(c.gender) meta.push(escapeHtml(genderLabel(c.gender)));
   if(c.age) meta.push(`<b>${escapeHtml(c.age)}</b> ${t("yearsOld")}`);
   if(by!==null) meta.push(`${t("birthYear")} <b>${by}</b>`);
   const aliases=(c.aliases||[]).join(", ");
@@ -1558,15 +2106,16 @@ function renderCharacterProfileView(b,c){
   const terms=characterTerms(c);
   return `<div class="section">
     <h4>${t("profileShort")}</h4>
-    <p>${escapeHtml([c.role?`${t("role")}: ${labelEnum("roles",c.role)}`:"",c.age?`${t("age")}: ${c.age}`:"",terms.length?`${t("recognizedBy")}: ${terms.join(", ")}`:""].filter(Boolean).join("\n")||t("profileEmpty"))}</p>
+    <p>${escapeHtml([c.role?`${t("role")}: ${labelEnum("roles",c.role)}`:"",c.gender?`${t("gender")}: ${genderLabel(c.gender)}`:"",c.age?`${t("age")}: ${c.age}`:"",terms.length?`${t("recognizedBy")}: ${terms.join(", ")}`:""].filter(Boolean).join("\n")||t("profileEmpty"))}</p>
   </div>`;
 }
 function renderCharacterProfileEdit(b,c){
   const by=birthYear(b,c);
   return `<div class="fld-stack">
     <div class="fld"><label>${t("name")}</label><input id="cName" value="${escapeAttr(c.name)}" placeholder="${escapeAttr(t("characterName"))}"></div>
-    <div class="fld-grid">
+    <div class="fld-grid three">
       <div class="fld"><label>${t("role")}</label>${roleSelect(c)}</div>
+      <div class="fld"><label>${t("gender")}</label>${genderSelect(c)}<div class="hint">${t("genderHint")}</div></div>
       <div class="fld"><label>${t("age")}</label><input id="cAge" value="${escapeAttr(c.age)}" placeholder="${escapeAttr(t("agePh"))}">
         <div class="hint" id="byHint">${by!==null?`${t("birthYear")} ${by}`:t("birthYearHint")}</div></div>
     </div>
@@ -1595,7 +2144,7 @@ function renderCharacterDetailsEdit(c){
   </div>`;
 }
 function characterRelationships(b,c){
-  return validCharacterLinks(b).filter(link=>link.from===c.id||link.to===c.id);
+  return displayCharacterLinks(b).filter(link=>link.from===c.id||link.to===c.id);
 }
 function relationStrengthName(link){
   const s=RELATION_STRENGTHS[link.strength]||RELATION_STRENGTHS.normal;
@@ -1616,17 +2165,17 @@ function renderCharacterRelationships(b,c){
 function renderCharacterRelationshipCard(b,c,link){
   const otherId=link.from===c.id?link.to:link.from;
   const other=(b.characters||[]).find(x=>x.id===otherId);
-  const st=relationStyle(link),note=link.note&&link.note.trim()?link.note.trim():t("noNote");
+  const st=relationStyle(link),note=link.note&&link.note.trim()?link.note.trim():t("noNote"),roles=relationRoleSummaryFor(link,c.id);
   return `<div class="relationship-card" style="--thread-color:${st.color}" title="${escapeAttr(note)}">
     ${threadSample(st)}
     <div>
       <div class="relationship-name">${escapeHtml(other?nameOrFallback(other.name):characterFallback())}</div>
-      <div class="relationship-meta">${escapeHtml(labelEnum("relations",link.type||"Связь"))} · ${escapeHtml(relationStrengthName(link))} ${t("linkLower")}</div>
+      <div class="relationship-meta">${escapeHtml(labelEnum("relations",link.type||"Связь"))}${roles?` · ${escapeHtml(roles)}`:""} · ${escapeHtml(relationStrengthName(link))} ${t("linkLower")}${link.derived?` · ${t("automaticRelation")}`:""}</div>
     </div>
     <div class="relationship-actions">
       <button class="btn small ghost" title="${t("openCharacter")}" onclick="selectItem('character','${otherId}')">${icon('user',15)}</button>
-      <button class="btn small ghost" title="${t("setupLink")}" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
-      <button class="btn small ghost" title="${t("deleteLink")}" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>
+      ${link.derived?"":`<button class="btn small ghost" title="${t("setupLink")}" onclick="openAddCharacterLink('${link.id}')">${icon('edit',15)}</button>
+      <button class="btn small ghost" title="${t("deleteLink")}" onclick="deleteCharacterLink('${link.id}')">${icon('trash',15)}</button>`}
     </div>
     <div class="relationship-note">${escapeHtml(note)}</div>
   </div>`;
@@ -1672,6 +2221,11 @@ function pluralRu(n,one,two,many){
   if(n1>1&&n1<5) return two;
   if(n1===1) return one;
   return many;
+}
+function genderLabel(value){ return value==="female"?t("genderFemale"):value==="male"?t("genderMale"):""; }
+function genderSelect(c){
+  return `<select id="cGender"><option value="" ${!c.gender?'selected':''}>${t("notSpecified")}</option>
+    ${CHARACTER_GENDERS.map(value=>`<option value="${value}" ${c.gender===value?'selected':''}>${escapeHtml(genderLabel(value))}</option>`).join("")}</select>`;
 }
 function roleSelect(c){
   const roles=state.settings.roles||[];
@@ -1761,63 +2315,87 @@ function renderLoreEdit(main,b){
 }
 
 /* ---- план книги ---- */
+function planChapterHeading(ch,index){
+  const title=titleOrFallback(ch.title).trim(),prefix=`${t("chapter")} ${index+1}`;
+  return new RegExp(`^${escapeRegExp(prefix)}(?:\\s|[.:]|$)`,"i").test(title)?title:`${prefix}. ${title}`;
+}
 function renderPlan(main,b){
+  if(b.planText===undefined) b.planText="";
   b.chapters.forEach(normalizeChapter);
-  const cards=b.chapters.length?b.chapters.map((ch,i)=>{
-    const chars=renderChapterCharacterChips(b,ch);
-    return `
-    <div class="plan-card">
-      <div class="plan-card-head">
-        <div class="plan-num">${i+1}</div>
-        <input class="plan-title" id="plTitle${i}" value="${escapeAttr(ch.title||'')}" placeholder="${escapeAttr(t("chapterTitle"))}">
-        <select class="plan-status" id="plStatus${i}">${optionList(PLAN_STATUSES,"plan",ch.planStatus)}</select>
-      </div>
-      <div class="plan-fields">
-        <div class="fld"><label>${t("whatHappens")}</label><textarea id="plSummary${i}" placeholder="${escapeAttr(t("planSummaryPh"))}">${escapeHtml(ch.planSummary)}</textarea></div>
-        <div class="fld"><label>${t("chapterNotes")}</label><textarea id="plNotes${i}" placeholder="${escapeAttr(t("chapterNotesPh"))}">${escapeHtml(ch.planNotes)}</textarea></div>
-      </div>
-      ${chars}
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-        <button class="btn small" onclick="selectItem('chapter','${ch.id}')">${icon('edit',15)} ${t("openChapter")}</button>
-        <button class="btn small ghost" onclick="moveChapter('${ch.id}',-1,event)">${icon('up',14)} ${t("up")}</button>
-        <button class="btn small ghost" onclick="moveChapter('${ch.id}',1,event)">${icon('down',14)} ${t("down")}</button>
-      </div>
-    </div>`;
-  }).join(""):`<div class="placeholder" style="height:auto;min-height:260px">
-      <div class="pic">${icon('list',54)}</div>
-      <div>${t("planEmpty")}</div>
+  b.characters.forEach(normalizeCharacter);
+  if(!["chapter","character"].includes(route.planMode)) route.planMode="overall";
+  const overall=route.planMode==="overall",chapterMode=route.planMode==="chapter",characterMode=route.planMode==="character";
+  let ch=chapterMode?b.chapters.find(item=>item.id===route.itemId):null;
+  if(chapterMode&&!ch&&b.chapters.length){ ch=b.chapters[0]; route.itemId=ch.id; }
+  let character=characterMode?b.characters.find(item=>item.id===route.itemId):null;
+  if(characterMode&&!character&&b.characters.length){ character=b.characters[0]; route.itemId=character.id; }
+  const chapterIndex=ch?b.chapters.findIndex(item=>item.id===ch.id):-1;
+  const chapterOptions=b.chapters.map((item,i)=>`<option value="${escapeAttr(item.id)}" ${ch&&item.id===ch.id?'selected':''}>${escapeHtml(`${i+1}. ${titleOrFallback(item.title)}`)}</option>`).join("");
+  const characterOptions=b.characters.map(item=>`<option value="${escapeAttr(item.id)}" ${character&&item.id===character.id?'selected':''}>${escapeHtml(nameOrFallback(item.name))}</option>`).join("");
+  let editor="";
+  if(overall) editor=`
+    <article class="plan-document-editor">
+      <header class="plan-document-head">
+        <h2 class="plan-document-title">${t("wholeBookPlan")}</h2>
+        <div class="plan-document-meta"><span id="planHeadCount"></span><button class="btn small ghost" onclick="openDocumentHistory()">${icon('restore',15)} ${t("history")}</button><button class="btn small ghost" onclick="importIntoCurrentDocument()">${icon('upload',15)} ${t("importDocument")}</button><span class="saved" id="edSaved">${icon('clock',14)} ${t("saved")}</span></div>
+      </header>
+      <textarea class="plan-document-body" id="planDocument" placeholder="${escapeAttr(t("wholeBookPlanPh"))}">${escapeHtml(b.planText)}</textarea>
+    </article>`;
+  else if(chapterMode&&ch) editor=`
+    <article class="plan-document-editor">
+      <header class="plan-document-head">
+        <h2 class="plan-document-title">${escapeHtml(planChapterHeading(ch,chapterIndex))}</h2>
+        <div class="plan-document-meta">
+          <select class="plan-item-select" id="planItemSelect" aria-label="${escapeAttr(t("selectChapter"))}" title="${escapeAttr(t("selectChapter"))}">${chapterOptions}</select>
+          <span id="planHeadCount"></span><button class="btn small ghost" onclick="openDocumentHistory()">${icon('restore',15)} ${t("history")}</button><button class="btn small ghost" onclick="importIntoCurrentDocument()">${icon('upload',15)} ${t("importDocument")}</button><span class="saved" id="edSaved">${icon('clock',14)} ${t("saved")}</span>
+        </div>
+      </header>
+      <textarea class="plan-document-body" id="planDocument" placeholder="${escapeAttr(t("chapterPlanPh"))}">${escapeHtml(ch.planText)}</textarea>
+    </article>`;
+  else if(characterMode&&character) editor=`
+    <article class="plan-document-editor">
+      <header class="plan-document-head">
+        <h2 class="plan-document-title">${escapeHtml(nameOrFallback(character.name))}</h2>
+        <div class="plan-document-meta"><select class="plan-item-select" id="planItemSelect" aria-label="${escapeAttr(t("selectCharacter"))}" title="${escapeAttr(t("selectCharacter"))}">${characterOptions}</select><span id="planHeadCount"></span><button class="btn small ghost" onclick="openDocumentHistory()">${icon('restore',15)} ${t("history")}</button><button class="btn small ghost" onclick="importIntoCurrentDocument()">${icon('upload',15)} ${t("importDocument")}</button><span class="saved" id="edSaved">${icon('clock',14)} ${t("saved")}</span></div>
+      </header>
+      <textarea class="plan-document-body" id="planDocument" placeholder="${escapeAttr(t("characterArcPh"))}">${escapeHtml(character.arcText)}</textarea>
+    </article>`;
+  else if(chapterMode) editor=`<div class="placeholder plan-empty">
+      <div class="pic">${icon('list',54)}</div><div>${t("planEmpty")}</div>
       <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button>
     </div>`;
-  main.innerHTML=`<div class="wrap">
-    <div class="pagehead">
-      <div>
-        <h1 style="margin:0;font-size:28px;letter-spacing:-.4px">${t("bookPlan")}</h1>
-        <div class="hint" style="margin-top:8px">${t("planHint")}</div>
-      </div>
-      <button class="btn primary" onclick="addChapter()">${icon('plus',16)} ${t("newChapter")}</button>
+  else editor=`<div class="placeholder plan-empty">
+      <div class="pic">${icon('user',54)}</div><div>${t("characterArcEmpty")}</div>
+      <button class="btn primary" onclick="addCharacter()">${icon('plus',16)} ${t("addCharacter")}</button>
+    </div>`;
+  main.innerHTML=`<div class="wrap plan-wrap">
+    <div class="plan-tabs">
+      <button class="plan-tab ${overall?'active':''}" onclick="openOverallPlan()">${t("overallPlanTab")}</button>
+      <button class="plan-tab ${chapterMode?'active':''}" onclick="openChapterPlans()">${t("chapterPlansTab")}</button>
+      <button class="plan-tab ${characterMode?'active':''}" onclick="openCharacterArcs()">${t("characterArcsTab")}</button>
     </div>
-    <div class="plan-list">${cards}</div>
+    ${editor}
   </div>`;
-  b.chapters.forEach((ch,i)=>{
-    const title=document.getElementById(`plTitle${i}`);
-    const status=document.getElementById(`plStatus${i}`);
-    const summary=document.getElementById(`plSummary${i}`);
-    const notes=document.getElementById(`plNotes${i}`);
-    [summary,notes].forEach(el=>{ if(el){ autoGrow(el); el.addEventListener("input",()=>autoGrow(el)); } });
-    if(title) title.addEventListener("input",()=>{ ch.title=title.value; ch.updatedAt=now(); b.updatedAt=now(); save(); renderSidebar(); renderTopbar(); });
-    if(status) status.addEventListener("change",()=>{ ch.planStatus=status.value; ch.updatedAt=now(); b.updatedAt=now(); save(); });
-    if(summary) summary.addEventListener("input",()=>{ ch.planSummary=summary.value; ch.updatedAt=now(); b.updatedAt=now(); save(); });
-    if(notes) notes.addEventListener("input",()=>{ ch.planNotes=notes.value; ch.updatedAt=now(); b.updatedAt=now(); save(); });
+  const planText=document.getElementById("planDocument");
+  if(!planText) return;
+  const doc=currentTextDocument();
+  const updatePlanCount=()=>{
+    const value=`${fmt(countWords(planText.value))} ${t("words")}`;
+    const head=document.getElementById("planHeadCount");
+    if(head) head.textContent=value;
+  };
+  updatePlanCount();
+  fitChapterBody(planText);
+  planText.addEventListener("input",()=>{
+    if(overall) b.planText=planText.value;
+    else if(chapterMode){ ch.planText=planText.value; ch.updatedAt=now(); }
+    else{ character.arcText=planText.value; character.updatedAt=now(); }
+    b.updatedAt=now(); updatePlanCount(); fitChapterBody(planText,true); flagSaving(); save(); scheduleAutoSnapshot(doc);
   });
+  const itemSelect=document.getElementById("planItemSelect");
+  if(itemSelect) itemSelect.addEventListener("change",()=>{ if(chapterMode) openChapterPlan(itemSelect.value); else openCharacterArc(itemSelect.value); });
+  planText.focus();
 }
-function renderChapterCharacterChips(b,ch){
-  const mentions=chapterCharacterMentions(b,ch);
-  if(!mentions.length) return "";
-  const chips=mentions.slice(0,8).map(x=>`<button class="char-chip" title="${escapeAttr(nameOrFallback(x.character.name)+" — "+(isEn()?`${fmt(x.count)} ${x.count===1?"mention":"mentions"}`:`${fmt(x.count)} упоминаний`))}" onclick="selectItem('character','${x.character.id}')">${icon('user',13)}<span>${escapeHtml(nameOrFallback(x.character.name))}</span><b>${fmt(x.count)}</b></button>`).join("");
-  const rest=mentions.length>8?`<span class="char-chip"><span>${t("more")} ${mentions.length-8}</span></span>`:"";
-  return `<div class="chapter-characters">${chips}${rest}</div>`;
-}
-
 /* ---- обзор / настройки книги ---- */
 function renderOverview(main,b){
   const w=bookWordCount(b),pg=Math.max(0,Math.round(w/WORDS_PER_PAGE)),sheets=bookCharCount(b)/CHARS_PER_SHEET;
@@ -1951,7 +2529,7 @@ function ensureUniqueItemId(list,item){
 }
 function fallbackBookForTrash(title){
   const b={id:uid(),title:title||t("restoredBook"),createdAt:now(),updatedAt:now(),
-    year:"",era:"",place:"",synopsis:"",chapters:[],characters:[],lore:[]};
+    year:"",era:"",place:"",synopsis:"",planText:"",planVersions:[],chapters:[],characters:[],characterLinks:[],lore:[]};
   state.books.unshift(b);
   return b;
 }
@@ -1969,7 +2547,7 @@ function restoreTrash(type,idx){
   }
   if(type==="characters"){
     let b=getBook(item.bookId) || fallbackBookForTrash(item.bookTitle||t("restoredBook"));
-    const c=ensureUniqueItemId(b.characters,cloneData(item.data));
+    const c=ensureUniqueItemId(b.characters,normalizeCharacter(cloneData(item.data)));
     b.characters.push(c); b.updatedAt=now();
   }
   if(type==="lore"){
@@ -2032,17 +2610,17 @@ function collectSearchItems(){
     const bookTitle=titleOrFallback(b.title);
     items.push({
       bookId:b.id,view:"overview",itemId:"",kind:t("book"),title:bookTitle,bookTitle,
-      text:[b.title,b.year,b.era,b.place,b.synopsis].filter(Boolean).join("\n")
+      text:[b.title,b.year,b.era,b.place,b.synopsis,b.planText].filter(Boolean).join("\n")
     });
     (b.chapters||[]).forEach((c,i)=>items.push({
       bookId:b.id,view:"chapter",itemId:c.id,kind:`${t("chapter")} ${i+1}`,title:titleOrFallback(c.title),bookTitle,
-      text:[c.title,c.planStatus,c.planSummary,c.planNotes,c.content].filter(Boolean).join("\n")
+      text:[c.title,c.planText,c.planSummary,c.planNotes,c.content].filter(Boolean).join("\n")
     }));
     (b.characters||[]).forEach(c=>items.push({
       bookId:b.id,view:"character",itemId:c.id,kind:t("charactersGroup").slice(0,-1),title:nameOrFallback(c.name),bookTitle,
-      text:[c.name,c.role,c.age,c.appearance,c.personality,c.background,c.goals,c.relationships,c.notes].filter(Boolean).join("\n")
+      text:[c.name,c.role,c.age,c.appearance,c.personality,c.background,c.goals,c.relationships,c.notes,c.arcText].filter(Boolean).join("\n")
     }));
-    validCharacterLinks(b).forEach(link=>items.push({
+    displayCharacterLinks(b).forEach(link=>items.push({
       bookId:b.id,view:"characterMap",itemId:"",kind:t("link"),title:`${characterName(b,link.from)} — ${characterName(b,link.to)}`,bookTitle,
       text:[characterName(b,link.from),characterName(b,link.to),link.type,link.note].filter(Boolean).join("\n")
     }));
@@ -2080,6 +2658,7 @@ function highlightText(text,tokens){
 function escapeRegExp(s){ return (s||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
 function openSearchResult(bookId,view,itemId){
   const b=getBook(bookId); if(!b) return;
+  snapshotCurrent();
   closeModal();
   route={screen:"book",bookId,view,itemId:itemId||null,charMode:"view"};
   render();
@@ -2205,12 +2784,26 @@ function escapeAttr(s){ return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot
 
 document.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="f"){ e.preventDefault(); openSearch(); }
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){ e.preventDefault(); if(route.view==="chapter") manualSnapshot(); }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"&&currentTextDocument()){ e.preventDefault(); manualSnapshot(); }
   if(e.key==="Escape"){
+    if(closeTextContextMenu()) return;
     if(document.querySelector(".modal.photo")){ closeModal(); return; }
     if(!document.getElementById("preview").classList.contains("hidden")) closePreview();
   }
 });
+document.addEventListener("contextmenu",e=>{
+  const target=editableTextTarget(e.target);
+  if(!target) return;
+  e.preventDefault();
+  showTextContextMenu(e,target);
+});
+document.addEventListener("pointerdown",e=>{
+  const menu=document.querySelector(".text-context-menu");
+  if(menu&&!menu.contains(e.target)) closeTextContextMenu();
+});
+document.addEventListener("scroll",closeTextContextMenu,true);
+window.addEventListener("blur",closeTextContextMenu);
+window.addEventListener("resize",()=>{ closeTextContextMenu(); fitChapterBody(document.getElementById("edBody")); });
 
 /* ============ СТАРТ ============ */
 if(window.pywebview&&window.pywebview.api){ boot(); }

@@ -14,17 +14,30 @@ import shutil
 import base64
 import ctypes
 import mimetypes
+import threading
 from datetime import datetime
-import webview
+
+from windows_startup import (
+    APP_USER_MODEL_ID,
+    MUTEX_NAME,
+    SingleInstance,
+    StartupLog,
+    StartupSplash,
+    activate_process_window,
+    set_process_app_user_model_id,
+)
 
 APP_NAME = "Книжница"
-MUTEX_NAME = "Local\\KnizhnitsaSingleInstance"
+APP_VERSION = "1.1.0"
 LEGACY_APP_NAMES = ("Пиши книгу",)
 MAX_BACKUPS = 15
 AUTO_BACKUP_INTERVAL = 10 * 60
 ALWAYS_START_MAXIMIZED = True
+webview = None
 window = None
-instance_mutex = None
+startup_log = None
+startup_splash = None
+single_instance = None
 last_auto_backup = 0
 
 
@@ -35,9 +48,10 @@ def data_dir():
     return d
 
 
-DATA_FILE = os.path.join(data_dir(), "library.json")
-BACKUP_DIR = os.path.join(data_dir(), "Резервные копии")
-WINDOW_STATE_FILE = os.path.join(data_dir(), "window.json")
+DATA_DIR = data_dir()
+DATA_FILE = os.path.join(DATA_DIR, "library.json")
+BACKUP_DIR = os.path.join(DATA_DIR, "Резервные копии")
+WINDOW_STATE_FILE = os.path.join(DATA_DIR, "window.json")
 
 
 def resource(name):
@@ -65,6 +79,146 @@ def msg(lang, ru, en):
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def _open_clipboard(attempts=8, delay=0.02):
+    """Открыть системный буфер обмена, переждав короткую блокировку другим приложением."""
+    user32 = ctypes.windll.user32
+    user32.OpenClipboard.argtypes = [ctypes.c_void_p]
+    user32.OpenClipboard.restype = ctypes.c_int
+    for _ in range(attempts):
+        if user32.OpenClipboard(None):
+            return True
+        time.sleep(delay)
+    return False
+
+
+def read_clipboard_text():
+    """Прочитать обычный Unicode-текст из буфера обмена Windows."""
+    cf_unicode_text = 13
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+    user32.IsClipboardFormatAvailable.argtypes = [ctypes.c_uint]
+    user32.IsClipboardFormatAvailable.restype = ctypes.c_int
+    user32.GetClipboardData.argtypes = [ctypes.c_uint]
+    user32.GetClipboardData.restype = ctypes.c_void_p
+    kernel32.GlobalLock.argtypes = [ctypes.c_void_p]
+    kernel32.GlobalLock.restype = ctypes.c_void_p
+    kernel32.GlobalUnlock.argtypes = [ctypes.c_void_p]
+    kernel32.GlobalUnlock.restype = ctypes.c_int
+
+    if not _open_clipboard():
+        raise OSError("clipboard is busy")
+    handle = None
+    pointer = None
+    try:
+        if not user32.IsClipboardFormatAvailable(cf_unicode_text):
+            return ""
+        handle = user32.GetClipboardData(cf_unicode_text)
+        if not handle:
+            raise OSError("clipboard text is unavailable")
+        pointer = kernel32.GlobalLock(handle)
+        if not pointer:
+            raise OSError("clipboard text is locked")
+        return ctypes.wstring_at(pointer)
+    finally:
+        if pointer and handle:
+            kernel32.GlobalUnlock(handle)
+        user32.CloseClipboard()
+
+
+def write_clipboard_text(text):
+    """Записать обычный Unicode-текст в буфер обмена Windows."""
+    cf_unicode_text = 13
+    gmem_moveable = 0x0002
+    data = str(text or "").encode("utf-16-le") + b"\x00\x00"
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+    kernel32.GlobalAlloc.argtypes = [ctypes.c_uint, ctypes.c_size_t]
+    kernel32.GlobalAlloc.restype = ctypes.c_void_p
+    kernel32.GlobalLock.argtypes = [ctypes.c_void_p]
+    kernel32.GlobalLock.restype = ctypes.c_void_p
+    kernel32.GlobalUnlock.argtypes = [ctypes.c_void_p]
+    kernel32.GlobalUnlock.restype = ctypes.c_int
+    kernel32.GlobalFree.argtypes = [ctypes.c_void_p]
+    kernel32.GlobalFree.restype = ctypes.c_void_p
+    user32.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]
+    user32.SetClipboardData.restype = ctypes.c_void_p
+
+    handle = kernel32.GlobalAlloc(gmem_moveable, len(data))
+    if not handle:
+        raise OSError("clipboard allocation failed")
+    pointer = kernel32.GlobalLock(handle)
+    if not pointer:
+        kernel32.GlobalFree(handle)
+        raise OSError("clipboard allocation is locked")
+    ctypes.memmove(pointer, data, len(data))
+    kernel32.GlobalUnlock(handle)
+
+    if not _open_clipboard():
+        kernel32.GlobalFree(handle)
+        raise OSError("clipboard is busy")
+    transferred = False
+    try:
+        if not user32.EmptyClipboard():
+            raise OSError("clipboard could not be cleared")
+        if not user32.SetClipboardData(cf_unicode_text, handle):
+            raise OSError("clipboard text could not be written")
+        transferred = True
+    finally:
+        user32.CloseClipboard()
+        if not transferred:
+            kernel32.GlobalFree(handle)
+
+
+def read_imported_text(path):
+    """Извлечь обычный текст из поддерживаемого авторского документа."""
+    ext = os.path.splitext(path)[1].lower()
+    if ext == ".docx":
+        from docx import Document
+        from docx.document import Document as DocumentObject
+        from docx.oxml.table import CT_Tbl
+        from docx.oxml.text.paragraph import CT_P
+        from docx.table import Table
+        from docx.text.paragraph import Paragraph
+
+        document = Document(path)
+        blocks = []
+        parent = document.element.body if isinstance(document, DocumentObject) else document._element
+        for child in parent.iterchildren():
+            if isinstance(child, CT_P):
+                paragraph = Paragraph(child, document)
+                text = paragraph.text.strip()
+                if not text:
+                    continue
+                style_name = (paragraph.style.name if paragraph.style is not None else "").lower()
+                numbering = (
+                    (paragraph._p.pPr is not None and paragraph._p.pPr.numPr is not None)
+                    or "list" in style_name
+                    or "спис" in style_name
+                )
+                blocks.append(("• " if numbering else "") + text)
+            elif isinstance(child, CT_Tbl):
+                table = Table(child, document)
+                rows = []
+                for row in table.rows:
+                    cells = [re.sub(r"\s+", " ", cell.text).strip() for cell in row.cells]
+                    if any(cells):
+                        rows.append(" | ".join(cells))
+                if rows:
+                    blocks.append("\n".join(rows))
+        return "\n\n".join(blocks).strip()
+
+    if ext not in (".txt", ".md"):
+        raise ValueError("unsupported document type")
+    with open(path, "rb") as stream:
+        raw = stream.read()
+    for encoding in ("utf-8-sig", "utf-8", "cp1251"):
+        try:
+            return raw.decode(encoding).replace("\r\n", "\n").replace("\r", "\n")
+        except UnicodeDecodeError:
+            continue
+    return raw.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
 
 
 def has_books(raw):
@@ -291,30 +445,6 @@ def save_window_state():
         pass
 
 
-def acquire_single_instance():
-    global instance_mutex
-    try:
-        ERROR_ALREADY_EXISTS = 183
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-        kernel32.CreateMutexW.restype = ctypes.c_void_p
-        kernel32.CreateMutexW.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_wchar_p]
-        instance_mutex = kernel32.CreateMutexW(None, False, MUTEX_NAME)
-        # use_last_error → берём код ошибки сразу, ctypes не затирает его
-        if ctypes.get_last_error() != ERROR_ALREADY_EXISTS:
-            return True
-        # второй экземпляр: показываем уже открытое окно и выходим
-        user32 = ctypes.windll.user32
-        user32.FindWindowW.restype = ctypes.c_void_p
-        user32.FindWindowW.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p]
-        hwnd = user32.FindWindowW(None, APP_NAME)
-        if hwnd:
-            user32.ShowWindow(ctypes.c_void_p(hwnd), 9)   # SW_RESTORE
-            user32.SetForegroundWindow(ctypes.c_void_p(hwnd))
-        return False
-    except Exception:
-        return True
-
-
 class Api:
     """Мост между интерфейсом (JS) и диском (Python)."""
 
@@ -351,6 +481,22 @@ class Api:
 
     def data_location(self):
         return DATA_FILE
+
+    # ---- системный буфер обмена для меню правой кнопки ----
+    def clipboard_read_text(self, lang="ru"):
+        lang = norm_lang(lang)
+        try:
+            return {"ok": True, "error": "", "text": read_clipboard_text()}
+        except Exception:
+            return result(False, msg(lang, "Не удалось прочитать буфер обмена.", "Could not read the clipboard."))
+
+    def clipboard_write_text(self, text, lang="ru"):
+        lang = norm_lang(lang)
+        try:
+            write_clipboard_text(text)
+            return result(True)
+        except Exception:
+            return result(False, msg(lang, "Не удалось записать текст в буфер обмена.", "Could not write to the clipboard."))
 
     def backup_state(self, data, reason="ручная копия", lang="ru"):
         return create_backup_from_text(data, reason, lang)
@@ -420,6 +566,33 @@ class Api:
                 return "data:%s;base64,%s" % (mime, data)
         except Exception:
             return ""
+
+    # ---- импорт текста в открытую главу / план / арку ----
+    def import_text_document(self, lang="ru"):
+        lang = norm_lang(lang)
+        try:
+            paths = window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                file_types=(
+                    msg(lang, "Документы Word и текст (*.docx;*.txt;*.md)", "Word and text documents (*.docx;*.txt;*.md)"),
+                    msg(lang, "Документ Word (*.docx)", "Word document (*.docx)"),
+                    msg(lang, "Текстовый документ (*.txt;*.md)", "Text document (*.txt;*.md)"),
+                ),
+            )
+            if not paths:
+                return {"ok": False, "cancelled": True, "error": ""}
+            path = paths[0] if isinstance(paths, (list, tuple)) else paths
+            text = read_imported_text(path)
+            return {
+                "ok": True,
+                "error": "",
+                "name": os.path.basename(path),
+                "text": text,
+            }
+        except ValueError:
+            return result(False, msg(lang, "Поддерживаются только DOCX, TXT и MD.", "Only DOCX, TXT, and MD are supported."))
+        except Exception as exc:
+            return result(False, f"{msg(lang, 'Не удалось прочитать документ', 'Could not read the document')}: {exc}")
 
     # ---- экспорт готовой книги ----
     def export_docx(self, book, lang="ru"):
@@ -528,37 +701,126 @@ class Api:
 
 
 def main():
-    global window
-    if not acquire_single_instance():
+    global webview, window, startup_log, startup_splash, single_instance
+
+    startup_log = StartupLog(DATA_DIR)
+    app_id_ok = set_process_app_user_model_id(APP_USER_MODEL_ID)
+    single_instance = SingleInstance(DATA_DIR, startup_log, mutex_name=MUTEX_NAME)
+    role = single_instance.acquire()
+
+    if role == "secondary":
         return
-    migrate_legacy_data()
-    settings = load_initial_settings()
-    with open(resource("ui.html"), "r", encoding="utf-8") as f:
-        html = prepare_html(f.read(), settings)
+    if role == "error":
+        ctypes.windll.user32.MessageBoxW(
+            None,
+            "Не удалось проверить уже запущенную Книжницу. Попробуйте ещё раз.",
+            APP_NAME,
+            0x10,
+        )
+        return
 
-    state = load_window_state()
-    win_kwargs = dict(
-        html=html,
-        js_api=Api(),
-        width=(state or {}).get("width", 1240),
-        height=(state or {}).get("height", 860),
-        min_size=(940, 620),
-        background_color="#161618" if settings["theme"] == "dark" else "#f6f6f4",
+    startup_log.rotate_if_needed()
+    startup_log.write(
+        "python_entry",
+        version=APP_VERSION,
+        frozen=bool(getattr(sys, "frozen", False)),
+        app_user_model_id=app_id_ok,
     )
-    if state and "x" in state and "y" in state:
-        win_kwargs["x"] = state["x"]
-        win_kwargs["y"] = state["y"]
+    startup_log.write("instance_primary")
 
-    window = webview.create_window(APP_NAME, **win_kwargs)
+    window_ready = threading.Event()
+    activation_pending = threading.Event()
 
-    if ALWAYS_START_MAXIMIZED or (state and state.get("maximized")):
-        window.events.shown += lambda: window.maximize()
-    # Запоминаем размер/позицию на случай, если позже отключим автозапуск развёрнутым.
-    window.events.resized += lambda *a: save_window_state()
-    window.events.moved += lambda *a: save_window_state()
-    window.events.closing += save_window_state
+    def request_window_activation():
+        activation_pending.set()
+        if window_ready.is_set():
+            activate_process_window(os.getpid(), APP_NAME, logger=startup_log)
 
-    webview.start()
+    single_instance.start_listener(request_window_activation)
+
+    startup_splash = StartupSplash(resource("icon.ico"))
+    splash_ok = startup_splash.start()
+    startup_log.write("splash_shown", success=splash_ok)
+
+    try:
+        startup_log.write("webview_import_begin")
+        import webview as webview_module
+
+        webview = webview_module
+        startup_log.write("webview_import_done")
+
+        startup_log.write("data_migration_begin")
+        migrate_legacy_data()
+        startup_log.write("data_migration_done")
+
+        settings = load_initial_settings()
+        startup_log.write("html_prepare_begin")
+        with open(resource("ui.html"), "r", encoding="utf-8") as f:
+            html = prepare_html(f.read(), settings)
+        startup_log.write("html_prepare_done")
+
+        state = load_window_state()
+        win_kwargs = dict(
+            html=html,
+            js_api=Api(),
+            width=(state or {}).get("width", 1240),
+            height=(state or {}).get("height", 860),
+            min_size=(940, 620),
+            background_color="#161618" if settings["theme"] == "dark" else "#f6f6f4",
+        )
+        if state and "x" in state and "y" in state:
+            win_kwargs["x"] = state["x"]
+            win_kwargs["y"] = state["y"]
+
+        startup_log.write("create_window_begin")
+        window = webview.create_window(APP_NAME, **win_kwargs)
+        startup_log.write("create_window_done")
+
+        def on_window_shown():
+            startup_log.write("window_shown")
+            window_ready.set()
+            if startup_splash:
+                startup_splash.stop()
+            if ALWAYS_START_MAXIMIZED or (state and state.get("maximized")):
+                window.maximize()
+            if activation_pending.is_set():
+                activate_process_window(os.getpid(), APP_NAME, logger=startup_log)
+
+        def on_window_loaded():
+            startup_log.write("window_loaded")
+
+        def on_window_closing(*_):
+            startup_log.write("window_closing")
+            save_window_state()
+
+        window.events.shown += on_window_shown
+        window.events.loaded += on_window_loaded
+        # Запоминаем размер/позицию на случай, если позже отключим автозапуск развёрнутым.
+        window.events.resized += lambda *a: save_window_state()
+        window.events.moved += lambda *a: save_window_state()
+        window.events.closing += on_window_closing
+
+        startup_log.write("webview_start_begin")
+        webview.start()
+        startup_log.write("webview_start_done")
+    except Exception as exc:
+        startup_log.write("fatal_error", error=type(exc).__name__, message=str(exc))
+        if startup_splash:
+            startup_splash.stop()
+        ctypes.windll.user32.MessageBoxW(
+            None,
+            "Книжница не смогла запуститься. Подробности записаны в startup.log.",
+            APP_NAME,
+            0x10,
+        )
+        raise
+    finally:
+        if startup_splash:
+            startup_splash.stop()
+        if single_instance:
+            single_instance.close()
+        if startup_log:
+            startup_log.write("shutdown")
 
 
 if __name__ == "__main__":
