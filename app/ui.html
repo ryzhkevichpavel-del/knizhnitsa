@@ -433,6 +433,18 @@
   .text-context-menu button:disabled{color:var(--muted);opacity:.48;cursor:default}
   .text-context-menu kbd{font:11px/1.2 "Segoe UI",sans-serif;color:var(--muted);background:transparent}
   .text-context-separator{height:1px;background:var(--line);margin:4px 5px}
+  .global-save-status{position:fixed;right:14px;bottom:14px;z-index:45;display:flex;align-items:center;gap:6px;
+    max-width:min(520px,calc(100vw - 28px));padding:7px 11px;border:1px solid var(--line);border-radius:10px;
+    background:color-mix(in srgb,var(--panel) 94%,transparent);box-shadow:var(--shadow);color:var(--muted);font-size:12px}
+  .global-save-status.saved{color:var(--ok)}
+  .global-save-status.error{color:var(--danger);border-color:color-mix(in srgb,var(--danger),var(--line) 55%)}
+  .global-save-status[hidden]{display:none}
+  [role="button"]:focus-visible,.book-card:focus-visible,.nav-item:focus-visible,.side-book:focus-visible,.swatch:focus-visible,
+  .search-result:focus-visible,.relationship-card:focus-visible{outline:3px solid var(--accent-soft);outline-offset:2px}
+  .chapter-order-actions{display:flex;gap:2px;margin-left:auto}
+  .chapter-order-actions button{width:23px;height:23px;border:none;background:transparent;color:var(--muted);padding:0;border-radius:7px}
+  .chapter-order-actions button:hover:not(:disabled){color:var(--accent);background:var(--panel)}
+  .chapter-order-actions button:disabled{opacity:.28;cursor:default}
   .size-ctl{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
   .size-ctl button{border:none;background:var(--panel);padding:5px 11px;color:var(--muted);font-size:14px;font-weight:600}
   .size-ctl button:hover{color:var(--accent)}
@@ -457,6 +469,7 @@
 <div id="modalRoot"></div>
 <div id="contextMenuRoot"></div>
 <div class="toast" id="toast"></div>
+<div class="global-save-status saved" id="globalSaveStatus" role="status" aria-live="polite" hidden></div>
 
 <script>
 /* ============ ИКОНКИ ============ */
@@ -549,8 +562,8 @@ const TEXT={
   appName:["Книжница","Knizhnitsa"], settings:["Настройки","Settings"], search:["Поиск","Search"], trash:["Корзина","Trash"],
   allBooks:["Все книги","All books"], export:["Экспорт","Export"], preview:["Как в книге","Book view"], done:["Готово","Done"],
   cancel:["Отмена","Cancel"], close:["Закрыть","Close"], delete:["Удалить","Delete"], save:["Сохранить","Save"], add:["Добавить","Add"],
-  cut:["Вырезать","Cut"], copy:["Копировать","Copy"], paste:["Вставить","Paste"], selectAll:["Выделить всё","Select all"],
-  clipboardUnavailable:["Не удалось открыть буфер обмена","Could not access the clipboard"],
+  cut:["Вырезать","Cut"], copy:["Копировать","Copy"], paste:["Вставить","Paste"], selectAll:["Выделить всё","Select all"], undo:["Отменить","Undo"], redo:["Повторить","Redo"],
+  clipboardUnavailable:["Не удалось открыть буфер обмена","Could not access the clipboard"], clipboardEmpty:["В буфере обмена нет текста","There is no text in the clipboard"],
   create:["Создать","Create"], restore:["Вернуть","Restore"], edit:["Редактировать","Edit"], rename:["Переименовать","Rename"],
   noTitle:["Без названия","Untitled"], noName:["Без имени","Unnamed"], noRole:["Без роли","No role"], noNote:["Без заметки","No note"],
   words:["слов","words"], pages:["стр.","pages"], pagesFull:["страниц","pages"], chaptersShort:["гл.","ch."], chapters:["глав","chapters"],
@@ -565,7 +578,7 @@ const TEXT={
   renameBook:["Переименовать книгу","Rename book"], renameChapter:["Переименовать главу","Rename chapter"], title:["Название","Title"],
   newChapter:["Новая глава","New chapter"], chapter:["Глава","Chapter"], chapterTitle:["Название главы","Chapter title"], chooseChapter:["Выбери главу слева — или создай новую.","Choose a chapter on the left, or create a new one."],
   history:["История","History"], importDocument:["Импорт","Import"], saved:["Сохранено","Saved"], saving:["Сохранение…","Saving..."], notSaved:["Не сохранено","Not saved"],
-  chapterBodyPh:["Здесь начинается глава…","The chapter starts here..."], current:["Сейчас","Now"], empty:["(пусто)","(empty)"],
+  chapterBodyPh:["Здесь начинается глава…","The chapter starts here..."], current:["Сейчас","Now"], empty:["(пусто)","(empty)"], moveUp:["Переместить выше","Move up"], moveDown:["Переместить ниже","Move down"],
   noVersions:["История пока пуста. Первая версия появится после изменения текста или перехода к другому документу.","History is empty. The first version will appear after editing or switching documents."],
   documentHistory:["История текста","Text history"], savedVersions:["Сохранённые версии","Saved versions"], currentText:["Текущий текст","Current text"], currentMatchesLatest:["Совпадает с последней сохранённой версией.","Matches the latest saved version."], currentHasChanges:["Есть изменения после последней сохранённой версии.","There are changes since the latest saved version."], compareCurrent:["Сравнить с последней версией","Compare with latest version"], showChanges:["Сравнить с предыдущей","Compare with previous"], viewVersionText:["Посмотреть текст","View text"], alreadyOpen:["Уже открыт","Already open"], versionAlreadyOpen:["Эта версия уже открыта в редакторе.","This version is already open in the editor."], added:["Добавлено","Added"], removed:["Удалено","Removed"], noTextChanges:["Текст не изменился","No text changes"], firstSavedVersion:["Первая доступная версия","Earliest available version"], textSize:["объём","size"], firstVersionHelp:["Более ранней версии нет, поэтому сравнивать её не с чем.","There is no earlier version to compare it with."],
   restoreVersionTitle:["Вернуть текст к этому моменту?","Restore the text to this point?"], restoreVersionMsg:["Текущий текст сначала сохранится в истории. После этого он будет заменён выбранной версией.","The current text will be saved to history first, then replaced with the selected version."],
@@ -606,7 +619,9 @@ const TEXT={
   trashEmpty:["Корзина пуста.","Trash is empty."], clear:["Очистить","Empty"], withChaptersCharacters:["Со всеми главами и персонажами","With all chapters and characters"], fromBook:["Из книги","From book"], restoredBook:["Восстановленная книга","Restored book"], restored:["Восстановлено","Restored"], deleteForever:["Удалить окончательно","Delete permanently"], deleteForeverTitle:["Удалить окончательно?","Delete permanently?"], deleteForeverMsg:["После этого вернуть из корзины уже не получится.","After this, it cannot be restored from trash."], emptyTrashTitle:["Очистить корзину?","Empty trash?"], emptyTrashMsg:["Все элементы в корзине будут удалены окончательно.","All items in trash will be permanently deleted."],
   searchPh:["Имя, сцена, фраза, место...","Name, scene, phrase, place..."], searchMin:["Введите хотя бы 2 символа.","Enter at least 2 characters."], searchNothing:["Ничего не найдено.","Nothing found."], link:["Связь","Link"], lore:["Лор","Lore"],
   exportBook:["Экспорт книги","Export book"], docxExport:["Настоящий документ Word (.docx)","Real Word document (.docx)"], txtExport:["Текстовый файл (.txt)","Text file (.txt)"], wordSaved:["Книга сохранена в Word","Book saved to Word"], txtSaved:["Книга сохранена в .txt","Book saved as .txt"], failTitle:["Не получилось","Something went wrong"], wordFail:["Не удалось сохранить Word-файл.","Could not save the Word file."], txtFail:["Не удалось сохранить текстовый файл.","Could not save the text file."],
-  chapterUpper:["ГЛАВА","CHAPTER"], emptyChapter:["(глава пока пустая)","(chapter is empty)"], backupSaved:["Копия сохранена","Backup saved"], backupFail:["Не удалось сохранить копию.","Could not save backup."], badBackup:["Файл не похож на копию Книжницы.","This file does not look like a Knizhnitsa backup."], replaceBooks:["Заменить книги?","Replace books?"], replaceBooksMsg:["Текущая библиотека заменится содержимым копии.","Current library will be replaced by the backup contents."], replace:["Заменить","Replace"], beforeImport:["перед импортом","before import"], oldBackupFail:["Не удалось сохранить старое состояние перед импортом.","Could not save the old state before import."], backupLoaded:["Копия загружена","Backup loaded"], understand:["Понятно","OK"], saveModuleMissing:["Не найден модуль сохранения.","Save module was not found."], saveLibraryFail:["Не удалось сохранить библиотеку.","Could not save library."]
+  chapterUpper:["ГЛАВА","CHAPTER"], emptyChapter:["(глава пока пустая)","(chapter is empty)"], backupSaved:["Копия сохранена","Backup saved"], backupFail:["Не удалось сохранить копию.","Could not save backup."], badBackup:["Файл не похож на копию Книжницы.","This file does not look like a Knizhnitsa backup."], replaceBooks:["Заменить книги?","Replace books?"], replaceBooksMsg:["Текущая библиотека заменится содержимым копии.","Current library will be replaced by the backup contents."], replace:["Заменить","Replace"], beforeImport:["перед импортом","before import"], oldBackupFail:["Не удалось сохранить старое состояние перед импортом.","Could not save the old state before import."], backupLoaded:["Копия загружена","Backup loaded"], understand:["Понятно","OK"], saveModuleMissing:["Не найден модуль сохранения.","Save module was not found."], saveLibraryFail:["Не удалось сохранить библиотеку.","Could not save library."],
+  loadFailTitle:["Не удалось открыть библиотеку","Could not open the library"], loadFailMsg:["Книжница не стала показывать пустую библиотеку, чтобы не скрыть проблему. Можно восстановить последнюю исправную копию.","Knizhnitsa did not show an empty library, so the problem stays visible. You can restore the latest working backup."], recoverLatest:["Восстановить последнюю копию","Restore latest backup"], recoveryFail:["Не удалось восстановить библиотеку.","Could not restore the library."], recoveryDone:["Библиотека восстановлена","Library restored"], tryAgain:["Повторить","Try again"], recoveryOfferTitle:["Найдена более свежая копия","A newer copy was found"], recoveryOfferMsg:["После прошлого закрытия осталась более свежая исправная копия. Восстановить её?","A newer working copy remained after the previous close. Restore it?"],
+  about:["О программе","About"], version:["Версия","Version"], checkUpdates:["Проверить обновления","Check for updates"], checkingUpdates:["Проверяем…","Checking..."], currentVersion:["Установлена актуальная версия","You have the latest version"], updateAvailable:["Доступна версия","Version available"], downloadUpdate:["Скачать обновление","Download update"], updateCheckFail:["Не удалось проверить обновления.","Could not check for updates."], updatePrivacy:["Проверка выполняется только по этой кнопке. В фоне приложение в интернет не выходит.","Updates are checked only when you click this button. The app does not access the internet in the background."]
 };
 const ENUM_LABELS={
   roles:{"Главный герой":"Main character","Протагонист":"Protagonist","Антагонист":"Antagonist","Второстепенный персонаж":"Supporting character","Эпизодический персонаж":"Minor character","Наставник":"Mentor","Союзник":"Ally","Соперник":"Rival","Любовная линия":"Love interest","Рассказчик":"Narrator","Резонёр":"Reasoner"},
@@ -632,6 +647,7 @@ let state={ books:[], settings:{
 let dialogueDashUndo=[],dialogueDashRedo=[];
 let route={ screen:"home", bookId:null, view:null, itemId:null, charMode:"view", charTab:"profile", planMode:"overall" };
 let editorFontSize=19, saveTimer=null, snapTimer=null;
+let lastSavedPayload="", queuedSavePayload="", saveInFlight=null;
 
 function api(){ return (window.pywebview&&window.pywebview.api)?window.pywebview.api:null; }
 function apiOk(res){ return res===true || (res&&res.ok); }
@@ -648,6 +664,15 @@ function editableTextTarget(node){
   if(!el||el.disabled||el.readOnly) return null;
   if(el.tagName==="INPUT"&&!['text','search','email','url','tel','password'].includes((el.type||'text').toLowerCase())) return null;
   return el;
+}
+function selectableTextTarget(node){
+  const editable=editableTextTarget(node);
+  if(editable) return {el:editable,editable:true};
+  const selection=window.getSelection();
+  if(!selection||!selection.rangeCount||selection.isCollapsed) return null;
+  const range=selection.getRangeAt(0),root=node.closest(".modal,.main,.sidebar,#home,#preview,.topbar")||document.body;
+  if(!root.contains(range.commonAncestorContainer)) return null;
+  return {el:root,editable:false};
 }
 function selectedEditableText(el){
   if(el.tagName==="INPUT"||el.tagName==="TEXTAREA"){
@@ -695,18 +720,22 @@ async function readSystemClipboard(){
   try{ return await navigator.clipboard.readText(); }catch(e){ return null; }
 }
 async function runTextContextCommand(command,target){
-  if(!target||!document.contains(target)) return;
-  if(command==="selectAll"){ selectAllEditableText(target); return; }
+  if(!target||!target.el||!document.contains(target.el)) return;
+  const el=target.el;
+  if(command==="undo"||command==="redo"){ el.focus(); document.execCommand(command); return; }
+  if(command==="selectAll"){ selectAllEditableText(el); return; }
   if(command==="paste"){
     const text=await readSystemClipboard();
     if(text===null){ toast(t("clipboardUnavailable")); return; }
-    if(text) replaceEditableSelection(target,text,"insertFromPaste");
+    if(!text){ toast(t("clipboardEmpty")); return; }
+    replaceEditableSelection(el,text,"insertFromPaste");
     return;
   }
-  const text=selectedEditableText(target);
+  if(command==="delete"){ replaceEditableSelection(el,"","deleteContent"); return; }
+  const text=selectedEditableText(el);
   if(!text) return;
   if(!await writeSystemClipboard(text)){ toast(t("clipboardUnavailable")); return; }
-  if(command==="cut") replaceEditableSelection(target,"","deleteByCut");
+  if(command==="cut") replaceEditableSelection(el,"","deleteByCut");
 }
 function closeTextContextMenu(){
   const root=document.getElementById("contextMenuRoot"),wasOpen=!!(root&&root.firstChild);
@@ -715,14 +744,18 @@ function closeTextContextMenu(){
   return wasOpen;
 }
 function showTextContextMenu(event,target){
-  const root=document.getElementById("contextMenuRoot"),hasSelection=!!selectedEditableText(target);
+  const root=document.getElementById("contextMenuRoot"),hasSelection=!!selectedEditableText(target.el),editable=target.editable;
   textContextTarget=target;
   root.innerHTML=`<div class="text-context-menu" role="menu">
-    <button type="button" data-command="cut" ${hasSelection?'':'disabled'}><span>${t("cut")}</span><kbd>Ctrl+X</kbd></button>
-    <button type="button" data-command="copy" ${hasSelection?'':'disabled'}><span>${t("copy")}</span><kbd>Ctrl+C</kbd></button>
-    <button type="button" data-command="paste"><span>${t("paste")}</span><kbd>Ctrl+V</kbd></button>
+    ${editable?`<button type="button" data-command="undo"><span>${t("undo")}</span><kbd>Ctrl+Z</kbd></button>
+    <button type="button" data-command="redo"><span>${t("redo")}</span><kbd>Ctrl+Y</kbd></button>
     <div class="text-context-separator"></div>
-    <button type="button" data-command="selectAll"><span>${t("selectAll")}</span><kbd>Ctrl+A</kbd></button>
+    <button type="button" data-command="cut" ${hasSelection?'':'disabled'}><span>${t("cut")}</span><kbd>Ctrl+X</kbd></button>`:""}
+    <button type="button" data-command="copy" ${hasSelection?'':'disabled'}><span>${t("copy")}</span><kbd>Ctrl+C</kbd></button>
+    ${editable?`<button type="button" data-command="paste"><span>${t("paste")}</span><kbd>Ctrl+V</kbd></button>
+    <button type="button" data-command="delete" ${hasSelection?'':'disabled'}><span>${t("delete")}</span><kbd>Del</kbd></button>
+    <div class="text-context-separator"></div>
+    <button type="button" data-command="selectAll"><span>${t("selectAll")}</span><kbd>Ctrl+A</kbd></button>`:""}
   </div>`;
   const menu=root.firstElementChild;
   menu.style.left="0px"; menu.style.top="0px";
@@ -748,23 +781,81 @@ function nameOrFallback(v){ return v || t("noName"); }
 function characterFallback(){ return isEn() ? "Character" : "Персонаж"; }
 function roleOrFallback(v){ return v ? labelEnum("roles",v) : t("noRole"); }
 let lastSaveErrorAt=0;
+function serializedState(){ return JSON.stringify(state); }
+async function persistPayload(payload,flush=false){
+  if(!payload||payload===lastSavedPayload) return true;
+  if(saveInFlight){ queuedSavePayload=payload; return saveInFlight; }
+  const a=api();
+  if(!a||(!a.save&&!a.flush_save)){ markSaveError(t("saveModuleMissing")); return false; }
+  saveInFlight=(async()=>{
+    try{
+      const fn=flush&&a.flush_save?a.flush_save.bind(a):(a.save?a.save.bind(a):a.flush_save.bind(a));
+      const res=await fn(payload,lang());
+      if(apiOk(res)){ lastSavedPayload=payload; markSaved(); return true; }
+      markSaveError(apiError(res,t("saveLibraryFail"))); return false;
+    }catch(e){ markSaveError(t("saveLibraryFail")+" "+(e&&e.message?e.message:e)); return false; }
+    finally{
+      saveInFlight=null;
+      const next=queuedSavePayload; queuedSavePayload="";
+      if(next&&next!==lastSavedPayload) persistPayload(next,flush);
+    }
+  })();
+  return saveInFlight;
+}
 function save(){
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(async()=>{
-    const a=api();
-    if(!a||!a.save) return markSaveError(t("saveModuleMissing"));
-    try{
-      const res=await a.save(JSON.stringify(state),lang());
-      if(apiOk(res)) markSaved();
-      else markSaveError(apiError(res,t("saveLibraryFail")));
-    }catch(e){
-      markSaveError(t("saveLibraryFail")+" "+(e&&e.message?e.message:e));
-    }
-  },250);
+  flagSaving();
+  saveTimer=setTimeout(()=>{ saveTimer=null; persistPayload(serializedState()); },250);
+}
+async function flushPendingSave(){
+  clearTimeout(saveTimer); saveTimer=null;
+  return persistPayload(serializedState(),true);
+}
+window.knizhnitsaBeforeClose=function(){
+  clearTimeout(saveTimer); clearTimeout(snapTimer); saveTimer=snapTimer=null;
+  snapshotCurrent("move");
+  return serializedState();
+};
+function decodedLoadResult(raw){
+  if(typeof raw==="string") return {ok:true,data:raw};
+  if(raw&&raw.ok) return {ok:true,data:raw.data!==undefined?raw.data:(raw.state!==undefined?raw.state:raw.library),recovery_available:!!raw.recovery_available,recovery_source:raw.recovery_source||""};
+  return {ok:false,error:apiError(raw,t("loadFailMsg")),recovery_available:!!(raw&&raw.recovery_available)};
+}
+function parseLoadedData(value){
+  const d=typeof value==="string"?JSON.parse(value):value;
+  if(!d||!Array.isArray(d.books)) throw new Error(t("badBackup"));
+  return d;
+}
+async function recoverLatestLibrary(){
+  const a=api();
+  if(!a||!a.recover_latest_backup) return openInfo(t("loadFailTitle"),t("recoveryFail"));
+  const button=document.getElementById("recoverLibrary"); if(button) button.disabled=true;
+  try{
+    const result=decodedLoadResult(await a.recover_latest_backup(lang()));
+    if(!result.ok) throw new Error(result.error||t("recoveryFail"));
+    state=parseLoadedData(result.data); ensureData(); lastSavedPayload=serializedState();
+    closeModal(); applyTheme(); render(); toast(t("recoveryDone"));
+  }catch(e){ if(button) button.disabled=false; openInfo(t("loadFailTitle"),e&&e.message?e.message:t("recoveryFail")); }
+}
+function showLoadFailure(result){
+  applyTheme(); render();
+  modal(`<h3>${t("loadFailTitle")}</h3><div class="mpad mmsg">${escapeHtml(result.error||t("loadFailMsg"))}<br><br>${escapeHtml(t("loadFailMsg"))}</div>
+    <div class="mfoot">${result.recovery_available?`<button class="btn primary" id="recoverLibrary" onclick="recoverLatestLibrary()">${t("recoverLatest")}</button>`:""}<button class="btn" onclick="closeModal();boot()">${t("tryAgain")}</button></div>`,"wide");
+  // Ошибка загрузки блокирует пустой экран: закрыть её можно только повтором
+  // или восстановлением, иначе пользователь может принять пустоту за потерю книг.
+  activeModalCancel=()=>{};
 }
 async function boot(){
   const a=api();
-  if(a){ try{ const raw=await a.load(); if(raw){ const d=JSON.parse(raw); if(d&&d.books) state=d; } }catch(e){} }
+  let recoveryOffer=false;
+  if(a&&a.load){
+    try{
+      const result=decodedLoadResult(await a.load());
+      if(!result.ok){ showLoadFailure(result); return; }
+      if(result.data!==undefined&&result.data!==null&&result.data!=="") state=parseLoadedData(result.data);
+      recoveryOffer=result.recovery_available;
+    }catch(e){ showLoadFailure({error:e&&e.message?e.message:t("loadFailMsg"),recovery_available:true}); return; }
+  }
   ensureData();
   const s=state.settings=state.settings||{};
   if(s.theme!=="dark") s.theme="light";
@@ -775,7 +866,12 @@ async function boot(){
   document.documentElement.lang=s.lang;
   if(!Array.isArray(s.roles)||!s.roles.length) s.roles=DEFAULT_ROLES.slice();
   editorFontSize=s.fontSize;
+  lastSavedPayload=serializedState();
   applyTheme(); render();
+  if(recoveryOffer){
+    const restore=await openConfirm({title:t("recoveryOfferTitle"),message:t("recoveryOfferMsg"),ok:t("recoverLatest"),danger:false});
+    if(restore) recoverLatestLibrary();
+  }
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function now(){ return Date.now(); }
@@ -838,7 +934,7 @@ function mentionSnippet(text,mention){
 function bookWordCount(b){ return b.chapters.reduce((s,c)=>s+countWords(c.content),0); }
 function bookCharCount(b){ return b.chapters.reduce((s,c)=>s+countChars(c.content),0); }
 function statsLine(b){
-  const w=bookWordCount(b),ch=bookCharCount(b),pages=Math.max(1,Math.round(w/WORDS_PER_PAGE)),sheets=ch/CHARS_PER_SHEET;
+  const w=bookWordCount(b),ch=bookCharCount(b),pages=Math.max(0,Math.round(w/WORDS_PER_PAGE)),sheets=ch/CHARS_PER_SHEET;
   return `<b>${fmt(w)}</b> ${t("words")} · <b>≈${fmt(pages)}</b> ${t("pages")} · ${sheets.toFixed(1)} ${t("authorSheetShort")}`;
 }
 function getBook(id){ return state.books.find(b=>b.id===id); }
@@ -1827,12 +1923,13 @@ function render(){
   document.title=t("appName");
   if(route.screen==="home") renderHome(); else renderBookScreen();
   renderTopbar();
+  enhanceInteractiveControls(document);
 }
 function renderHome(){
   document.getElementById("home").classList.remove("hidden");
   document.getElementById("book").classList.add("hidden");
   const cards=state.books.map(b=>{
-    const w=bookWordCount(b),pages=Math.max(1,Math.round(w/WORDS_PER_PAGE));
+    const w=bookWordCount(b),pages=Math.max(0,Math.round(w/WORDS_PER_PAGE));
     const upd=new Date(b.updatedAt).toLocaleDateString(dateLocale(),{day:"2-digit",month:"long",year:"numeric"});
     return `<div class="book-card" onclick="openBook('${b.id}')">
       <button class="btn icon ghost small del" title="${t("delete")}" onclick="deleteBook('${b.id}',event)">${icon('trash',16)}</button>
@@ -1863,6 +1960,10 @@ function renderSidebar(){
     return `<div class="nav-item chapter-item ${active}" data-chapter-id="${c.id}" onclick="openChapterFromSidebar(event,'${c.id}')"
       onpointerdown="startChapterDrag(event,'${c.id}')">
       <span class="num">${i+1}</span><span class="label">${escapeHtml(titleOrFallback(c.title))}</span>
+      <span class="chapter-order-actions">
+        <button type="button" title="${t("moveUp")}" aria-label="${t("moveUp")}" ${i===0?'disabled':''} onclick="moveChapter('${c.id}',-1,event)">${icon('up',13)}</button>
+        <button type="button" title="${t("moveDown")}" aria-label="${t("moveDown")}" ${i===b.chapters.length-1?'disabled':''} onclick="moveChapter('${c.id}',1,event)">${icon('down',13)}</button>
+      </span>
       <span class="nav-actions">
         <button title="${t("rename")}" onclick="renameChapter('${c.id}',event)">${icon('edit',14)}</button>
         <button title="${t("moveToTrash")}" onclick="deleteChapter('${c.id}',event)">${icon('trash',14)}</button>
@@ -1889,9 +1990,11 @@ function renderSidebar(){
     <div class="side-group"><div class="side-head"><span>${t("chaptersGroup")}</span><span class="add" title="${t("addChapter")}" onclick="addChapter()">${icon('plus',16)}</span></div><div class="chapter-list" id="chapterList">${chItems}</div></div>
     <div class="side-group"><div class="side-head"><span>${t("charactersGroup")}</span><span class="add" title="${t("addCharacter")}" onclick="addCharacter()">${icon('plus',16)}</span></div>${chrItems}</div>
     <div class="side-group"><div class="side-head"><span>${t("worldLore")}</span><span class="add" title="${t("addLore")}" onclick="addLore()">${icon('plus',16)}</span></div>${loreItems}</div>`;
+  enhanceInteractiveControls(document.getElementById("sidebar"));
 }
 function renderMain(){
   const b=curBook(),main=document.getElementById("main");
+  queueMicrotask(()=>enhanceInteractiveControls(main));
   if(route.view==="chapter") return renderChapterEditor(main,b);
   if(route.view==="character") return route.charMode==="edit"?renderCharacterEdit(main,b):renderCharacterView(main,b);
   if(route.view==="characterMap") return renderCharacterMap(main,b);
@@ -1923,7 +2026,7 @@ function renderChapterEditor(main,b){
   </div>`;
   const title=document.getElementById("edTitle"),body=document.getElementById("edBody");
   fitChapterBody(body);
-  const updCount=()=>{ const w=countWords(body.value),pg=Math.max(1,Math.round(w/WORDS_PER_PAGE));
+  const updCount=()=>{ const w=countWords(body.value),pg=Math.max(0,Math.round(w/WORDS_PER_PAGE));
     document.getElementById("edCount").innerHTML=`<b>${fmt(w)}</b> ${t("words")} · ≈${fmt(pg)} ${t("pages")}`; };
   updCount();
   title.addEventListener("input",()=>{ ch.title=title.value; ch.updatedAt=now(); flagSaving(); save(); renderSidebar(); renderTopbar(); });
@@ -1970,19 +2073,25 @@ function handleDialogueDashHistory(body,event){
 }
 let savingTimer=null;
 function flagSaving(){
-  const el=document.getElementById("edSaved"); if(!el) return;
-  el.innerHTML=`${icon('clock',14)} ${t("saving")}`; el.style.color="var(--muted)";
+  const el=document.getElementById("edSaved");
+  if(el){ el.innerHTML=`${icon('clock',14)} ${t("saving")}`; el.style.color="var(--muted)"; }
+  const global=document.getElementById("globalSaveStatus");
+  if(global){ global.hidden=false; global.className="global-save-status"; global.innerHTML=`${icon('clock',13)} ${t("saving")}`; }
 }
 function markSaved(){
-  const el=document.getElementById("edSaved"); if(!el) return;
+  const el=document.getElementById("edSaved");
   clearTimeout(savingTimer);
-  el.innerHTML=`${icon('clock',14)} ${t("saved")}`; el.style.color="var(--ok)";
+  if(el){ el.innerHTML=`${icon('clock',14)} ${t("saved")}`; el.style.color="var(--ok)"; }
+  const global=document.getElementById("globalSaveStatus");
+  if(global){ global.hidden=false; global.className="global-save-status saved"; global.innerHTML=`${icon('clock',13)} ${t("saved")}`; }
 }
 function markSaveError(msg){
   const el=document.getElementById("edSaved");
   if(el){ el.innerHTML=`${icon('x',14)} ${t("notSaved")}`; el.style.color="var(--danger)"; }
-  const t=Date.now();
-  if(t-lastSaveErrorAt>3000){ toast(msg); lastSaveErrorAt=t; }
+  const global=document.getElementById("globalSaveStatus");
+  if(global){ global.hidden=false; global.className="global-save-status error"; global.innerHTML=`${icon('x',13)} ${t("notSaved")}: ${escapeHtml(msg||t("saveLibraryFail"))}`; }
+  const moment=Date.now();
+  if(moment-lastSaveErrorAt>3000){ toast(msg); lastSaveErrorAt=moment; }
 }
 function setFont(d){
   editorFontSize=Math.min(28,Math.max(14,editorFontSize+d)); state.settings.fontSize=editorFontSize; save();
@@ -2457,6 +2566,40 @@ function renderTopbar(){
 }
 
 /* ============ НАСТРОЙКИ ============ */
+let currentAppVersion="—",latestUpdateUrl="";
+async function refreshAppInfo(){
+  const el=document.getElementById("appVersionValue"),a=api();
+  if(!el) return;
+  if(a&&a.app_info){
+    try{ const info=await a.app_info(); if(apiOk(info)&&info.version) currentAppVersion=String(info.version); }catch(e){}
+  }
+  el.textContent=currentAppVersion;
+}
+async function checkForUpdates(){
+  const a=api(),button=document.getElementById("checkUpdatesButton"),status=document.getElementById("updateStatus"),download=document.getElementById("downloadUpdateButton");
+  if(!button||!status) return;
+  button.disabled=true; status.textContent=t("checkingUpdates"); if(download) download.hidden=true;
+  try{
+    if(!a||!a.check_for_updates) throw new Error(t("updateCheckFail"));
+    const result=await a.check_for_updates(lang());
+    if(!apiOk(result)) throw new Error(apiError(result,t("updateCheckFail")));
+    currentAppVersion=String(result.current_version||currentAppVersion); latestUpdateUrl=String(result.url||"");
+    const versionEl=document.getElementById("appVersionValue"); if(versionEl) versionEl.textContent=currentAppVersion;
+    if(result.update_available){
+      status.textContent=`${t("updateAvailable")} ${result.latest_version||""}`.trim();
+      if(download&&latestUpdateUrl) download.hidden=false;
+    }else status.textContent=t("currentVersion");
+  }catch(e){ status.textContent=e&&e.message?e.message:t("updateCheckFail"); }
+  finally{ button.disabled=false; }
+}
+async function openUpdateDownload(){
+  if(!latestUpdateUrl) return;
+  const a=api();
+  try{
+    if(a&&a.open_external){ const result=await a.open_external(latestUpdateUrl,lang()); if(apiOk(result)) return; throw new Error(apiError(result,t("updateCheckFail"))); }
+    window.open(latestUpdateUrl,"_blank","noopener");
+  }catch(e){ openInfo(t("failTitle"),e&&e.message?e.message:t("updateCheckFail")); }
+}
 function openSettings(){
   const s=state.settings;
   const themeSeg=`<div class="seg">
@@ -2483,8 +2626,17 @@ function openSettings(){
         </div>
         <div class="hint" style="margin-top:10px">${t("dataHint")}</div>
       </div>
+      <div class="set-section"><div class="sh">${t("about")}</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span>${t("version")}: <b id="appVersionValue">${escapeHtml(currentAppVersion)}</b></span>
+          <button class="btn small" id="checkUpdatesButton" onclick="checkForUpdates()">${t("checkUpdates")}</button>
+          <button class="btn small primary" id="downloadUpdateButton" onclick="openUpdateDownload()" hidden>${t("downloadUpdate")}</button>
+        </div>
+        <div class="hint" id="updateStatus" style="margin-top:10px">${t("updatePrivacy")}</div>
+      </div>
     </div>
     <div class="mfoot"><button class="btn primary" onclick="closeModal()">${t("done")}</button></div>`,"wide");
+  refreshAppInfo();
 }
 
 /* ============ КОРЗИНА ============ */
@@ -2603,6 +2755,7 @@ function renderSearchResults(query){
     <div class="sr-book">${escapeHtml(r.bookTitle)}</div>
     <div class="sr-snippet">${highlightText(r.snippet,tokens)}</div>
   </div>`).join("");
+  enhanceInteractiveControls(box);
 }
 function collectSearchItems(){
   const items=[];
@@ -2665,7 +2818,6 @@ function openSearchResult(bookId,view,itemId){
 }
 
 /* ============ ЭКСПОРТ ============ */
-function buildBookText(b){ let out=b.title.toUpperCase()+"\n\n"; b.chapters.forEach((c,i)=>{ out+=(c.title||(`${t("chapter")} ${i+1}`))+"\n\n"+(c.content||"")+"\n\n\n"; }); return out; }
 function openExport(){
   modal(`<h3>${t("exportBook")}</h3><div class="mpad">
     <button class="btn" style="width:100%;justify-content:flex-start;margin-bottom:10px;padding:14px 16px" onclick="exportDocx()">${icon('word',20)} ${t("docxExport")}</button>
@@ -2682,7 +2834,7 @@ async function exportDocx(){
 async function exportTxt(){
   const a=api(); if(!a) return;
   closeModal(); snapshotCurrent();
-  const res=await a.export_txt(buildBookText(curBook()),lang());
+  const res=await a.export_txt(curBook(),lang());
   if(apiOk(res)) toast(t("txtSaved"));
   else if(apiError(res,"")) openInfo(t("failTitle"),apiError(res,t("txtFail")));
 }
@@ -2712,7 +2864,10 @@ async function exportBackup(){
 }
 async function importBackup(){
   const a=api(); if(!a) return;
-  const raw=await a.import_backup(lang()); if(!raw) return;
+  const imported=await a.import_backup(lang());
+  if(!imported||(typeof imported==="object"&&imported.cancelled)) return;
+  if(typeof imported==="object"&&!apiOk(imported)) return openInfo(t("failTitle"),apiError(imported,t("backupFail")));
+  const raw=typeof imported==="string"?imported:imported.data; if(!raw) return;
   let d; try{ d=JSON.parse(raw); if(!d.books) throw 0; }catch(e){ return openInfo(t("failTitle"),t("badBackup")); }
   if(!await openConfirm({title:t("replaceBooks"),message:t("replaceBooksMsg"),ok:t("replace"),danger:false})) return;
   snapshotCurrent();
@@ -2740,8 +2895,39 @@ function openCharacterPhoto(id){
   document.getElementById("mClosePhoto").onclick=done;
   document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
 }
-function modal(html,cls){ document.getElementById("modalRoot").innerHTML=`<div class="modal-back" id="mback"><div class="modal ${cls||''}">${html}</div></div>`; }
-function closeModal(){ document.getElementById("modalRoot").innerHTML=""; }
+let modalReturnFocus=null,activeModalCancel=null;
+function enhanceInteractiveControls(root){
+  if(!root||!root.querySelectorAll) return;
+  root.querySelectorAll("[onclick]").forEach(el=>{
+    if(el.matches("button,input,textarea,select,a[href]")||el.hasAttribute("data-no-keyboard")) return;
+    if(!el.hasAttribute("role")) el.setAttribute("role","button");
+    if(!el.hasAttribute("tabindex")) el.tabIndex=0;
+    if(el.dataset.keyboardReady) return;
+    el.dataset.keyboardReady="1";
+    el.addEventListener("keydown",e=>{
+      if(e.target!==el) return;
+      if(e.key!=="Enter"&&e.key!==" ") return;
+      if(e.key===" ") e.preventDefault();
+      e.stopPropagation(); el.click();
+    });
+  });
+}
+function modal(html,cls){
+  if(!document.querySelector(".modal")) modalReturnFocus=document.activeElement;
+  activeModalCancel=null;
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-back" id="mback"><div class="modal ${cls||''}" role="dialog" aria-modal="true" tabindex="-1">${html}</div></div>`;
+  const dialog=document.querySelector(".modal");
+  const heading=dialog&&dialog.querySelector("h3");
+  if(heading){ heading.id="modalTitle"; dialog.setAttribute("aria-labelledby",heading.id); }
+  enhanceInteractiveControls(dialog);
+  queueMicrotask(()=>{ const focusable=dialog&&dialog.querySelector("button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex='0']"); (focusable||dialog)?.focus(); });
+}
+function closeModal(){
+  document.getElementById("modalRoot").innerHTML=""; activeModalCancel=null;
+  const restore=modalReturnFocus; modalReturnFocus=null;
+  if(restore&&document.contains(restore)&&restore.focus) restore.focus();
+}
+function requestCloseModal(){ if(activeModalCancel) activeModalCancel(); else closeModal(); }
 function openInput({title,label,value="",placeholder="",ok=t("done")}){
   return new Promise(res=>{
     modal(`<h3>${escapeHtml(title)}</h3><div class="mpad">${label?`<label class="flbl">${escapeHtml(label)}</label>`:''}
@@ -2749,6 +2935,7 @@ function openInput({title,label,value="",placeholder="",ok=t("done")}){
       <div class="mfoot"><button class="btn" id="mCancel">${t("cancel")}</button><button class="btn primary" id="mOk">${escapeHtml(ok)}</button></div>`);
     const inp=document.getElementById("mInput"); inp.focus(); inp.select();
     const done=v=>{ closeModal(); res(v); };
+    activeModalCancel=()=>done(null);
     document.getElementById("mOk").onclick=()=>done(inp.value);
     document.getElementById("mCancel").onclick=()=>done(null);
     document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(null); };
@@ -2760,6 +2947,7 @@ function openConfirm({title,message,ok=t("delete"),danger=true}){
     modal(`<h3>${escapeHtml(title)}</h3><div class="mpad mmsg">${escapeHtml(message||"")}</div>
       <div class="mfoot"><button class="btn" id="mCancel">${t("cancel")}</button><button class="btn ${danger?'danger':'primary'}" id="mOk">${escapeHtml(ok)}</button></div>`);
     const done=v=>{ closeModal(); res(v); };
+    activeModalCancel=()=>done(false);
     document.getElementById("mOk").onclick=()=>done(true);
     document.getElementById("mCancel").onclick=()=>done(false);
     document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(false); };
@@ -2770,6 +2958,7 @@ function openInfo(title,message){
     modal(`<h3>${escapeHtml(title)}</h3><div class="mpad mmsg">${escapeHtml(message)}</div>
       <div class="mfoot"><button class="btn primary" id="mOk">${t("understand")}</button></div>`);
     const done=()=>{ closeModal(); res(); };
+    activeModalCancel=done;
     document.getElementById("mOk").onclick=done;
     document.getElementById("mback").onclick=e=>{ if(e.target.id==="mback") done(); };
   });
@@ -2783,16 +2972,24 @@ function escapeHtml(s){ return (s||"").replace(/[&<>]/g,m=>({"&":"&amp;","<":"&l
 function escapeAttr(s){ return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 document.addEventListener("keydown",e=>{
+  const dialog=document.querySelector(".modal");
+  if(e.key==="Tab"&&dialog){
+    const focusable=[...dialog.querySelectorAll("button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),a[href],[tabindex='0']")].filter(el=>el.offsetParent!==null);
+    if(!focusable.length){ e.preventDefault(); dialog.focus(); return; }
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); return; }
+    if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); return; }
+  }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="f"){ e.preventDefault(); openSearch(); }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"&&currentTextDocument()){ e.preventDefault(); manualSnapshot(); }
   if(e.key==="Escape"){
     if(closeTextContextMenu()) return;
-    if(document.querySelector(".modal.photo")){ closeModal(); return; }
-    if(!document.getElementById("preview").classList.contains("hidden")) closePreview();
+    if(document.querySelector(".modal")){ e.preventDefault(); requestCloseModal(); return; }
+    if(!document.getElementById("preview").classList.contains("hidden")){ closePreview(); return; }
   }
 });
 document.addEventListener("contextmenu",e=>{
-  const target=editableTextTarget(e.target);
+  const target=selectableTextTarget(e.target);
   if(!target) return;
   e.preventDefault();
   showTextContextMenu(e,target);
@@ -2804,6 +3001,9 @@ document.addEventListener("pointerdown",e=>{
 document.addEventListener("scroll",closeTextContextMenu,true);
 window.addEventListener("blur",closeTextContextMenu);
 window.addEventListener("resize",()=>{ closeTextContextMenu(); fitChapterBody(document.getElementById("edBody")); });
+window.addEventListener("beforeunload",()=>{ flushPendingSave(); });
+window.addEventListener("pagehide",()=>{ flushPendingSave(); });
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") flushPendingSave(); });
 
 /* ============ СТАРТ ============ */
 if(window.pywebview&&window.pywebview.api){ boot(); }

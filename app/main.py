@@ -15,6 +15,10 @@ import base64
 import ctypes
 import mimetypes
 import threading
+import urllib.error
+import urllib.parse
+import urllib.request
+import webbrowser
 from datetime import datetime
 
 from windows_startup import (
@@ -28,7 +32,7 @@ from windows_startup import (
 )
 
 APP_NAME = "Книжница"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 LEGACY_APP_NAMES = ("Пиши книгу",)
 MAX_BACKUPS = 15
 AUTO_BACKUP_INTERVAL = 10 * 60
@@ -39,6 +43,8 @@ startup_log = None
 startup_splash = None
 single_instance = None
 last_auto_backup = 0
+library_lock = threading.RLock()
+UPDATE_API_URL = "https://api.github.com/repos/ryzhkevichpavel-del/knizhnitsa/releases/latest"
 
 
 def data_dir():
@@ -64,8 +70,10 @@ def appdata_dir(app_name):
     return os.path.join(base, app_name)
 
 
-def result(ok=True, error=""):
-    return {"ok": bool(ok), "error": error}
+def result(ok=True, error="", **extra):
+    response = {"ok": bool(ok), "error": error}
+    response.update(extra)
+    return response
 
 
 def norm_lang(lang):
@@ -79,6 +87,62 @@ def msg(lang, ru, en):
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def parse_library_text(raw):
+    """Проверить, что строка является библиотекой, не меняя её содержимое."""
+    data = json.loads(raw)
+    if not isinstance(data, dict):
+        raise ValueError("library root must be an object")
+    return data
+
+
+def read_valid_library(path):
+    raw = read_text(path)
+    return raw, parse_library_text(raw)
+
+
+def atomic_write_text(path, data):
+    """Записать текст через временный файл и принудительно сбросить его на диск."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8", newline="") as stream:
+        stream.write(data)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(tmp, path)
+
+
+def library_stats(data):
+    """Небольшая диагностика размера библиотеки без раскрытия её содержимого."""
+    if isinstance(data, str):
+        raw = data
+        parsed = parse_library_text(data)
+    else:
+        parsed = data if isinstance(data, dict) else {}
+        raw = json.dumps(parsed, ensure_ascii=False)
+    books = parsed.get("books") if isinstance(parsed.get("books"), list) else []
+    chapters = characters = history = 0
+    for book in books:
+        if not isinstance(book, dict):
+            continue
+        chapter_list = book.get("chapters") if isinstance(book.get("chapters"), list) else []
+        character_list = book.get("characters") if isinstance(book.get("characters"), list) else []
+        chapters += len(chapter_list)
+        characters += len(character_list)
+        for collection_owner in [book, *chapter_list, *character_list]:
+            if not isinstance(collection_owner, dict):
+                continue
+            for field in ("history", "versions", "planVersions", "arcVersions"):
+                if isinstance(collection_owner.get(field), list):
+                    history += len(collection_owner[field])
+    return {
+        "bytes": len(raw.encode("utf-8")),
+        "books": len(books),
+        "chapters": chapters,
+        "characters": characters,
+        "historyEntries": history,
+    }
 
 
 def _open_clipboard(attempts=8, delay=0.02):
@@ -221,9 +285,78 @@ def read_imported_text(path):
     return raw.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
 
 
+def build_book_txt(book, lang="ru"):
+    """Собрать понятный текстовый файл книги с заголовками глав."""
+    lang = norm_lang(lang)
+    book = book if isinstance(book, dict) else {}
+    title = book.get("title") or msg(lang, "Книга", "Book")
+    parts = [str(title).strip()]
+    for index, chapter in enumerate(book.get("chapters") or []):
+        if not isinstance(chapter, dict):
+            continue
+        heading = chapter.get("title") or f"{msg(lang, 'Глава', 'Chapter')} {index + 1}"
+        content = str(chapter.get("content") or "").replace("\r\n", "\n").replace("\r", "\n").strip()
+        parts.append(str(heading).strip() + ("\n\n" + content if content else ""))
+    return "\n\n".join(parts).rstrip() + "\n"
+
+
+def write_book_docx(book, path, lang="ru"):
+    """Записать книгу в DOCX, сохранив абзацы и одиночные переносы строк."""
+    from docx import Document
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Pt, Inches
+
+    lang = norm_lang(lang)
+    book = book if isinstance(book, dict) else {}
+    title = book.get("title") or msg(lang, "книга", "book")
+    doc = Document()
+    section = doc.sections[0]
+    section.top_margin = Inches(0.8)
+    section.bottom_margin = Inches(0.8)
+    section.left_margin = Inches(0.9)
+    section.right_margin = Inches(0.9)
+
+    normal = doc.styles["Normal"]
+    normal.font.name = "Georgia"
+    normal.font.size = Pt(12)
+
+    title_paragraph = doc.add_paragraph()
+    title_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title_run = title_paragraph.add_run(str(title))
+    title_run.bold = True
+    title_run.font.size = Pt(22)
+
+    chapters = book.get("chapters") or []
+    for index, chapter in enumerate(chapters):
+        if not isinstance(chapter, dict):
+            continue
+        doc.add_page_break()
+        heading = doc.add_paragraph()
+        heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        heading_run = heading.add_run(chapter.get("title") or f"{msg(lang, 'Глава', 'Chapter')} {index + 1}")
+        heading_run.bold = True
+        heading_run.font.size = Pt(16)
+
+        text = str(chapter.get("content") or "").replace("\r\n", "\n").replace("\r", "\n")
+        for block in re.split(r"\n[ \t]*\n", text):
+            if not block.strip():
+                continue
+            paragraph = doc.add_paragraph()
+            paragraph.paragraph_format.first_line_indent = Inches(0.35)
+            paragraph.paragraph_format.line_spacing = 1.25
+            paragraph.paragraph_format.space_after = Pt(2)
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            lines = block.strip().split("\n")
+            for line_index, line in enumerate(lines):
+                if line_index:
+                    paragraph.add_run().add_break()
+                paragraph.add_run(line)
+    doc.save(path)
+
+
 def has_books(raw):
     try:
-        data = json.loads(raw)
+        data = parse_library_text(raw)
         return bool(data.get("books"))
     except Exception:
         return False
@@ -239,8 +372,21 @@ def current_file_has_books():
 
 
 def migrate_legacy_data():
-    if current_file_has_books():
-        return
+    current_raw = ""
+    if os.path.exists(DATA_FILE):
+        try:
+            current_raw, _ = read_valid_library(DATA_FILE)
+            # Любой корректный текущий файл авторитетен, даже если пользователь
+            # сознательно удалил из него все книги.
+            return result(True, migrated=False)
+        except Exception as exc:
+            return result(
+                False,
+                f"Основной файл библиотеки повреждён; перенос старой версии остановлен: {exc}",
+                code="current_file_invalid",
+                migrated=False,
+            )
+    errors = []
     for old_name in LEGACY_APP_NAMES:
         old_file = os.path.join(appdata_dir(old_name), "library.json")
         if not os.path.exists(old_file):
@@ -250,13 +396,19 @@ def migrate_legacy_data():
             if not has_books(raw):
                 continue
             os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-            if os.path.exists(DATA_FILE):
-                create_backup_from_text(read_text(DATA_FILE), "перед переносом")
+            if current_raw:
+                backup = create_backup_from_text(current_raw, "перед переносом")
+                if not backup.get("ok"):
+                    return result(False, backup.get("error", ""), migrated=False)
             shutil.copy2(old_file, DATA_FILE)
             create_backup_from_text(raw, "перенесено из старой версии")
-            return
-        except Exception:
+            return result(True, migrated=True, source=old_file)
+        except Exception as exc:
+            errors.append(f"{old_file}: {exc}")
             continue
+    if errors:
+        return result(False, "Не удалось перенести старую библиотеку: " + "; ".join(errors), migrated=False)
+    return result(True, migrated=False)
 
 
 def safe_slug(text):
@@ -266,24 +418,50 @@ def safe_slug(text):
 
 
 def backup_name(reason):
-    stamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    stamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S-%f")
     return f"{stamp} - {safe_slug(reason)}.json"
 
 
-def read_latest_backup_bytes():
+def backup_files():
     try:
         files = [
-            os.path.join(BACKUP_DIR, n)
-            for n in os.listdir(BACKUP_DIR)
-            if n.lower().endswith(".json")
+            os.path.join(BACKUP_DIR, name)
+            for name in os.listdir(BACKUP_DIR)
+            if name.lower().endswith(".json")
         ]
-        if not files:
-            return None
-        latest = max(files, key=os.path.getmtime)
-        with open(latest, "rb") as f:
-            return f.read()
-    except Exception:
-        return None
+        return sorted(files, key=os.path.getmtime, reverse=True)
+    except (FileNotFoundError, NotADirectoryError):
+        return []
+
+
+def valid_recovery_candidates(include_tmp=True):
+    """Вернуть только читаемые JSON-копии, начиная с самой свежей."""
+    candidates = []
+    tmp = DATA_FILE + ".tmp"
+    paths = ([tmp] if include_tmp and os.path.exists(tmp) else []) + backup_files()
+    for path in paths:
+        try:
+            raw, _ = read_valid_library(path)
+            candidates.append({
+                "path": os.path.abspath(path),
+                "source": "temporary" if os.path.abspath(path) == os.path.abspath(tmp) else "backup",
+                "modified": os.path.getmtime(path),
+                "data": raw,
+            })
+        except Exception:
+            continue
+    return sorted(candidates, key=lambda item: item["modified"], reverse=True)
+
+
+def latest_recovery_candidate(include_tmp=True):
+    candidates = valid_recovery_candidates(include_tmp)
+    return candidates[0] if candidates else None
+
+
+def read_latest_backup_bytes():
+    for candidate in valid_recovery_candidates(include_tmp=False):
+        return candidate["data"].encode("utf-8")
+    return None
 
 
 def recycle_path(path):
@@ -312,37 +490,40 @@ def recycle_path(path):
         pass
     try:
         os.remove(path)
+        return not os.path.exists(path)
     except Exception:
         pass
     return False
 
 
 def prune_backups():
+    removed = 0
+    failed = []
     try:
-        files = [
-            os.path.join(BACKUP_DIR, n)
-            for n in os.listdir(BACKUP_DIR)
-            if n.lower().endswith(".json")
-        ]
-        files.sort(key=os.path.getmtime, reverse=True)
-        for path in files[MAX_BACKUPS:]:
-            recycle_path(path)
-    except Exception:
-        pass
+        for path in backup_files()[MAX_BACKUPS:]:
+            if recycle_path(path):
+                removed += 1
+            else:
+                failed.append(path)
+        return result(not failed, "" if not failed else "Не удалось убрать старые резервные копии.", removed=removed)
+    except Exception as exc:
+        return result(False, f"Не удалось проверить резервные копии: {exc}", removed=removed)
 
 
 def create_backup_from_text(data, reason, lang="ru"):
     if not data:
         return result(True)
     try:
+        parse_library_text(data)
         raw = data.encode("utf-8")
         if read_latest_backup_bytes() == raw:
             return result(True)
         os.makedirs(BACKUP_DIR, exist_ok=True)
         path = os.path.join(BACKUP_DIR, backup_name(reason))
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(data)
-        prune_backups()
+        atomic_write_text(path, data)
+        prune_result = prune_backups()
+        if not prune_result.get("ok"):
+            return result(False, prune_result.get("error", ""), path=path)
         return {"ok": True, "path": path, "error": ""}
     except Exception as e:
         return result(False, f"{msg(lang, 'Не удалось сделать резервную копию', 'Could not create a backup')}: {e}")
@@ -450,37 +631,210 @@ class Api:
 
     # ---- данные книг ----
     def load(self):
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                return f.read()
-        except FileNotFoundError:
-            return ""
-        except Exception:
-            return ""
+        """Загрузить библиотеку и никогда не маскировать ошибку под пустую книгу."""
+        with library_lock:
+            try:
+                raw, parsed = read_valid_library(DATA_FILE)
+                recovery = latest_recovery_candidate()
+                main_modified = os.path.getmtime(DATA_FILE)
+                newer_tmp = bool(
+                    recovery
+                    and recovery["source"] == "temporary"
+                    and recovery["modified"] > main_modified
+                    and recovery["data"] != raw
+                )
+                return result(
+                    True,
+                    data=raw,
+                    stats=library_stats(raw),
+                    recovery_available=newer_tmp,
+                    recovery_source=recovery["source"] if newer_tmp else "",
+                    recovery_path=recovery["path"] if newer_tmp else "",
+                )
+            except FileNotFoundError:
+                recovery = latest_recovery_candidate()
+                if recovery:
+                    return result(
+                        False,
+                        "Основной файл библиотеки не найден, но доступна резервная копия.",
+                        code="library_missing",
+                        data="",
+                        recovery_available=True,
+                        recovery_source=recovery["source"],
+                        recovery_path=recovery["path"],
+                    )
+                return result(True, data="", stats=library_stats({}), recovery_available=False)
+            except Exception as exc:
+                recovery = latest_recovery_candidate()
+                return result(
+                    False,
+                    f"Не удалось прочитать библиотеку: {exc}",
+                    code="library_invalid",
+                    data="",
+                    recovery_available=bool(recovery),
+                    recovery_source=(recovery or {}).get("source", ""),
+                    recovery_path=(recovery or {}).get("path", ""),
+                )
 
     def save(self, data, lang="ru"):
+        return self._save_library(data, lang)
+
+    def flush_save(self, data, lang="ru"):
+        """Синхронная точка сохранения для обработчика закрытия окна."""
+        return self._save_library(data, lang)
+
+    def _save_library(self, data, lang="ru"):
         lang = norm_lang(lang)
-        try:
-            old = ""
-            if os.path.exists(DATA_FILE):
-                old = read_text(DATA_FILE)
-            if old and old != data:
-                backup_res = backup_current_file(
-                    msg(lang, "автокопия перед сохранением", "auto backup before saving"),
-                    lang=lang,
+        with library_lock:
+            try:
+                if not isinstance(data, str):
+                    raise ValueError(msg(lang, "Данные библиотеки должны быть текстом JSON.", "Library data must be JSON text."))
+                parsed = parse_library_text(data)
+                old = ""
+                if os.path.exists(DATA_FILE):
+                    try:
+                        old, _ = read_valid_library(DATA_FILE)
+                    except Exception as exc:
+                        recovery = latest_recovery_candidate()
+                        return result(
+                            False,
+                            f"{msg(lang, 'Основной файл повреждён; сначала восстановите копию', 'The main file is damaged; restore a backup first')}: {exc}",
+                            code="current_file_invalid",
+                            recovery_available=bool(recovery),
+                            recovery_path=(recovery or {}).get("path", ""),
+                        )
+                if old == data:
+                    return result(True, changed=False, stats=library_stats(data))
+                if old:
+                    backup_res = backup_current_file(
+                        msg(lang, "автокопия перед сохранением", "auto backup before saving"),
+                        lang=lang,
+                    )
+                    if not backup_res.get("ok"):
+                        return backup_res
+                atomic_write_text(DATA_FILE, data)
+                return result(True, changed=True, stats=library_stats(data))
+            except Exception as e:
+                return result(False, f"{msg(lang, 'Не удалось сохранить библиотеку', 'Could not save library')}: {e}")
+
+    def recover_latest_backup(self, lang="ru"):
+        """Безопасно восстановить свежую исправную копию и вернуть её интерфейсу."""
+        lang = norm_lang(lang)
+        with library_lock:
+            recovery = latest_recovery_candidate()
+            if not recovery:
+                return result(False, msg(lang, "Исправная резервная копия не найдена.", "No valid backup was found."))
+            try:
+                if os.path.exists(DATA_FILE):
+                    old = read_text(DATA_FILE)
+                    if old and old != recovery["data"]:
+                        try:
+                            parse_library_text(old)
+                            backup = create_backup_from_text(
+                                old,
+                                msg(lang, "перед восстановлением", "before recovery"),
+                                lang,
+                            )
+                            if not backup.get("ok"):
+                                return backup
+                        except Exception:
+                            os.makedirs(BACKUP_DIR, exist_ok=True)
+                            damaged_path = os.path.join(BACKUP_DIR, backup_name(msg(lang, "поврежденный файл", "damaged file")))
+                            atomic_write_text(damaged_path, old)
+                            prune_backups()
+                atomic_write_text(DATA_FILE, recovery["data"])
+                return result(
+                    True,
+                    data=recovery["data"],
+                    source=recovery["source"],
+                    path=recovery["path"],
+                    restored=True,
+                    stats=library_stats(recovery["data"]),
                 )
-                if not backup_res.get("ok"):
-                    return backup_res
+            except Exception as exc:
+                return result(False, f"{msg(lang, 'Не удалось восстановить библиотеку', 'Could not restore the library')}: {exc}")
+
+    def data_stats(self, data=None, lang="ru"):
+        try:
+            if data is None:
+                data = read_text(DATA_FILE) if os.path.exists(DATA_FILE) else "{}"
+            return result(True, stats=library_stats(data))
+        except Exception as exc:
+            return result(False, f"{msg(lang, 'Не удалось проверить библиотеку', 'Could not inspect the library')}: {exc}")
+
+    def maintain_data(self, lang="ru"):
+        """Безопасная уборка старых копий и заведомо ненужного старого tmp."""
+        with library_lock:
+            prune = prune_backups()
+            tmp_removed = False
             tmp = DATA_FILE + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                f.write(data)
-            os.replace(tmp, DATA_FILE)  # атомарно — не потеряем книгу при сбое
-            return result(True)
-        except Exception as e:
-            return result(False, f"{msg(lang, 'Не удалось сохранить библиотеку', 'Could not save library')}: {e}")
+            try:
+                if os.path.exists(tmp) and os.path.exists(DATA_FILE) and os.path.getmtime(tmp) <= os.path.getmtime(DATA_FILE):
+                    os.remove(tmp)
+                    tmp_removed = True
+            except OSError:
+                pass
+            return result(prune.get("ok", False), prune.get("error", ""), removed=prune.get("removed", 0), tempRemoved=tmp_removed)
 
     def data_location(self):
         return DATA_FILE
+
+    def app_info(self):
+        return result(
+            True,
+            version=APP_VERSION,
+            data_location=DATA_FILE,
+            startup_log=os.path.join(DATA_DIR, "startup.log"),
+        )
+
+    def check_for_updates(self, lang="ru"):
+        """Проверить выпуск только по явному вызову из настроек."""
+        lang = norm_lang(lang)
+        try:
+            request = urllib.request.Request(
+                UPDATE_API_URL,
+                headers={"Accept": "application/vnd.github+json", "User-Agent": f"Knizhnitsa/{APP_VERSION}"},
+            )
+
+            with urllib.request.urlopen(request, timeout=8) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            latest = str(payload.get("tag_name") or payload.get("name") or "").strip().lstrip("vV")
+            if not latest:
+                raise ValueError("release version is missing")
+            url = str(payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest")
+
+            def version_tuple(value):
+                numbers = [int(part) for part in re.findall(r"\d+", value)[:4]]
+                return tuple(numbers + [0] * (4 - len(numbers)))
+
+            return result(
+                True,
+                current_version=APP_VERSION,
+                latest_version=latest,
+                update_available=version_tuple(latest) > version_tuple(APP_VERSION),
+                url=url,
+            )
+        except Exception as exc:
+            return result(
+                False,
+                f"{msg(lang, 'Не удалось проверить обновления', 'Could not check for updates')}: {exc}",
+                current_version=APP_VERSION,
+                latest_version="",
+                update_available=False,
+                url="",
+            )
+
+    def open_external(self, url, lang="ru"):
+        """Открыть только страницу GitHub по явному клику пользователя."""
+        lang = norm_lang(lang)
+        try:
+            parsed = urllib.parse.urlparse(str(url or ""))
+            if parsed.scheme != "https" or parsed.hostname not in {"github.com", "www.github.com"}:
+                raise ValueError(msg(lang, "Разрешены только ссылки GitHub по HTTPS.", "Only HTTPS GitHub links are allowed."))
+            opened = webbrowser.open(parsed.geturl(), new=2)
+            return result(bool(opened), "" if opened else msg(lang, "Не удалось открыть браузер.", "Could not open the browser."))
+        except Exception as exc:
+            return result(False, f"{msg(lang, 'Не удалось открыть ссылку', 'Could not open the link')}: {exc}")
 
     # ---- системный буфер обмена для меню правой кнопки ----
     def clipboard_read_text(self, lang="ru"):
@@ -598,10 +952,6 @@ class Api:
     def export_docx(self, book, lang="ru"):
         lang = norm_lang(lang)
         try:
-            from docx import Document
-            from docx.enum.text import WD_ALIGN_PARAGRAPH
-            from docx.shared import Pt, Inches
-
             title = (book or {}).get("title") or msg(lang, "книга", "book")
             path = window.create_file_dialog(
                 webview.SAVE_DIALOG,
@@ -613,51 +963,15 @@ class Api:
             if isinstance(path, (list, tuple)):
                 path = path[0]
 
-            doc = Document()
-            section = doc.sections[0]
-            section.top_margin = Inches(0.8)
-            section.bottom_margin = Inches(0.8)
-            section.left_margin = Inches(0.9)
-            section.right_margin = Inches(0.9)
-
-            normal = doc.styles["Normal"]
-            normal.font.name = "Georgia"
-            normal.font.size = Pt(12)
-
-            p = doc.add_paragraph()
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run = p.add_run(title)
-            run.bold = True
-            run.font.size = Pt(22)
-
-            chapters = (book or {}).get("chapters") or []
-            for index, chapter in enumerate(chapters):
-                doc.add_page_break()
-                h = doc.add_paragraph()
-                h.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                h_run = h.add_run(chapter.get("title") or f"{msg(lang, 'Глава', 'Chapter')} {index + 1}")
-                h_run.bold = True
-                h_run.font.size = Pt(16)
-
-                text = chapter.get("content") or ""
-                paragraphs = [p.strip() for p in re.split(r"\n+", text) if p.strip()]
-                if not paragraphs:
-                    continue
-                for para in paragraphs:
-                    pp = doc.add_paragraph()
-                    pp.paragraph_format.first_line_indent = Inches(0.35)
-                    pp.paragraph_format.line_spacing = 1.25
-                    pp.paragraph_format.space_after = Pt(2)
-                    pp.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-                    pp.add_run(para)
-
-            doc.save(path)
+            write_book_docx(book, path, lang)
             return result(True)
         except Exception as e:
             return result(False, f"{msg(lang, 'Не удалось сохранить DOCX', 'Could not save DOCX')}: {e}")
 
     def export_txt(self, content, lang="ru"):
         lang = norm_lang(lang)
+        if isinstance(content, dict):
+            content = build_book_txt(content, lang)
         return self._write_dialog(content, msg(lang, "книга.txt", "book.txt"),
                                   (msg(lang, "Текстовый файл (*.txt)", "Text file (*.txt)"),), encoding="utf-8", lang=lang)
 
@@ -692,12 +1006,14 @@ class Api:
             paths = window.create_file_dialog(
                 webview.OPEN_DIALOG, file_types=(msg(lang, "Файл копии (*.json)", "Backup file (*.json)"),))
             if not paths:
-                return ""
+                return result(False, "", cancelled=True)
             p = paths[0] if isinstance(paths, (list, tuple)) else paths
-            with open(p, "r", encoding="utf-8") as f:
-                return f.read()
-        except Exception:
-            return ""
+            raw, parsed = read_valid_library(p)
+            return result(True, data=raw, name=os.path.basename(p), stats=library_stats(raw), cancelled=False)
+        except (json.JSONDecodeError, ValueError) as exc:
+            return result(False, f"{msg(lang, 'Файл копии повреждён или имеет неверный формат', 'The backup is damaged or has an invalid format')}: {exc}", cancelled=False)
+        except Exception as exc:
+            return result(False, f"{msg(lang, 'Не удалось прочитать файл копии', 'Could not read the backup file')}: {exc}", cancelled=False)
 
 
 def main():
@@ -750,8 +1066,13 @@ def main():
         startup_log.write("webview_import_done")
 
         startup_log.write("data_migration_begin")
-        migrate_legacy_data()
-        startup_log.write("data_migration_done")
+        migration_result = migrate_legacy_data()
+        startup_log.write(
+            "data_migration_done",
+            success=bool(migration_result.get("ok")),
+            migrated=bool(migration_result.get("migrated")),
+            error=migration_result.get("error", ""),
+        )
 
         settings = load_initial_settings()
         startup_log.write("html_prepare_begin")
@@ -760,9 +1081,10 @@ def main():
         startup_log.write("html_prepare_done")
 
         state = load_window_state()
+        api = Api()
         win_kwargs = dict(
             html=html,
-            js_api=Api(),
+            js_api=api,
             width=(state or {}).get("width", 1240),
             height=(state or {}).get("height", 860),
             min_size=(940, 620),
@@ -789,9 +1111,63 @@ def main():
         def on_window_loaded():
             startup_log.write("window_loaded")
 
+        closing_allowed = threading.Event()
+        closing_flush_started = threading.Event()
+
+        def show_close_error(text):
+            ctypes.windll.user32.MessageBoxW(None, text, APP_NAME, 0x10)
+
+        def flush_then_close():
+            """Flush outside the native closing callback to avoid a WebView deadlock."""
+            try:
+                pending_data = window.evaluate_js(
+                    "window.knizhnitsaBeforeClose ? window.knizhnitsaBeforeClose() : null"
+                )
+                if isinstance(pending_data, str) and pending_data.strip():
+                    try:
+                        closing_lang = (json.loads(pending_data).get("settings") or {}).get("lang", "ru")
+                    except Exception:
+                        closing_lang = settings.get("lang", "ru")
+                    flush_result = api.flush_save(pending_data, closing_lang)
+                    startup_log.write(
+                        "close_flush",
+                        success=bool(flush_result.get("ok")),
+                        changed=bool(flush_result.get("changed")),
+                        error=flush_result.get("error", ""),
+                    )
+                    if not flush_result.get("ok"):
+                        show_close_error(
+                            "Книжница не смогла сохранить последние изменения.\n\n"
+                            "Окно останется открытым. Освободите место на диске или закройте программу, "
+                            "которая мешает записи, и попробуйте ещё раз.\n\n"
+                            + flush_result.get("error", "")
+                        )
+                        return
+                else:
+                    startup_log.write("close_flush", success=True, changed=False)
+                save_window_state()
+                closing_allowed.set()
+                window.destroy()
+            except Exception as exc:
+                startup_log.write("close_flush", success=False, error=str(exc))
+                show_close_error(
+                    "Книжница не смогла проверить сохранение последних изменений.\n\n"
+                    "Окно останется открытым. Попробуйте закрыть его ещё раз."
+                )
+            finally:
+                if not closing_allowed.is_set():
+                    closing_flush_started.clear()
+
         def on_window_closing(*_):
-            startup_log.write("window_closing")
-            save_window_state()
+            startup_log.write("window_closing", allowed=closing_allowed.is_set())
+            if closing_allowed.is_set():
+                return
+            if not closing_flush_started.is_set():
+                closing_flush_started.set()
+                threading.Thread(target=flush_then_close, name="close-flush", daemon=True).start()
+            # Returning immediately is essential: synchronous browser calls
+            # from the native closing callback can deadlock WebView2.
+            return False
 
         window.events.shown += on_window_shown
         window.events.loaded += on_window_loaded
@@ -809,7 +1185,7 @@ def main():
             startup_splash.stop()
         ctypes.windll.user32.MessageBoxW(
             None,
-            "Книжница не смогла запуститься. Подробности записаны в startup.log.",
+            f"Книжница не смогла запуститься.\n\nПодробности записаны сюда:\n{startup_log.path}",
             APP_NAME,
             0x10,
         )

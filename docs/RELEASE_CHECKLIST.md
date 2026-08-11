@@ -89,7 +89,15 @@ samples only. Do not test with private manuscripts.
 
 ## Installer and update
 
-- [ ] Build the installer with Inno Setup.
+- [ ] Run `app\build_release.ps1`; confirm syntax checks and all unit tests pass
+  before packaging starts.
+- [ ] Confirm the output is named exactly `Knizhnitsa-Setup.exe`.
+- [ ] Decide explicitly between the default unsigned build and
+  `-Mode Signed -CertificateThumbprint ...`.
+- [ ] For an unsigned build, say clearly in release notes that Windows may show
+  SmartScreen. Do not call it a trusted or verified publisher build.
+- [ ] For a signed build, inspect both executable signatures. Remember that a
+  locally valid signature alone does not guarantee public SmartScreen trust.
 - [ ] Install the app for the current Windows user.
 - [ ] Confirm Start Menu and desktop shortcuts are created.
 - [ ] Launch the installed app.
@@ -105,6 +113,10 @@ samples only. Do not test with private manuscripts.
   to date.
 - [ ] Confirm no private manuscripts, backups, tokens, keys, or local-only files
   are staged.
+- [ ] Confirm `APP_VERSION`, `AppVersion`, installer version information, and
+  executable version information all contain the same release version.
+- [ ] Confirm GitHub Actions ran unit tests and completed the PyInstaller build
+  smoke check for the exact commit being released.
 - [ ] Create a GitHub release with clear notes.
-- [ ] Attach the Windows installer.
+- [ ] Attach `Knizhnitsa-Setup.exe` and state whether it is signed or unsigned.
 - [ ] Download the release asset once and confirm it is the expected installer.

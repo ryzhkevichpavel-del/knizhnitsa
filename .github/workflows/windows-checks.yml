@@ -9,8 +9,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  syntax:
-    name: Python and UI syntax
+  checks:
+    name: Tests and Windows build smoke
     runs-on: windows-latest
 
     steps:
@@ -28,7 +28,10 @@ jobs:
           python -m pip install -r app\requirements.txt
 
       - name: Check Python syntax
-        run: python -m compileall app\main.py
+        run: python -m compileall -q app
+
+      - name: Run unit tests
+        run: python -m unittest discover -s app\tests -v
 
       - name: Check UI JavaScript syntax
         shell: pwsh
@@ -39,3 +42,12 @@ jobs:
           $js = ($matches | ForEach-Object { $_.Groups[1].Value }) -join "`n"
           Set-Content -LiteralPath $tmp -Value $js -Encoding UTF8
           node --check $tmp
+
+      - name: Build Windows application
+        shell: pwsh
+        working-directory: app
+        run: |
+          python -m PyInstaller --noconfirm --clean .\Книжница.spec
+          if (-not (Test-Path -LiteralPath ".\dist\Книжница\Книжница.exe")) {
+            throw "PyInstaller did not create the expected executable."
+          }

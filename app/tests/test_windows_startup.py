@@ -14,7 +14,11 @@ APP_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(APP_DIR))
 
 from windows_startup import (  # noqa: E402
+    ACTIVATE_EVENT_NAME,
     APP_USER_MODEL_ID,
+    INSTALLER_MUTEX_NAME,
+    LEGACY_ACTIVATE_EVENT_NAME,
+    MUTEX_NAME,
     SingleInstance,
     StartupLog,
     StartupSplash,
@@ -24,11 +28,31 @@ from windows_startup import (  # noqa: E402
 
 @unittest.skipUnless(sys.platform == "win32", "Проверки предназначены для Windows")
 class WindowsStartupTests(unittest.TestCase):
+    def test_default_instance_objects_cover_all_windows_sessions_for_one_user(self):
+        self.assertTrue(MUTEX_NAME.startswith("Global\\KnizhnitsaSingleInstance_"))
+        self.assertTrue(ACTIVATE_EVENT_NAME.startswith("Global\\KnizhnitsaActivate_"))
+        self.assertEqual(MUTEX_NAME.rsplit("_", 1)[-1], ACTIVATE_EVENT_NAME.rsplit("_", 1)[-1])
+        self.assertEqual(INSTALLER_MUTEX_NAME, "Local\\KnizhnitsaSingleInstance")
+        self.assertEqual(LEGACY_ACTIVATE_EVENT_NAME, "Local\\KnizhnitsaActivate")
+
     def test_webview_is_not_imported_at_main_module_entry(self):
         import main
 
         self.assertIsNone(main.webview)
         self.assertNotIn("webview", sys.modules)
+
+    def test_close_flush_runs_outside_native_closing_callback(self):
+        main_text = (APP_DIR / "main.py").read_text(encoding="utf-8")
+        self.assertIn("def flush_then_close():", main_text)
+        self.assertIn(
+            'threading.Thread(target=flush_then_close, name="close-flush", daemon=True).start()',
+            main_text,
+        )
+        closing_body = main_text.split("def on_window_closing(*_):", 1)[1].split(
+            "window.events.shown", 1
+        )[0]
+        self.assertIn("return False", closing_body)
+        self.assertNotIn("evaluate_js", closing_body)
 
     def test_app_user_model_id_is_explicit(self):
         self.assertTrue(set_process_app_user_model_id())

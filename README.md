@@ -64,8 +64,9 @@ SmartScreen. Для нового небольшого open-source приложе
 
 ## Разработка
 
-Требуется Windows, Python 3, зависимости из `app/requirements.txt` и, для сборки
-установщика, Inno Setup 6.
+Требуется Windows, Python 3.11, Node.js, зависимости из
+`app/requirements.txt` и, для сборки установщика, Inno Setup 6. Сценарий
+выпуска работает как в Windows PowerShell 5.1, так и в PowerShell 7.
 
 ```powershell
 cd app
@@ -73,12 +74,25 @@ python -m pip install -r requirements.txt
 python main.py
 ```
 
-Сборка приложения:
+Одна команда сначала проверяет Python и JavaScript, запускает тесты, а затем
+собирает приложение и установщик:
 
 ```powershell
 cd app
-python -m PyInstaller --noconfirm --clean .\Книжница.spec
+.\build_release.ps1
 ```
+
+По умолчанию получается честная неподписанная сборка. Windows может показать
+для неё SmartScreen. Если есть подходящий сертификат подписи кода, подписанная
+сборка запускается явно:
+
+```powershell
+cd app
+.\build_release.ps1 -Mode Signed -CertificateThumbprint "ОТПЕЧАТОК_СЕРТИФИКАТА"
+```
+
+Сам факт локальной подписи не гарантирует доверие SmartScreen: оно зависит от
+типа сертификата и репутации издателя.
 
 Готовая программа появится здесь:
 
@@ -86,24 +100,18 @@ python -m PyInstaller --noconfirm --clean .\Книжница.spec
 app\dist\Книжница\Книжница.exe
 ```
 
-Сборка установщика:
-
-```powershell
-cd app
-& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer.iss
-```
-
 Готовый установщик появится здесь:
 
 ```text
-app\dist\installer\Книжница-Setup.exe
+app\dist\installer\Knizhnitsa-Setup.exe
 ```
 
 ## Проверка изменений
 
-Автоматическое покрытие пока минимальное: GitHub Actions проверяет синтаксис
-Python и JavaScript-интерфейса на Windows без запуска GUI. Перед выпуском
-изменения также проверяются вручную по чеклисту:
+GitHub Actions на Windows проверяет синтаксис всего Python-кода и
+JavaScript-интерфейса, запускает модульные тесты и делает пробную сборку
+программы через PyInstaller. Поведение настоящего окна и установщика перед
+выпуском дополнительно проверяется вручную по чеклисту:
 
 - запуск приложения;
 - создание и редактирование книги;
@@ -115,6 +123,7 @@ Python и JavaScript-интерфейса на Windows без запуска GUI
 - сохранность пользовательских данных при обновлении и удалении.
 
 Подробный список: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md).
+Решения частых проблем: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Why open source? / Почему это открыто
 
@@ -134,8 +143,9 @@ Python и JavaScript-интерфейса на Windows без запуска GUI
 1. Обновить код и документацию, если поведение изменилось.
 2. Запустить приложение локально из `app/main.py`.
 3. Пройти ручной чеклист релиза.
-4. Собрать приложение через PyInstaller.
-5. Собрать установщик через Inno Setup.
+4. Запустить `app\build_release.ps1`: он сам проведёт автоматические проверки и
+   соберёт приложение и установщик.
+5. Явно отметить в заметках к выпуску, подписан установщик или нет.
 6. Установить новую версию поверх старой и проверить, что данные в
    `%APPDATA%\Книжница` сохранились.
 7. Создать GitHub release с установщиком и понятными заметками.
@@ -145,8 +155,8 @@ Python и JavaScript-интерфейса на Windows без запуска GUI
 ## Roadmap
 
 Короткий план развития и сопровождения: [docs/ROADMAP.md](docs/ROADMAP.md).
-В ближайших задачах - автоматические проверки локального хранения, экспорта,
-резервных копий, установщика и границ WebView/Python bridge.
+В ближайших задачах — расширение проверок локального хранения, экспорта,
+резервных копий и границ WebView/Python bridge.
 
 Дополнительные maintainer-документы:
 

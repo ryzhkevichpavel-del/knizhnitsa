@@ -6,6 +6,7 @@
 процессу и пишет компактный журнал этапов запуска.
 """
 import ctypes
+import hashlib
 import os
 import threading
 import time
@@ -14,8 +15,20 @@ from datetime import datetime
 
 
 APP_USER_MODEL_ID = "Knizhnitsa.Desktop"
-MUTEX_NAME = "Local\\KnizhnitsaSingleInstance"
-ACTIVATE_EVENT_NAME = "Local\\KnizhnitsaActivate"
+
+
+def _user_kernel_scope():
+    """Stable per-user suffix for kernel objects shared by Windows sessions."""
+    identity = os.environ.get("USERPROFILE") or os.path.expanduser("~") or os.environ.get("USERNAME") or "default"
+    normalized = os.path.normcase(os.path.abspath(identity)).encode("utf-8", errors="surrogatepass")
+    return hashlib.sha256(normalized).hexdigest()[:16]
+
+
+_KERNEL_SCOPE = _user_kernel_scope()
+MUTEX_NAME = f"Global\\KnizhnitsaSingleInstance_{_KERNEL_SCOPE}"
+ACTIVATE_EVENT_NAME = f"Global\\KnizhnitsaActivate_{_KERNEL_SCOPE}"
+INSTALLER_MUTEX_NAME = "Local\\KnizhnitsaSingleInstance"
+LEGACY_ACTIVATE_EVENT_NAME = "Local\\KnizhnitsaActivate"
 
 ERROR_ALREADY_EXISTS = 183
 WAIT_OBJECT_0 = 0
@@ -179,6 +192,9 @@ class SingleInstance:
         self.pid_path = os.path.join(data_folder, "instance.pid")
         self.mutex_handle = None
         self.event_handle = None
+        self.installer_mutex_handle = None
+        self.legacy_event_handle = None
+        self.use_compatibility_aliases = mutex_name == MUTEX_NAME and event_name == ACTIVATE_EVENT_NAME
         self.is_primary = False
         self._stopping = threading.Event()
         self._listener = None
@@ -221,6 +237,23 @@ class SingleInstance:
             self.mutex_handle = None
             self.event_handle = None
             return "secondary"
+        if self.use_compatibility_aliases:
+            self.legacy_event_handle = kernel32.CreateEventW(None, False, False, LEGACY_ACTIVATE_EVENT_NAME)
+            ctypes.set_last_error(0)
+            self.installer_mutex_handle = kernel32.CreateMutexW(None, False, INSTALLER_MUTEX_NAME)
+            legacy_error = ctypes.get_last_error()
+            if self.installer_mutex_handle and legacy_error == ERROR_ALREADY_EXISTS:
+                pid = self._read_pid()
+                signalled = bool(self.legacy_event_handle and kernel32.SetEvent(self.legacy_event_handle))
+                self.logger.write("instance_secondary_legacy", primary_pid=pid or "unknown", signalled=signalled)
+                for handle_name in ("installer_mutex_handle", "legacy_event_handle", "mutex_handle", "event_handle"):
+                    handle = getattr(self, handle_name)
+                    if handle:
+                        kernel32.CloseHandle(handle)
+                        setattr(self, handle_name, None)
+                return "secondary"
+            if not self.installer_mutex_handle or not self.legacy_event_handle:
+                self.logger.write("instance_compatibility_alias_failed")
         self.is_primary = True
         self._write_pid()
         return "primary"
@@ -286,7 +319,7 @@ class SingleInstance:
         if self._listener:
             self._listener.join(timeout=0.6)
         kernel32 = self._kernel32()
-        for handle_name in ("event_handle", "mutex_handle"):
+        for handle_name in ("legacy_event_handle", "installer_mutex_handle", "event_handle", "mutex_handle"):
             handle = getattr(self, handle_name)
             if handle:
                 kernel32.CloseHandle(handle)
