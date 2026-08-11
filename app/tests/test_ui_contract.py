@@ -81,9 +81,28 @@ class UiContractTests(unittest.TestCase):
         for command in ("heading", "bold", "italic", "list", "divider"):
             self.assertIn(f"applyLoreFormat('{command}')", self.html)
         self.assertIn('id="loreDetails"', self.html)
+        self.assertNotIn('class="format-divider"', self.html)
+        self.assertNotIn('class="format-hint"', self.html)
+        self.assertNotIn('<div class="lore-meta"><span>${t("formatting")}</span></div>', self.html)
+        self.assertNotIn('formatting:["Оформление","Formatting"]', self.html)
+
+    def test_new_lore_opens_the_full_editor_without_a_title_prompt(self):
+        self.assertIn("function addLore(){", self.html)
+        self.assertIn('const item={id:uid(),type:"Заметка",title:""', self.html)
+        self.assertNotIn('const title=await openInput({title:t("newLore")', self.html)
+        self.assertIn('if(titleInput&&!item.title.trim()) queueMicrotask(()=>titleInput.focus())', self.html)
 
     def test_truncated_sidebar_labels_expose_the_full_name(self):
         self.assertIn('class="label" title="${escapeAttr(titleOrFallback(item.title))}"', self.html)
+
+    def test_sidebar_actions_are_consistent_for_chapters_characters_and_lore(self):
+        self.assertIn("async function renameCharacter(id,ev)", self.html)
+        self.assertIn("async function renameLore(id,ev)", self.html)
+        self.assertIn("onclick=\"renameCharacter('${c.id}',event)\"", self.html)
+        self.assertIn("onclick=\"deleteCharacter('${c.id}',event)\"", self.html)
+        self.assertIn("onclick=\"renameLore('${item.id}',event)\"", self.html)
+        self.assertIn("onclick=\"deleteLore('${item.id}',event)\"", self.html)
+        self.assertIn('if(route.view==="lore"&&route.itemId===id)', self.html)
 
 
 if __name__ == "__main__":
