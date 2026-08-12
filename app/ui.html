@@ -152,8 +152,14 @@
   .character-layout{display:grid;grid-template-columns:minmax(300px,420px) minmax(0,1fr);gap:28px;align-items:start}
   .character-photo-panel{width:100%;position:sticky;top:28px}
   .character-main{min-width:0;max-width:none}
-  .portrait.large{width:100%;aspect-ratio:4/5;min-height:360px;background:#101014;border-color:#25252b}
-  .portrait.large img{width:100%;height:100%;object-fit:contain}
+  .portrait.large{width:100%;aspect-ratio:4/5;min-height:280px;position:relative;isolation:isolate;
+    background:var(--panel2);border-color:var(--line)}
+  .portrait.large .portrait-backdrop{position:absolute;inset:-24px;width:calc(100% + 48px);height:calc(100% + 48px);
+    object-fit:cover;filter:blur(18px) saturate(.9) brightness(.94);transform:scale(1.06);opacity:.96;pointer-events:none;z-index:0}
+  .portrait.large::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.08));
+    box-shadow:inset 0 0 28px rgba(0,0,0,.12);pointer-events:none;z-index:1}
+  .portrait.large .portrait-image{position:relative;width:100%;height:100%;object-fit:contain;display:block;z-index:2;
+    filter:drop-shadow(0 4px 14px rgba(0,0,0,.2))}
   .portrait-button{padding:0;cursor:zoom-in;text-align:inherit}
   .portrait-button:hover{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .photo-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
@@ -2240,12 +2246,27 @@ function setFont(d){
 }
 
 /* ---- персонаж: профиль ---- */
+function renderCharacterPortrait(c,photoAlt){
+  if(!c.photo) return `<div class="portrait large empty">${icon('user',64)}</div>`;
+  const photoSrc=escapeAttr(c.photo);
+  return `<button class="portrait large portrait-button" title="${t("openPhoto")}" onclick="openCharacterPhoto('${c.id}')">
+    <img class="portrait-backdrop" src="${photoSrc}" alt="" aria-hidden="true">
+    <img class="portrait-image" src="${photoSrc}" alt="${photoAlt}" onload="fitCharacterPortrait(this)">
+  </button>`;
+}
+function fitCharacterPortrait(img){
+  const portrait=img&&img.closest(".portrait.large");
+  if(!portrait||!img.naturalWidth||!img.naturalHeight) return;
+  const naturalRatio=img.naturalWidth/img.naturalHeight;
+  const safeRatio=Math.min(1.5,Math.max(.72,naturalRatio));
+  portrait.style.aspectRatio=String(safeRatio);
+}
 function renderCharacterView(main,b){
   const c=b.characters.find(x=>x.id===route.itemId);
   if(!c){ route.view="overview"; return renderMain(); }
   normalizeCharacter(c);
   const photoAlt=escapeAttr(c.name||t("photoAlt"));
-  const portrait=c.photo?`<button class="portrait large portrait-button" title="${t("openPhoto")}" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
+  const portrait=renderCharacterPortrait(c,photoAlt);
   main.innerHTML=`<div class="wrap character-wrap">
     <div class="pagehead">
       <div></div>
@@ -2270,7 +2291,7 @@ function renderCharacterEdit(main,b){
   if(!c){ route.view="overview"; return renderMain(); }
   normalizeCharacter(c);
   const photoAlt=escapeAttr(c.name||t("photoAlt"));
-  const photo=c.photo?`<button class="portrait large portrait-button" title="${t("openPhoto")}" onclick="openCharacterPhoto('${c.id}')"><img src="${c.photo}" alt="${photoAlt}"></button>`:`<div class="portrait large empty">${icon('user',64)}</div>`;
+  const photo=renderCharacterPortrait(c,photoAlt);
   const by=birthYear(b,c);
   main.innerHTML=`<div class="wrap character-wrap">
     <div class="pagehead">
