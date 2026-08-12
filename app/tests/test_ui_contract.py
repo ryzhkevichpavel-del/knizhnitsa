@@ -16,7 +16,7 @@ class UiContractTests(unittest.TestCase):
         self.assertIn("recover_latest_backup", self.html)
 
     def test_pending_state_can_be_flushed_before_close(self):
-        self.assertIn("window.knizhnitsaBeforeClose=function()", self.html)
+        self.assertIn("window.avtoreyaBeforeClose=function()", self.html)
         self.assertIn('window.addEventListener("beforeunload"', self.html)
         self.assertIn("flushPendingSave()", self.html)
 

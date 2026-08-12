@@ -1,6 +1,6 @@
 # Promotion Notes
 
-This is a modest promotion plan for Книжница. The goal is to find real writers
+This is a modest promotion plan for Авторея. The goal is to find real writers
 and maintainers who may care about a local-first writing tool. Do not spam, buy
 stars, ask uninterested people for stars, or invent adoption numbers.
 
@@ -32,13 +32,13 @@ stars, ask uninterested people for stars, or invent adoption numbers.
 
 ## Short Russian Post
 
-Я открыл исходный код Книжницы: это local-first Windows-приложение для писателей.
+Я открыл исходный код Автореи: это local-first Windows-приложение для писателей.
 В нём можно вести книги, главы, персонажей, план, поиск, корзину, резервные
 копии и экспорт в Word/TXT.
 
 Главное: без облака, без аккаунтов, рукописи хранятся локально на компьютере.
 
-GitHub: https://github.com/ryzhkevichpavel-del/knizhnitsa
+GitHub: https://github.com/ryzhkevichpavel-del/avtoreya
 
 Если приложение вам действительно полезно или вы хотите следить за развитием,
 буду рад звезде на GitHub. Особенно ценна обратная связь от писателей: что
@@ -46,14 +46,14 @@ GitHub: https://github.com/ryzhkevichpavel-del/knizhnitsa
 
 ## Short English Post
 
-I open-sourced Knizhnitsa, a local-first Windows desktop app for writers. It
+I open-sourced Avtoreya, a local-first Windows desktop app for writers. It
 helps manage books, chapters, characters, plans, search, trash, backups, and
 DOCX/TXT export.
 
 The privacy promise is simple: no cloud, no accounts, manuscripts stay on your
 computer.
 
-GitHub: https://github.com/ryzhkevichpavel-del/knizhnitsa
+GitHub: https://github.com/ryzhkevichpavel-del/avtoreya
 
 If the project is useful to you or you want to follow its development, a GitHub
 star is appreciated. Feedback from writers is even more useful: what feels good,

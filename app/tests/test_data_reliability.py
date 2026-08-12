@@ -168,6 +168,27 @@ class DataReliabilityTests(unittest.TestCase):
         self.assertIn("Старая книга", main.read_text(main.DATA_FILE))
         self.assertGreaterEqual(len(main.backup_files()), 1)
 
+    def test_brand_migration_preserves_legacy_backup_files(self):
+        legacy_dir = os.path.join(self.data_dir, "Книжница")
+        old_file = os.path.join(legacy_dir, "library.json")
+        old_backup = os.path.join(legacy_dir, "Резервные копии", "2026-01-01 - старая.json")
+        self.write(old_file, library("Текущая старая книга"))
+        self.write(old_backup, library("Более ранняя книга"))
+
+        with mock.patch.object(main, "LEGACY_APP_NAMES", ("Книжница",)), mock.patch.object(
+            main, "appdata_dir", return_value=legacy_dir
+        ):
+            response = main.migrate_legacy_data()
+
+        self.assertTrue(response["ok"])
+        self.assertTrue(response["migrated"])
+        self.assertTrue(os.path.exists(old_backup))
+        self.assertTrue(os.path.exists(os.path.join(main.BACKUP_DIR, os.path.basename(old_backup))))
+        self.assertIn("Текущая старая книга", main.read_text(main.DATA_FILE))
+
+    def test_default_brand_migration_includes_knizhnitsa(self):
+        self.assertIn("Книжница", main.LEGACY_APP_NAMES)
+
     def test_legacy_migration_never_overwrites_a_corrupt_current_file(self):
         self.write(main.DATA_FILE, "{damaged")
         legacy_dir = os.path.join(self.data_dir, "Старая версия")
@@ -302,7 +323,7 @@ class DataReliabilityTests(unittest.TestCase):
 
     def test_external_links_are_limited_to_https_github(self):
         with mock.patch.object(main.webbrowser, "open", return_value=True) as opener:
-            allowed = self.api.open_external("https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest")
+            allowed = self.api.open_external("https://github.com/ryzhkevichpavel-del/avtoreya/releases/latest")
             blocked = self.api.open_external("https://example.test/not-allowed")
         self.assertTrue(allowed["ok"])
         self.assertFalse(blocked["ok"])

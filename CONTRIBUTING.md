@@ -1,6 +1,6 @@
 # Contributing
 
-Спасибо за интерес к Книжнице. Это небольшое local-first Windows-приложение для
+Спасибо за интерес к Авторее. Это небольшое local-first Windows-приложение для
 писателей, поэтому главный принцип простой: не рисковать пользовательскими
 рукописями и локальными данными.
 
@@ -26,7 +26,7 @@ Build the desktop app:
 
 ```powershell
 cd app
-python -m PyInstaller --noconfirm --clean .\Книжница.spec
+python -m PyInstaller --noconfirm --clean .\Авторея.spec
 ```
 
 Build the Windows installer with Inno Setup 6:
@@ -51,7 +51,7 @@ There are no automated tests yet. For now, use the manual release checklist:
 - export `.docx` and `.txt`;
 - create and import a backup;
 - install/update with the installer;
-- confirm user data in `%APPDATA%\Книжница` is not deleted by update or
+- confirm user data in `%APPDATA%\Авторея` is not deleted by update or
   uninstall.
 
 Full checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md).

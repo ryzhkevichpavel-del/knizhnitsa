@@ -34,7 +34,7 @@ jobs:
       - name: Check UI JavaScript syntax
         shell: pwsh
         run: |
-          $tmp = Join-Path $env:RUNNER_TEMP "knizhnitsa-ui-check.js"
+          $tmp = Join-Path $env:RUNNER_TEMP "avtoreya-ui-check.js"
           $html = Get-Content -Raw app\ui.html
           $matches = [regex]::Matches($html, '(?s)<script>(.*?)</script>')
           $js = ($matches | ForEach-Object { $_.Groups[1].Value }) -join "`n"
@@ -45,8 +45,8 @@ jobs:
         shell: pwsh
         working-directory: app
         run: |
-          python -m PyInstaller --noconfirm --clean .\Книжница.spec
-          if (-not (Test-Path -LiteralPath ".\dist\Книжница\Книжница.exe")) {
+          python -m PyInstaller --noconfirm --clean .\Авторея.spec
+          if (-not (Test-Path -LiteralPath ".\dist\Авторея\Авторея.exe")) {
             throw "PyInstaller did not create the expected executable."
           }
 
@@ -84,6 +84,6 @@ jobs:
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Knizhnitsa-Setup-${{ github.ref_name }}-unsigned
-          path: app\dist\installer\Knizhnitsa-Setup.exe
+          name: Avtoreya-Setup-${{ github.ref_name }}-unsigned
+          path: app\dist\installer\Avtoreya-Setup.exe
           if-no-files-found: error

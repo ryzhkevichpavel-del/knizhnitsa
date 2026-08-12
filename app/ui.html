@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Книжница</title>
+<title>Авторея</title>
 <style>
   /* ===================== БАЗА (нейтральная, без коричневого) ===================== */
   :root, [data-theme="light"]{
@@ -648,7 +648,7 @@ const MAP_MIN_ZOOM=.65, MAP_MAX_ZOOM=2.2, MAP_ZOOM_STEP=.15;
 
 /* ============ ЛОКАЛИЗАЦИЯ ============ */
 const TEXT={
-  appName:["Книжница","Knizhnitsa"], settings:["Настройки","Settings"], search:["Поиск","Search"], trash:["Корзина","Trash"],
+  appName:["Авторея","Avtoreya"], settings:["Настройки","Settings"], search:["Поиск","Search"], trash:["Корзина","Trash"],
   allBooks:["Все книги","All books"], export:["Экспорт","Export"], preview:["Макет книги","Book layout"], done:["Готово","Done"],
   cancel:["Отмена","Cancel"], close:["Закрыть","Close"], delete:["Удалить","Delete"], save:["Сохранить","Save"], add:["Добавить","Add"],
   cut:["Вырезать","Cut"], copy:["Копировать","Copy"], paste:["Вставить","Paste"], selectAll:["Выделить всё","Select all"], undo:["Отменить","Undo"], redo:["Повторить","Redo"],
@@ -711,8 +711,8 @@ const TEXT={
   trashEmpty:["Корзина пуста.","Trash is empty."], clear:["Очистить","Empty"], withChaptersCharacters:["Со всеми главами и персонажами","With all chapters and characters"], fromBook:["Из книги","From book"], restoredBook:["Восстановленная книга","Restored book"], restored:["Восстановлено","Restored"], deleteForever:["Удалить окончательно","Delete permanently"], deleteForeverTitle:["Удалить окончательно?","Delete permanently?"], deleteForeverMsg:["После этого вернуть из корзины уже не получится.","After this, it cannot be restored from trash."], emptyTrashTitle:["Очистить корзину?","Empty trash?"], emptyTrashMsg:["Все элементы в корзине будут удалены окончательно.","All items in trash will be permanently deleted."],
   searchPh:["Имя, сцена, фраза, место...","Name, scene, phrase, place..."], searchMin:["Введите хотя бы 2 символа.","Enter at least 2 characters."], searchNothing:["Ничего не найдено.","Nothing found."], link:["Связь","Link"], lore:["Лор","Lore"],
   exportBook:["Экспорт книги","Export book"], docxExport:["Настоящий документ Word (.docx)","Real Word document (.docx)"], txtExport:["Текстовый файл (.txt)","Text file (.txt)"], wordSaved:["Книга сохранена в Word","Book saved to Word"], txtSaved:["Книга сохранена в .txt","Book saved as .txt"], failTitle:["Не получилось","Something went wrong"], wordFail:["Не удалось сохранить Word-файл.","Could not save the Word file."], txtFail:["Не удалось сохранить текстовый файл.","Could not save the text file."],
-  chapterUpper:["ГЛАВА","CHAPTER"], emptyChapter:["(глава пока пустая)","(chapter is empty)"], backupSaved:["Копия сохранена","Backup saved"], backupFail:["Не удалось сохранить копию.","Could not save backup."], badBackup:["Файл не похож на копию Книжницы.","This file does not look like a Knizhnitsa backup."], replaceBooks:["Заменить книги?","Replace books?"], replaceBooksMsg:["Текущая библиотека заменится содержимым копии.","Current library will be replaced by the backup contents."], replace:["Заменить","Replace"], beforeImport:["перед импортом","before import"], oldBackupFail:["Не удалось сохранить старое состояние перед импортом.","Could not save the old state before import."], backupLoaded:["Копия загружена","Backup loaded"], understand:["Понятно","OK"], saveModuleMissing:["Не найден модуль сохранения.","Save module was not found."], saveLibraryFail:["Не удалось сохранить библиотеку.","Could not save library."],
-  loadFailTitle:["Не удалось открыть библиотеку","Could not open the library"], loadFailMsg:["Книжница не стала показывать пустую библиотеку, чтобы не скрыть проблему. Можно восстановить последнюю исправную копию.","Knizhnitsa did not show an empty library, so the problem stays visible. You can restore the latest working backup."], recoverLatest:["Восстановить последнюю копию","Restore latest backup"], recoveryFail:["Не удалось восстановить библиотеку.","Could not restore the library."], recoveryDone:["Библиотека восстановлена","Library restored"], tryAgain:["Повторить","Try again"], recoveryOfferTitle:["Найдена более свежая копия","A newer copy was found"], recoveryOfferMsg:["После прошлого закрытия осталась более свежая исправная копия. Восстановить её?","A newer working copy remained after the previous close. Restore it?"],
+  chapterUpper:["ГЛАВА","CHAPTER"], emptyChapter:["(глава пока пустая)","(chapter is empty)"], backupSaved:["Копия сохранена","Backup saved"], backupFail:["Не удалось сохранить копию.","Could not save backup."], badBackup:["Файл не похож на копию Автореи.","This file does not look like an Avtoreya backup."], replaceBooks:["Заменить книги?","Replace books?"], replaceBooksMsg:["Текущая библиотека заменится содержимым копии.","Current library will be replaced by the backup contents."], replace:["Заменить","Replace"], beforeImport:["перед импортом","before import"], oldBackupFail:["Не удалось сохранить старое состояние перед импортом.","Could not save the old state before import."], backupLoaded:["Копия загружена","Backup loaded"], understand:["Понятно","OK"], saveModuleMissing:["Не найден модуль сохранения.","Save module was not found."], saveLibraryFail:["Не удалось сохранить библиотеку.","Could not save library."],
+  loadFailTitle:["Не удалось открыть библиотеку","Could not open the library"], loadFailMsg:["Авторея не стала показывать пустую библиотеку, чтобы не скрыть проблему. Можно восстановить последнюю исправную копию.","Avtoreya did not show an empty library, so the problem stays visible. You can restore the latest working backup."], recoverLatest:["Восстановить последнюю копию","Restore latest backup"], recoveryFail:["Не удалось восстановить библиотеку.","Could not restore the library."], recoveryDone:["Библиотека восстановлена","Library restored"], tryAgain:["Повторить","Try again"], recoveryOfferTitle:["Найдена более свежая копия","A newer copy was found"], recoveryOfferMsg:["После прошлого закрытия осталась более свежая исправная копия. Восстановить её?","A newer working copy remained after the previous close. Restore it?"],
   about:["О программе","About"], version:["Версия","Version"], checkUpdates:["Проверить обновления","Check for updates"], checkingUpdates:["Проверяем…","Checking..."], currentVersion:["Установлена актуальная версия","You have the latest version"], updateAvailable:["Доступна версия","Version available"], downloadUpdate:["Скачать обновление","Download update"], updateNow:["Обновить","Update"], automaticUpdateChecks:["Проверять обновления при каждом запуске","Check for updates at every launch"], updateCheckFail:["Не удалось проверить обновления.","Could not check for updates."], updatePrivacy:["Проверка занимает несколько килобайт; книги и другие данные не отправляются.","The check uses only a few kilobytes; books and other data are never sent."]
 };
 const ENUM_LABELS={
@@ -915,7 +915,7 @@ async function flushPendingSave(){
   clearTimeout(saveTimer); saveTimer=null;
   return persistPayload(serializedState(),true);
 }
-window.knizhnitsaBeforeClose=function(){
+window.avtoreyaBeforeClose=function(){
   clearTimeout(saveTimer); clearTimeout(snapTimer); saveTimer=snapTimer=null;
   snapshotCurrent("move");
   return serializedState();

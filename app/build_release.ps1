@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet("Unsigned", "Signed")]
     [string]$Mode = "Unsigned",
 
@@ -10,7 +10,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $appDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$installer = Join-Path $appDir "dist\installer\Knizhnitsa-Setup.exe"
+$installer = Join-Path $appDir "dist\installer\Avtoreya-Setup.exe"
 
 function Assert-LastExitCode([string]$Name) {
     if ($LASTEXITCODE -ne 0) {
@@ -122,7 +122,7 @@ try {
     Assert-LastExitCode "Unit tests"
 
     Write-Output "3/4 Checking UI JavaScript syntax..."
-    $tempJs = Join-Path ([System.IO.Path]::GetTempPath()) ("knizhnitsa-ui-{0}.js" -f [guid]::NewGuid().ToString("N"))
+    $tempJs = Join-Path ([System.IO.Path]::GetTempPath()) ("avtoreya-ui-{0}.js" -f [guid]::NewGuid().ToString("N"))
     try {
         $html = Get-Content -Raw ".\ui.html"
         $matches = [regex]::Matches($html, '(?s)<script(?:\s[^>]*)?>(.*?)</script>')
@@ -169,7 +169,7 @@ try {
         $powerShell = (Get-Process -Id $PID).Path
         $thisScript = $MyInvocation.MyCommand.Path
         $signCommand = "`$q$powerShell`$q -NoProfile -ExecutionPolicy Bypass -File `$q$thisScript`$q -Mode Signed -CertificateThumbprint `$q$CertificateThumbprint`$q -SignFile `$f"
-        & $iscc "/DSignedBuild=1" "/Sknizhnitsa=$signCommand" ".\installer.iss"
+        & $iscc "/DSignedBuild=1" "/Savtoreya=$signCommand" ".\installer.iss"
     }
     else {
         & $iscc ".\installer.iss"

@@ -1,6 +1,6 @@
 # Adoption Notes
 
-Книжница should track interest honestly. Do not create fake stars, fake download
+Авторея should track interest honestly. Do not create fake stars, fake download
 activity, fake issues, or fake testimonials.
 
 ## What To Watch
@@ -14,8 +14,8 @@ activity, fake issues, or fake testimonials.
 
 ## Downloads
 
-GitHub counts downloads per release asset. For Книжница, the main public asset is
-usually `Knizhnitsa-Setup.exe`.
+GitHub counts downloads per release asset. For Авторея, the main public asset is
+usually `Avtoreya-Setup.exe`.
 
 Download count is not the same as active users. It can include repeated
 downloads, maintainer checks, failed installs, or automated fetches. Treat it as
@@ -26,19 +26,19 @@ a rough interest signal only.
 Check the latest release and asset download counts:
 
 ```powershell
-gh release view --repo ryzhkevichpavel-del/knizhnitsa --json tagName,assets --jq '.tagName, (.assets[] | "\(.name): \(.downloadCount) downloads")'
+gh release view --repo ryzhkevichpavel-del/avtoreya --json tagName,assets --jq '.tagName, (.assets[] | "\(.name): \(.downloadCount) downloads")'
 ```
 
 Check repository stars:
 
 ```powershell
-gh repo view ryzhkevichpavel-del/knizhnitsa --json stargazerCount --jq '.stargazerCount'
+gh repo view ryzhkevichpavel-del/avtoreya --json stargazerCount --jq '.stargazerCount'
 ```
 
 List open issues:
 
 ```powershell
-gh issue list --repo ryzhkevichpavel-del/knizhnitsa --state open
+gh issue list --repo ryzhkevichpavel-del/avtoreya --state open
 ```
 
 ## Review Rhythm

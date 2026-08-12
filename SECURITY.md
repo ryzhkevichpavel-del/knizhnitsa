@@ -1,6 +1,6 @@
 # Security Policy
 
-Книжница works with private writing material: drafts, book plans, character
+Авторея works with private writing material: drafts, book plans, character
 notes, exports, and local backups. Please treat every example file as sensitive.
 
 ## What not to post publicly
@@ -9,8 +9,8 @@ Do not attach or paste any of the following into public GitHub issues, pull
 requests, screenshots, or logs:
 
 - real manuscripts, drafts, chapter text, book plans, or character notes;
-- `%APPDATA%\Книжница\library.json`;
-- files from `%APPDATA%\Книжница\Резервные копии`;
+- `%APPDATA%\Авторея\library.json`;
+- files from `%APPDATA%\Авторея\Резервные копии`;
 - exported `.docx` or `.txt` files containing private text;
 - personal names, emails, phone numbers, addresses, tokens, keys, or passwords.
 
@@ -31,7 +31,7 @@ a safer follow-up channel.
 
 Security-sensitive areas in this project include:
 
-- local library storage in `%APPDATA%\Книжница`;
+- local library storage in `%APPDATA%\Авторея`;
 - local backup creation, pruning, import, and restore behavior;
 - Word and TXT export paths and generated files;
 - the Windows installer and update/uninstall behavior;

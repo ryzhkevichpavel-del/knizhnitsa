@@ -1,8 +1,8 @@
-param(
+﻿param(
     [Parameter(Mandatory = $true)]
     [string]$ShortcutPath,
 
-    [string]$AppUserModelId = "Knizhnitsa.Desktop"
+    [string]$AppUserModelId = "Avtoreya.Desktop"
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,13 +11,13 @@ if (-not (Test-Path -LiteralPath $ShortcutPath)) {
     exit 0
 }
 
-if (-not ("Knizhnitsa.ShortcutProperties" -as [type])) {
+if (-not ("Avtoreya.ShortcutProperties" -as [type])) {
     Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace Knizhnitsa
+namespace Avtoreya
 {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     internal struct PropertyKey
@@ -104,4 +104,4 @@ namespace Knizhnitsa
 }
 
 $resolved = (Resolve-Path -LiteralPath $ShortcutPath).Path
-[Knizhnitsa.ShortcutProperties]::SetAppUserModelId($resolved, $AppUserModelId)
+[Avtoreya.ShortcutProperties]::SetAppUserModelId($resolved, $AppUserModelId)

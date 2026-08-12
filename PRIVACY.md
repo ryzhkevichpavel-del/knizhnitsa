@@ -2,9 +2,9 @@
 
 Effective date: 12 August 2026
 
-Книжница is a local-first Windows application for writers. It has no user
+Авторея is a local-first Windows application for writers. It has no user
 accounts, advertising, analytics, cloud synchronization, or telemetry operated
-by the Книжница project.
+by the Авторея project.
 
 ## Data stored on the computer
 
@@ -14,7 +14,7 @@ store these files.
 
 ## Network access
 
-By default, after each application launch, Книжница makes one delayed HTTPS
+By default, after each application launch, Авторея makes one delayed HTTPS
 request to the public GitHub Releases API to check whether a newer version is
 available. The user can disable these automatic checks in the application
 settings and still run a manual check when needed. The request contains the
@@ -28,22 +28,26 @@ contents. It does not download or install an update automatically. When an
 update exists, the application shows a button; GitHub Releases opens only after
 the user clicks it.
 
-If the computer is offline or GitHub is unavailable, Книжница continues to work
+If the computer is offline or GitHub is unavailable, Авторея continues to work
 normally. The latest update-check result may be cached locally in
-`%APPDATA%\Книжница\update-check.json`.
+`%APPDATA%\Авторея\update-check.json`.
+
+When upgrading from the former name, the application copies the valid local
+library and backups from `%APPDATA%\Книжница` into the new Авторея folder. The
+old files are left in place and are not uploaded or deleted.
 
 GitHub processes the update request under the
 [GitHub General Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 ## Sharing data by user action
 
-Книжница exports files only to a location selected by the user. If a user later
+Авторея exports files only to a location selected by the user. If a user later
 uploads an exported file, a manuscript, or a diagnostic example to another
 service, that action and the receiving service's privacy terms are outside the
-Книжница application.
+Авторея application.
 
 ## Questions
 
 Privacy questions may be opened as a
-[GitHub issue](https://github.com/ryzhkevichpavel-del/knizhnitsa/issues) without
+[GitHub issue](https://github.com/ryzhkevichpavel-del/avtoreya/issues) without
 attaching manuscripts, library files, backups, or other private information.

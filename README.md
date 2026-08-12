@@ -1,14 +1,17 @@
-# Книжница
+# Авторея
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/ryzhkevichpavel-del/knizhnitsa?label=release)](https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/ryzhkevichpavel-del/avtoreya?label=release)](https://github.com/ryzhkevichpavel-del/avtoreya/releases/latest)
 ![Windows](https://img.shields.io/badge/platform-Windows-0078d4.svg)
 ![Python](https://img.shields.io/badge/python-3.x-3776ab.svg)
 ![Local-first](https://img.shields.io/badge/local--first-privacy-6a5acd.svg)
 
-Книжница is a local-first Windows desktop app for writers. It helps keep books,
-chapters, characters, plans, search, trash, backups, and exports in one quiet
-workspace.
+**Авторея — локальная программа для написания и планирования книг.** Книги,
+главы, герои, связи, планы, поиск, резервные копии и экспорт собраны в одном
+спокойном рабочем пространстве.
+
+Avtoreya is a local-first Windows desktop app for writers. It keeps books,
+chapters, characters, plans, backups, and exports in one private workspace.
 
 Приложение работает без облака, без аккаунтов и без обязательного интернета. Все
 рукописи хранятся только на компьютере пользователя.
@@ -16,11 +19,11 @@ workspace.
 Интерфейс поддерживает русский и английский языки; переключатель `RU / EN`
 находится в верхней панели приложения.
 
-**Скачать последнюю версию:** [GitHub Releases](https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest)
+**Скачать последнюю версию:** [GitHub Releases](https://github.com/ryzhkevichpavel-del/avtoreya/releases/latest)
 
 [Privacy policy](PRIVACY.md) · [Code signing policy](CODE_SIGNING_POLICY.md)
 
-![Книжница — редактор главы](docs/screenshot.png)
+![Авторея — локальная библиотека писателя](docs/screenshot.png)
 
 ## Что делает приложение
 
@@ -43,27 +46,31 @@ workspace.
 Основная библиотека хранится здесь:
 
 ```text
-%APPDATA%\Книжница\library.json
+%APPDATA%\Авторея\library.json
 ```
+
+При первом запуске Авторея автоматически переносит библиотеку и исправные
+резервные копии из `%APPDATA%\Книжница`. Исходные файлы старой версии остаются
+на месте, поэтому переименование не лишает пользователя его книг.
 
 Резервные копии хранятся рядом:
 
 ```text
-%APPDATA%\Книжница\Резервные копии
+%APPDATA%\Авторея\Резервные копии
 ```
 
-Книжница не загружает рукописи на сервер. Если вы публикуете issue или pull
+Авторея не загружает рукописи на сервер. Если вы публикуете issue или pull
 request, не прикладывайте реальные рукописи, личные данные и приватные файлы.
 
 ## Установка
 
-1. Откройте [Releases](../../releases) и скачайте `Knizhnitsa-Setup.exe`.
+1. Откройте [Releases](../../releases) и скачайте `Avtoreya-Setup.exe`.
 2. Запустите установщик.
-3. После установки Книжница появится в меню Пуск и на рабочем столе.
+3. После установки Авторея появится в меню Пуск и на рабочем столе.
 
 Установка идет для текущего пользователя и не требует пароля администратора.
 Книги при удалении приложения не трогаются, потому что лежат в
-`%APPDATA%\Книжница`.
+`%APPDATA%\Авторея`.
 
 Пока установщик не подписан сертификатом, Windows может показать предупреждение
 SmartScreen. Для нового небольшого open-source приложения это ожидаемо: исходный
@@ -114,13 +121,13 @@ cd app
 Готовая программа появится здесь:
 
 ```text
-app\dist\Книжница\Книжница.exe
+app\dist\Авторея\Авторея.exe
 ```
 
 Готовый установщик появится здесь:
 
 ```text
-app\dist\installer\Knizhnitsa-Setup.exe
+app\dist\installer\Avtoreya-Setup.exe
 ```
 
 ## Проверка изменений
@@ -144,7 +151,7 @@ JavaScript-интерфейса, запускает модульные тест�
 
 ## Why open source? / Почему это открыто
 
-Книжница работает с самым личным материалом писателя: черновиками, идеями и
+Авторея работает с самым личным материалом писателя: черновиками, идеями и
 рукописями. Поэтому проект открыт, чтобы любой мог проверить, где хранятся
 данные, как создаются резервные копии, как работает экспорт и что делает
 установщик.
@@ -164,7 +171,7 @@ JavaScript-интерфейса, запускает модульные тест�
    соберёт приложение и установщик.
 5. Явно отметить в заметках к выпуску, подписан установщик или нет.
 6. Установить новую версию поверх старой и проверить, что данные в
-   `%APPDATA%\Книжница` сохранились.
+   `%APPDATA%\Авторея` сохранились.
 7. Создать GitHub release с установщиком и понятными заметками.
 
 План сопровождения лежит в [docs/ROADMAP.md](docs/ROADMAP.md).

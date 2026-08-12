@@ -1,6 +1,6 @@
 # Release Checklist
 
-Use this checklist before publishing a new Книжница release. Use fake writing
+Use this checklist before publishing a new Авторея release. Use fake writing
 samples only. Do not test with private manuscripts.
 
 ## Basic launch
@@ -8,7 +8,7 @@ samples only. Do not test with private manuscripts.
 - [ ] Install or run the candidate build on Windows.
 - [ ] Open the app successfully.
 - [ ] Confirm the main window renders correctly.
-- [ ] Confirm existing local data loads from `%APPDATA%\Книжница`.
+- [ ] Confirm existing local data loads from `%APPDATA%\Авторея`.
 - [ ] Confirm Russian opens by default, then switch `RU / EN` and confirm the
   selected interface language persists after restart.
 
@@ -91,7 +91,7 @@ samples only. Do not test with private manuscripts.
 ## Backups
 
 - [ ] Create a manual backup.
-- [ ] Confirm backup appears in `%APPDATA%\Книжница\Резервные копии`.
+- [ ] Confirm backup appears in `%APPDATA%\Авторея\Резервные копии`.
 - [ ] Import a backup made from fake/test data.
 - [ ] Confirm the app creates a safety backup before import.
 - [ ] Confirm old backups are pruned without deleting the active library.
@@ -104,7 +104,7 @@ samples only. Do not test with private manuscripts.
 - [ ] Confirm a failed background check stays silent and does not delay the main window.
 - [ ] Run `app\build_release.ps1`; confirm syntax checks and all unit tests pass
   before packaging starts.
-- [ ] Confirm the output is named exactly `Knizhnitsa-Setup.exe`.
+- [ ] Confirm the output is named exactly `Avtoreya-Setup.exe`.
 - [ ] Decide explicitly between the default unsigned build and
   `-Mode Signed -CertificateThumbprint ...`.
 - [ ] For an unsigned build, say clearly in release notes that Windows may show
@@ -116,9 +116,9 @@ samples only. Do not test with private manuscripts.
 - [ ] Launch the installed app.
 - [ ] Install the new version over the previous version.
 - [ ] Confirm the updater closes the running app if needed.
-- [ ] Confirm existing user data in `%APPDATA%\Книжница` remains after update.
+- [ ] Confirm existing user data in `%APPDATA%\Авторея` remains after update.
 - [ ] Uninstall the app.
-- [ ] Confirm user data in `%APPDATA%\Книжница` is not deleted by uninstall.
+- [ ] Confirm user data in `%APPDATA%\Авторея` is not deleted by uninstall.
 
 ## Release publication
 
@@ -131,5 +131,5 @@ samples only. Do not test with private manuscripts.
 - [ ] Confirm GitHub Actions ran unit tests and completed the PyInstaller build
   smoke check for the exact commit being released.
 - [ ] Create a GitHub release with clear notes.
-- [ ] Attach `Knizhnitsa-Setup.exe` and state whether it is signed or unsigned.
+- [ ] Attach `Avtoreya-Setup.exe` and state whether it is signed or unsigned.
 - [ ] Download the release asset once and confirm it is the expected installer.

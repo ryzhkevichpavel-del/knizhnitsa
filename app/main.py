@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Книжница — нативное приложение для Windows для написания книг.
+Авторея — нативное приложение для Windows для написания книг.
 Окно на движке WebView2 (Edge), интерфейс — ui.html.
-Данные хранятся в реальном файле: %APPDATA%\\Книжница\\library.json
+Данные хранятся в реальном файле: %APPDATA%\\Авторея\\library.json
 """
 import os
 import io
@@ -31,9 +31,9 @@ from windows_startup import (
     set_process_app_user_model_id,
 )
 
-APP_NAME = "Книжница"
-APP_VERSION = "1.3.0"
-LEGACY_APP_NAMES = ("Пиши книгу",)
+APP_NAME = "Авторея"
+APP_VERSION = "1.4.0"
+LEGACY_APP_NAMES = ("Книжница", "Пиши книгу")
 MAX_BACKUPS = 15
 AUTO_BACKUP_INTERVAL = 10 * 60
 ALWAYS_START_MAXIMIZED = True
@@ -45,7 +45,7 @@ single_instance = None
 last_auto_backup = 0
 library_lock = threading.RLock()
 update_lock = threading.RLock()
-UPDATE_API_URL = "https://api.github.com/repos/ryzhkevichpavel-del/knizhnitsa/releases/latest"
+UPDATE_API_URL = "https://api.github.com/repos/ryzhkevichpavel-del/avtoreya/releases/latest"
 UPDATE_CHECK_TIMEOUT = 5
 
 
@@ -88,7 +88,7 @@ def update_result(payload, source):
     latest = str(payload.get("latest_version") or payload.get("tag_name") or payload.get("name") or "").strip().lstrip("vV")
     if not latest:
         raise ValueError("release version is missing")
-    url = str(payload.get("url") or payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest")
+    url = str(payload.get("url") or payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/avtoreya/releases/latest")
     return result(
         True,
         current_version=APP_VERSION,
@@ -413,6 +413,29 @@ def current_file_has_books():
         return False
 
 
+def copy_legacy_backups(old_folder):
+    """Скопировать до 15 исправных копий старого приложения, не меняя оригиналы."""
+    old_backup_dir = os.path.join(old_folder, "Резервные копии")
+    if not os.path.isdir(old_backup_dir):
+        return
+    candidates = []
+    for name in os.listdir(old_backup_dir):
+        source = os.path.join(old_backup_dir, name)
+        if not os.path.isfile(source) or not name.lower().endswith(".json"):
+            continue
+        try:
+            read_valid_library(source)
+            candidates.append(source)
+        except Exception:
+            continue
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+    for source in sorted(candidates, key=os.path.getmtime, reverse=True)[:MAX_BACKUPS]:
+        destination = os.path.join(BACKUP_DIR, os.path.basename(source))
+        if not os.path.exists(destination):
+            shutil.copy2(source, destination)
+    prune_backups()
+
+
 def migrate_legacy_data():
     current_raw = ""
     if os.path.exists(DATA_FILE):
@@ -430,7 +453,8 @@ def migrate_legacy_data():
             )
     errors = []
     for old_name in LEGACY_APP_NAMES:
-        old_file = os.path.join(appdata_dir(old_name), "library.json")
+        old_folder = appdata_dir(old_name)
+        old_file = os.path.join(old_folder, "library.json")
         if not os.path.exists(old_file):
             continue
         try:
@@ -443,6 +467,7 @@ def migrate_legacy_data():
                 if not backup.get("ok"):
                     return result(False, backup.get("error", ""), migrated=False)
             shutil.copy2(old_file, DATA_FILE)
+            copy_legacy_backups(old_folder)
             create_backup_from_text(raw, "перенесено из старой версии")
             return result(True, migrated=True, source=old_file)
         except Exception as exc:
@@ -835,7 +860,7 @@ class Api:
         with update_lock:
             cached = read_update_cache()
             try:
-                headers = {"Accept": "application/vnd.github+json", "User-Agent": f"Knizhnitsa/{APP_VERSION}"}
+                headers = {"Accept": "application/vnd.github+json", "User-Agent": f"Avtoreya/{APP_VERSION}"}
                 if not force and cached.get("etag"):
                     headers["If-None-Match"] = str(cached["etag"])
                 request = urllib.request.Request(
@@ -861,7 +886,7 @@ class Api:
                 cached = {
                     "checked_at": time.time(),
                     "latest_version": latest,
-                    "url": str(payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest"),
+                    "url": str(payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/avtoreya/releases/latest"),
                     "etag": str(etag or ""),
                 }
                 try:
@@ -1057,7 +1082,7 @@ class Api:
         lang = norm_lang(lang)
         return self._write_dialog(
             data,
-            msg(lang, "Книжница-копия.json", "Knizhnitsa-backup.json"),
+            msg(lang, "Авторея-копия.json", "Avtoreya-backup.json"),
             (msg(lang, "Файл копии (*.json)", "Backup file (*.json)"),),
             lang=lang,
         )
@@ -1091,7 +1116,7 @@ def main():
     if role == "error":
         ctypes.windll.user32.MessageBoxW(
             None,
-            "Не удалось проверить уже запущенную Книжницу. Попробуйте ещё раз.",
+            "Не удалось проверить уже запущенную Авторею. Попробуйте ещё раз.",
             APP_NAME,
             0x10,
         )
@@ -1183,7 +1208,7 @@ def main():
             """Flush outside the native closing callback to avoid a WebView deadlock."""
             try:
                 pending_data = window.evaluate_js(
-                    "window.knizhnitsaBeforeClose ? window.knizhnitsaBeforeClose() : null"
+                    "window.avtoreyaBeforeClose ? window.avtoreyaBeforeClose() : null"
                 )
                 if isinstance(pending_data, str) and pending_data.strip():
                     try:
@@ -1199,7 +1224,7 @@ def main():
                     )
                     if not flush_result.get("ok"):
                         show_close_error(
-                            "Книжница не смогла сохранить последние изменения.\n\n"
+                            "Авторея не смогла сохранить последние изменения.\n\n"
                             "Окно останется открытым. Освободите место на диске или закройте программу, "
                             "которая мешает записи, и попробуйте ещё раз.\n\n"
                             + flush_result.get("error", "")
@@ -1213,7 +1238,7 @@ def main():
             except Exception as exc:
                 startup_log.write("close_flush", success=False, error=str(exc))
                 show_close_error(
-                    "Книжница не смогла проверить сохранение последних изменений.\n\n"
+                    "Авторея не смогла проверить сохранение последних изменений.\n\n"
                     "Окно останется открытым. Попробуйте закрыть его ещё раз."
                 )
             finally:
@@ -1247,7 +1272,7 @@ def main():
             startup_splash.stop()
         ctypes.windll.user32.MessageBoxW(
             None,
-            f"Книжница не смогла запуститься.\n\nПодробности записаны сюда:\n{startup_log.path}",
+            f"Авторея не смогла запуститься.\n\nПодробности записаны сюда:\n{startup_log.path}",
             APP_NAME,
             0x10,
         )

@@ -18,6 +18,7 @@ from windows_startup import (  # noqa: E402
     APP_USER_MODEL_ID,
     INSTALLER_MUTEX_NAME,
     LEGACY_ACTIVATE_EVENT_NAME,
+    LEGACY_INSTALLER_MUTEX_NAME,
     MUTEX_NAME,
     SingleInstance,
     StartupLog,
@@ -29,10 +30,11 @@ from windows_startup import (  # noqa: E402
 @unittest.skipUnless(sys.platform == "win32", "Проверки предназначены для Windows")
 class WindowsStartupTests(unittest.TestCase):
     def test_default_instance_objects_cover_all_windows_sessions_for_one_user(self):
-        self.assertTrue(MUTEX_NAME.startswith("Global\\KnizhnitsaSingleInstance_"))
-        self.assertTrue(ACTIVATE_EVENT_NAME.startswith("Global\\KnizhnitsaActivate_"))
+        self.assertTrue(MUTEX_NAME.startswith("Global\\AvtoreyaSingleInstance_"))
+        self.assertTrue(ACTIVATE_EVENT_NAME.startswith("Global\\AvtoreyaActivate_"))
         self.assertEqual(MUTEX_NAME.rsplit("_", 1)[-1], ACTIVATE_EVENT_NAME.rsplit("_", 1)[-1])
-        self.assertEqual(INSTALLER_MUTEX_NAME, "Local\\KnizhnitsaSingleInstance")
+        self.assertEqual(INSTALLER_MUTEX_NAME, "Local\\AvtoreyaSingleInstance")
+        self.assertEqual(LEGACY_INSTALLER_MUTEX_NAME, "Local\\KnizhnitsaSingleInstance")
         self.assertEqual(LEGACY_ACTIVATE_EVENT_NAME, "Local\\KnizhnitsaActivate")
 
     def test_webview_is_not_imported_at_main_module_entry(self):
@@ -71,8 +73,8 @@ class WindowsStartupTests(unittest.TestCase):
 
     def test_activation_signal_waits_until_listener_starts(self):
         unique = uuid.uuid4().hex
-        mutex_name = f"Local\\KnizhnitsaTestMutex_{unique}"
-        event_name = f"Local\\KnizhnitsaTestEvent_{unique}"
+        mutex_name = f"Local\\AvtoreyaTestMutex_{unique}"
+        event_name = f"Local\\AvtoreyaTestEvent_{unique}"
         with tempfile.TemporaryDirectory() as folder:
             logger = StartupLog(folder)
             primary = SingleInstance(folder, logger, mutex_name=mutex_name, event_name=event_name)

@@ -10,17 +10,17 @@ class ReleaseMetadataTests(unittest.TestCase):
         main_text = (APP_DIR / "main.py").read_text(encoding="utf-8")
         installer = (APP_DIR / "installer.iss").read_text(encoding="utf-8")
         version_info = (APP_DIR / "version_info.txt").read_text(encoding="utf-8")
-        self.assertIn('APP_VERSION = "1.3.0"', main_text)
-        self.assertIn('#define AppVersion "1.3.0"', installer)
-        self.assertIn("VersionInfoVersion=1.3.0.0", installer)
-        self.assertIn("filevers=(1, 3, 0, 0)", version_info)
-        self.assertIn("prodvers=(1, 3, 0, 0)", version_info)
+        self.assertIn('APP_VERSION = "1.4.0"', main_text)
+        self.assertIn('#define AppVersion "1.4.0"', installer)
+        self.assertIn("VersionInfoVersion=1.4.0.0", installer)
+        self.assertIn("filevers=(1, 4, 0, 0)", version_info)
+        self.assertIn("prodvers=(1, 4, 0, 0)", version_info)
 
     def test_app_user_model_id_is_consistent(self):
         startup = (APP_DIR / "windows_startup.py").read_text(encoding="utf-8")
         installer = (APP_DIR / "installer.iss").read_text(encoding="utf-8")
         shortcut_script = (APP_DIR / "set_shortcut_app_id.ps1").read_text(encoding="utf-8-sig")
-        expected = "Knizhnitsa.Desktop"
+        expected = "Avtoreya.Desktop"
         self.assertIn(expected, startup)
         self.assertIn(expected, installer)
         self.assertIn(expected, shortcut_script)
@@ -49,12 +49,19 @@ class ReleaseMetadataTests(unittest.TestCase):
         self.assertIn("compileall", build_script)
         self.assertIn("unittest discover", build_script)
         self.assertIn("node --check", build_script)
-        self.assertIn("OutputBaseFilename=Knizhnitsa-Setup", installer)
+        self.assertIn("OutputBaseFilename=Avtoreya-Setup", installer)
         self.assertIn("python -m unittest discover", workflow)
         self.assertIn("python -m PyInstaller", workflow)
         self.assertIn("actions/checkout@v7", workflow)
         self.assertIn("actions/setup-python@v7", workflow)
         self.assertNotIn("FORCE_JAVASCRIPT_ACTIONS_TO_NODE24", workflow)
+
+    def test_brand_upgrade_removes_only_old_program_files_and_shortcuts(self):
+        installer = (APP_DIR / "installer.iss").read_text(encoding="utf-8")
+        self.assertIn("UsePreviousGroup=no", installer)
+        self.assertIn('Type: files; Name: "{app}\\Книжница.exe"', installer)
+        self.assertIn('Type: files; Name: "{autodesktop}\\Книжница.lnk"', installer)
+        self.assertNotIn('%APPDATA%\\Книжница', installer)
 
     def test_release_dependencies_are_fully_pinned(self):
         requirements = (APP_DIR / "requirements.txt").read_text(encoding="utf-8")

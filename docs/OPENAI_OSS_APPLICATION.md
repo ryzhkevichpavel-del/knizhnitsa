@@ -1,13 +1,13 @@
 # OpenAI Codex for OSS Application Notes
 
 This document is a maintainer-facing draft for preparing an OpenAI Codex for
-Open Source application. It should stay factual: Книжница is a new public
+Open Source application. It should stay factual: Авторея is a new public
 local-first desktop app for writers, not a project with proven large-scale
 adoption.
 
 ## Why this project fits
 
-Книжница is a Windows desktop app for writers who want to keep manuscripts,
+Авторея is a Windows desktop app for writers who want to keep manuscripts,
 chapters, characters, plans, backups, and exports on their own computer. The
 project is public, MIT-licensed, and intentionally local-first: no accounts, no
 cloud sync, and no default upload of manuscripts.
@@ -44,7 +44,7 @@ The app works with private creative material. Security review matters because a
 bug can expose, corrupt, overwrite, or unexpectedly remove user writing. Important
 areas:
 
-- local manuscript storage in `%APPDATA%\Книжница\library.json`;
+- local manuscript storage in `%APPDATA%\Авторея\library.json`;
 - backup creation, pruning, import, and restore behavior;
 - export of private text to Word and TXT files;
 - Windows installer update/uninstall behavior;
@@ -58,14 +58,14 @@ local-first, and safer for writers.
 
 ### Describe your role
 
-I am the maintainer of Книжница, a public MIT-licensed local-first Windows
+I am the maintainer of Авторея, a public MIT-licensed local-first Windows
 desktop app for writers. I manage the repository, releases, installer packaging,
 documentation, issue triage, and the security-sensitive areas around local
 manuscript storage, backups, export, and the WebView/Python bridge.
 
 ### Why does this repository qualify?
 
-Книжница is an open-source desktop tool for writers. It is intentionally
+Авторея is an open-source desktop tool for writers. It is intentionally
 local-first: it works without accounts, without cloud sync, and keeps manuscripts
 on the user's own Windows computer. The repository is public, MIT-licensed, has a
 release with a Windows installer, and includes README, SECURITY, CONTRIBUTING,
@@ -98,7 +98,7 @@ manuscripts from the app. Planned uses include:
 
 ### Anything else
 
-Книжница is built around a simple privacy promise: writers should be able to use
+Авторея is built around a simple privacy promise: writers should be able to use
 the app without an account and without sending manuscripts to a server. The
 project is still early, which makes this a good moment to add security review,
 tests, and maintainer discipline before the codebase grows.

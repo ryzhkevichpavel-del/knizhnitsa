@@ -1,7 +1,7 @@
 # Roadmap
 
 This is a practical maintenance plan, not a promise of dates. The goal is to
-keep Книжница safe for local writing work and easier to review as an open-source
+keep Авторея safe for local writing work and easier to review as an open-source
 project.
 
 ## Near-term maintenance
@@ -42,5 +42,5 @@ project.
 - GitHub Actions compiles all Python sources, checks UI JavaScript, runs unit
   tests, and performs a PyInstaller build smoke test.
 - One PowerShell 5.1/7-compatible release command supports explicit signed and
-  unsigned modes and always creates `Knizhnitsa-Setup.exe`.
+  unsigned modes and always creates `Avtoreya-Setup.exe`.
 - Manual release and Windows troubleshooting instructions are documented.

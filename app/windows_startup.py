@@ -14,7 +14,7 @@ from ctypes import wintypes
 from datetime import datetime
 
 
-APP_USER_MODEL_ID = "Knizhnitsa.Desktop"
+APP_USER_MODEL_ID = "Avtoreya.Desktop"
 
 
 def _user_kernel_scope():
@@ -25,9 +25,10 @@ def _user_kernel_scope():
 
 
 _KERNEL_SCOPE = _user_kernel_scope()
-MUTEX_NAME = f"Global\\KnizhnitsaSingleInstance_{_KERNEL_SCOPE}"
-ACTIVATE_EVENT_NAME = f"Global\\KnizhnitsaActivate_{_KERNEL_SCOPE}"
-INSTALLER_MUTEX_NAME = "Local\\KnizhnitsaSingleInstance"
+MUTEX_NAME = f"Global\\AvtoreyaSingleInstance_{_KERNEL_SCOPE}"
+ACTIVATE_EVENT_NAME = f"Global\\AvtoreyaActivate_{_KERNEL_SCOPE}"
+INSTALLER_MUTEX_NAME = "Local\\AvtoreyaSingleInstance"
+LEGACY_INSTALLER_MUTEX_NAME = "Local\\KnizhnitsaSingleInstance"
 LEGACY_ACTIVATE_EVENT_NAME = "Local\\KnizhnitsaActivate"
 
 ERROR_ALREADY_EXISTS = 183
@@ -193,6 +194,7 @@ class SingleInstance:
         self.mutex_handle = None
         self.event_handle = None
         self.installer_mutex_handle = None
+        self.legacy_installer_mutex_handle = None
         self.legacy_event_handle = None
         self.use_compatibility_aliases = mutex_name == MUTEX_NAME and event_name == ACTIVATE_EVENT_NAME
         self.is_primary = False
@@ -241,18 +243,30 @@ class SingleInstance:
             self.legacy_event_handle = kernel32.CreateEventW(None, False, False, LEGACY_ACTIVATE_EVENT_NAME)
             ctypes.set_last_error(0)
             self.installer_mutex_handle = kernel32.CreateMutexW(None, False, INSTALLER_MUTEX_NAME)
+            installer_error = ctypes.get_last_error()
+            ctypes.set_last_error(0)
+            self.legacy_installer_mutex_handle = kernel32.CreateMutexW(None, False, LEGACY_INSTALLER_MUTEX_NAME)
             legacy_error = ctypes.get_last_error()
-            if self.installer_mutex_handle and legacy_error == ERROR_ALREADY_EXISTS:
+            if (
+                (self.installer_mutex_handle and installer_error == ERROR_ALREADY_EXISTS)
+                or (self.legacy_installer_mutex_handle and legacy_error == ERROR_ALREADY_EXISTS)
+            ):
                 pid = self._read_pid()
-                signalled = bool(self.legacy_event_handle and kernel32.SetEvent(self.legacy_event_handle))
+                signalled = bool(
+                    (self.legacy_event_handle and kernel32.SetEvent(self.legacy_event_handle))
+                    or kernel32.SetEvent(self.event_handle)
+                )
                 self.logger.write("instance_secondary_legacy", primary_pid=pid or "unknown", signalled=signalled)
-                for handle_name in ("installer_mutex_handle", "legacy_event_handle", "mutex_handle", "event_handle"):
+                for handle_name in (
+                    "legacy_installer_mutex_handle", "installer_mutex_handle",
+                    "legacy_event_handle", "mutex_handle", "event_handle"
+                ):
                     handle = getattr(self, handle_name)
                     if handle:
                         kernel32.CloseHandle(handle)
                         setattr(self, handle_name, None)
                 return "secondary"
-            if not self.installer_mutex_handle or not self.legacy_event_handle:
+            if not self.installer_mutex_handle or not self.legacy_installer_mutex_handle or not self.legacy_event_handle:
                 self.logger.write("instance_compatibility_alias_failed")
         self.is_primary = True
         self._write_pid()
@@ -288,7 +302,7 @@ class SingleInstance:
                 user32.AllowSetForegroundWindow.argtypes = [wintypes.DWORD]
                 user32.AllowSetForegroundWindow.restype = wintypes.BOOL
                 user32.AllowSetForegroundWindow(pid)
-                activate_process_window(pid, "Книжница", logger=self.logger)
+                activate_process_window(pid, "Авторея", logger=self.logger)
             except OSError:
                 pass
         signalled = bool(kernel32.SetEvent(self.event_handle))
@@ -311,7 +325,7 @@ class SingleInstance:
                 elif result != WAIT_TIMEOUT:
                     break
 
-        self._listener = threading.Thread(target=listen, name="KnizhnitsaActivation", daemon=True)
+        self._listener = threading.Thread(target=listen, name="AvtoreyaActivation", daemon=True)
         self._listener.start()
 
     def close(self):
@@ -319,7 +333,10 @@ class SingleInstance:
         if self._listener:
             self._listener.join(timeout=0.6)
         kernel32 = self._kernel32()
-        for handle_name in ("legacy_event_handle", "installer_mutex_handle", "event_handle", "mutex_handle"):
+        for handle_name in (
+            "legacy_installer_mutex_handle", "legacy_event_handle",
+            "installer_mutex_handle", "event_handle", "mutex_handle"
+        ):
             handle = getattr(self, handle_name)
             if handle:
                 kernel32.CloseHandle(handle)
@@ -378,7 +395,7 @@ class StartupSplash:
         self._timer = None
 
     def start(self):
-        self._thread = threading.Thread(target=self._run, name="KnizhnitsaSplash", daemon=True)
+        self._thread = threading.Thread(target=self._run, name="AvtoreyaSplash", daemon=True)
         self._thread.start()
         self._ready.wait(timeout=1.5)
         if self.hwnd:
@@ -511,7 +528,7 @@ class StartupSplash:
                 left = 92 if icon else 30
                 title_rect = wintypes.RECT(left, 29, 395, 65)
                 gdi32.SelectObject(hdc, title_font)
-                user32.DrawTextW(hdc, "Книжница", -1, ctypes.byref(title_rect), 0x00000020)
+                user32.DrawTextW(hdc, "Авторея", -1, ctypes.byref(title_rect), 0x00000020)
                 gdi32.SetTextColor(hdc, 0x00B8B8B8)
                 text_rect = wintypes.RECT(left, 68, 395, 98)
                 gdi32.SelectObject(hdc, text_font)
@@ -532,7 +549,7 @@ class StartupSplash:
             return user32.DefWindowProcW(hwnd, message, wparam, lparam)
 
         self._wndproc = wndproc
-        class_name = f"KnizhnitsaStartupWindow_{os.getpid()}"
+        class_name = f"AvtoreyaStartupWindow_{os.getpid()}"
         hinstance = kernel32.GetModuleHandleW(None)
         wc = WNDCLASSEXW(
             ctypes.sizeof(WNDCLASSEXW),
@@ -555,7 +572,7 @@ class StartupSplash:
             y = max(0, (user32.GetSystemMetrics(1) - height) // 2)
             ex_style = 0x00000080 | 0x00000008 | 0x08000000  # TOOLWINDOW | TOPMOST | NOACTIVATE
             self.hwnd = user32.CreateWindowExW(
-                ex_style, class_name, "Книжница запускается", 0x80000000,
+                ex_style, class_name, "Авторея запускается", 0x80000000,
                 x, y, width, height, None, None, hinstance, None
             )
             if self.hwnd:
