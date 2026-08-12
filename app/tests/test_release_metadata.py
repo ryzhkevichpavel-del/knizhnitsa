@@ -10,11 +10,11 @@ class ReleaseMetadataTests(unittest.TestCase):
         main_text = (APP_DIR / "main.py").read_text(encoding="utf-8")
         installer = (APP_DIR / "installer.iss").read_text(encoding="utf-8")
         version_info = (APP_DIR / "version_info.txt").read_text(encoding="utf-8")
-        self.assertIn('APP_VERSION = "1.2.0"', main_text)
-        self.assertIn('#define AppVersion "1.2.0"', installer)
-        self.assertIn("VersionInfoVersion=1.2.0.0", installer)
-        self.assertIn("filevers=(1, 2, 0, 0)", version_info)
-        self.assertIn("prodvers=(1, 2, 0, 0)", version_info)
+        self.assertIn('APP_VERSION = "1.3.0"', main_text)
+        self.assertIn('#define AppVersion "1.3.0"', installer)
+        self.assertIn("VersionInfoVersion=1.3.0.0", installer)
+        self.assertIn("filevers=(1, 3, 0, 0)", version_info)
+        self.assertIn("prodvers=(1, 3, 0, 0)", version_info)
 
     def test_app_user_model_id_is_consistent(self):
         startup = (APP_DIR / "windows_startup.py").read_text(encoding="utf-8")

@@ -24,8 +24,9 @@ def library(title="Тест"):
 
 
 class FakeResponse:
-    def __init__(self, payload):
+    def __init__(self, payload, headers=None):
         self.payload = json.dumps(payload).encode("utf-8")
+        self.headers = headers or {}
 
     def __enter__(self):
         return self
@@ -46,6 +47,7 @@ class DataReliabilityTests(unittest.TestCase):
             mock.patch.object(main, "DATA_FILE", os.path.join(self.data_dir, "library.json")),
             mock.patch.object(main, "BACKUP_DIR", os.path.join(self.data_dir, "Резервные копии")),
             mock.patch.object(main, "WINDOW_STATE_FILE", os.path.join(self.data_dir, "window.json")),
+            mock.patch.object(main, "UPDATE_CACHE_FILE", os.path.join(self.data_dir, "update-check.json")),
         ]
         for patch in self.patches:
             patch.start()
@@ -240,6 +242,63 @@ class DataReliabilityTests(unittest.TestCase):
         self.assertFalse(response["ok"])
         self.assertEqual(response["current_version"], main.APP_VERSION)
         self.assertIn("Не удалось", response["error"])
+
+    def test_background_update_check_requests_once_on_every_launch(self):
+        self.write(
+            main.UPDATE_CACHE_FILE,
+            json.dumps({"checked_at": main.time.time(), "latest_version": "9.0.0", "url": "https://github.com/example/release"}),
+        )
+        with mock.patch.object(
+            main.urllib.request,
+            "urlopen",
+            return_value=FakeResponse({"tag_name": "v9.0.0", "html_url": "https://github.com/example/release"}),
+        ) as opener:
+            response = self.api.check_for_updates("ru", False)
+        self.assertTrue(response["ok"])
+        self.assertTrue(response["update_available"])
+        self.assertEqual(response["source"], "network")
+        opener.assert_called_once()
+
+    def test_background_update_check_refreshes_stale_cache(self):
+        self.write(
+            main.UPDATE_CACHE_FILE,
+            json.dumps({"checked_at": 1, "latest_version": "1.0.0", "url": "https://github.com/example/old"}),
+        )
+        with mock.patch.object(
+            main.urllib.request,
+            "urlopen",
+            return_value=FakeResponse({"tag_name": "v9.0.0", "html_url": "https://github.com/example/new"}),
+        ) as opener:
+            response = self.api.check_for_updates("ru", False)
+        self.assertTrue(response["ok"])
+        self.assertEqual(response["source"], "network")
+        self.assertEqual(response["latest_version"], "9.0.0")
+        opener.assert_called_once()
+
+    def test_background_update_check_reuses_etag_when_release_is_unchanged(self):
+        self.write(
+            main.UPDATE_CACHE_FILE,
+            json.dumps(
+                {
+                    "checked_at": 1,
+                    "latest_version": "9.0.0",
+                    "url": "https://github.com/example/release",
+                    "etag": '"release-9"',
+                }
+            ),
+        )
+
+        def unchanged(request, timeout):
+            self.assertEqual(request.get_header("If-none-match"), '"release-9"')
+            self.assertEqual(timeout, main.UPDATE_CHECK_TIMEOUT)
+            raise main.urllib.error.HTTPError(request.full_url, 304, "Not Modified", None, None)
+
+        with mock.patch.object(main.urllib.request, "urlopen", side_effect=unchanged) as opener:
+            response = self.api.check_for_updates("ru", False)
+        self.assertTrue(response["ok"])
+        self.assertEqual(response["source"], "not_modified")
+        self.assertTrue(response["update_available"])
+        opener.assert_called_once()
 
     def test_external_links_are_limited_to_https_github(self):
         with mock.patch.object(main.webbrowser, "open", return_value=True) as opener:

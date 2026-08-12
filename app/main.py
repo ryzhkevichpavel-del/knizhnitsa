@@ -32,7 +32,7 @@ from windows_startup import (
 )
 
 APP_NAME = "Книжница"
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
 LEGACY_APP_NAMES = ("Пиши книгу",)
 MAX_BACKUPS = 15
 AUTO_BACKUP_INTERVAL = 10 * 60
@@ -44,7 +44,9 @@ startup_splash = None
 single_instance = None
 last_auto_backup = 0
 library_lock = threading.RLock()
+update_lock = threading.RLock()
 UPDATE_API_URL = "https://api.github.com/repos/ryzhkevichpavel-del/knizhnitsa/releases/latest"
+UPDATE_CHECK_TIMEOUT = 5
 
 
 def data_dir():
@@ -58,6 +60,7 @@ DATA_DIR = data_dir()
 DATA_FILE = os.path.join(DATA_DIR, "library.json")
 BACKUP_DIR = os.path.join(DATA_DIR, "Резервные копии")
 WINDOW_STATE_FILE = os.path.join(DATA_DIR, "window.json")
+UPDATE_CACHE_FILE = os.path.join(DATA_DIR, "update-check.json")
 
 
 def resource(name):
@@ -74,6 +77,35 @@ def result(ok=True, error="", **extra):
     response = {"ok": bool(ok), "error": error}
     response.update(extra)
     return response
+
+
+def version_tuple(value):
+    numbers = [int(part) for part in re.findall(r"\d+", str(value or ""))[:4]]
+    return tuple(numbers + [0] * (4 - len(numbers)))
+
+
+def update_result(payload, source):
+    latest = str(payload.get("latest_version") or payload.get("tag_name") or payload.get("name") or "").strip().lstrip("vV")
+    if not latest:
+        raise ValueError("release version is missing")
+    url = str(payload.get("url") or payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest")
+    return result(
+        True,
+        current_version=APP_VERSION,
+        latest_version=latest,
+        update_available=version_tuple(latest) > version_tuple(APP_VERSION),
+        url=url,
+        checked_at=float(payload.get("checked_at") or time.time()),
+        source=source,
+    )
+
+
+def read_update_cache():
+    try:
+        cached = json.loads(read_text(UPDATE_CACHE_FILE))
+        return cached if isinstance(cached, dict) else {}
+    except (OSError, ValueError, TypeError):
+        return {}
 
 
 def norm_lang(lang):
@@ -797,42 +829,62 @@ class Api:
             startup_log=os.path.join(DATA_DIR, "startup.log"),
         )
 
-    def check_for_updates(self, lang="ru"):
-        """Проверить выпуск только по явному вызову из настроек."""
+    def check_for_updates(self, lang="ru", force=True):
+        """Проверить выпуск; при запуске использовать ETag и кэш как запасной ответ."""
         lang = norm_lang(lang)
-        try:
-            request = urllib.request.Request(
-                UPDATE_API_URL,
-                headers={"Accept": "application/vnd.github+json", "User-Agent": f"Knizhnitsa/{APP_VERSION}"},
-            )
-
-            with urllib.request.urlopen(request, timeout=8) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-            latest = str(payload.get("tag_name") or payload.get("name") or "").strip().lstrip("vV")
-            if not latest:
-                raise ValueError("release version is missing")
-            url = str(payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest")
-
-            def version_tuple(value):
-                numbers = [int(part) for part in re.findall(r"\d+", value)[:4]]
-                return tuple(numbers + [0] * (4 - len(numbers)))
-
-            return result(
-                True,
-                current_version=APP_VERSION,
-                latest_version=latest,
-                update_available=version_tuple(latest) > version_tuple(APP_VERSION),
-                url=url,
-            )
-        except Exception as exc:
-            return result(
-                False,
-                f"{msg(lang, 'Не удалось проверить обновления', 'Could not check for updates')}: {exc}",
-                current_version=APP_VERSION,
-                latest_version="",
-                update_available=False,
-                url="",
-            )
+        with update_lock:
+            cached = read_update_cache()
+            try:
+                headers = {"Accept": "application/vnd.github+json", "User-Agent": f"Knizhnitsa/{APP_VERSION}"}
+                if not force and cached.get("etag"):
+                    headers["If-None-Match"] = str(cached["etag"])
+                request = urllib.request.Request(
+                    UPDATE_API_URL,
+                    headers=headers,
+                )
+                try:
+                    with urllib.request.urlopen(request, timeout=UPDATE_CHECK_TIMEOUT) as response:
+                        payload = json.loads(response.read().decode("utf-8"))
+                        etag = response.headers.get("ETag", "")
+                except urllib.error.HTTPError as exc:
+                    if exc.code == 304 and cached:
+                        cached["checked_at"] = time.time()
+                        try:
+                            atomic_write_text(UPDATE_CACHE_FILE, json.dumps(cached, ensure_ascii=False))
+                        except OSError:
+                            pass
+                        return update_result(cached, "not_modified")
+                    raise
+                latest = str(payload.get("tag_name") or payload.get("name") or "").strip().lstrip("vV")
+                if not latest:
+                    raise ValueError("release version is missing")
+                cached = {
+                    "checked_at": time.time(),
+                    "latest_version": latest,
+                    "url": str(payload.get("html_url") or "https://github.com/ryzhkevichpavel-del/knizhnitsa/releases/latest"),
+                    "etag": str(etag or ""),
+                }
+                try:
+                    atomic_write_text(UPDATE_CACHE_FILE, json.dumps(cached, ensure_ascii=False))
+                except OSError:
+                    pass
+                return update_result(cached, "network")
+            except Exception as exc:
+                if not force and cached:
+                    try:
+                        stale = update_result(cached, "stale_cache")
+                        stale["stale"] = True
+                        return stale
+                    except (ValueError, TypeError):
+                        pass
+                return result(
+                    False,
+                    f"{msg(lang, 'Не удалось проверить обновления', 'Could not check for updates')}: {exc}",
+                    current_version=APP_VERSION,
+                    latest_version="",
+                    update_available=False,
+                    url="",
+                )
 
     def open_external(self, url, lang="ru"):
         """Открыть только страницу GitHub по явному клику пользователя."""

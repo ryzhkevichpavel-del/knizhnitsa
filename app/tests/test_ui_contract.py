@@ -47,9 +47,15 @@ class UiContractTests(unittest.TestCase):
         self.assertIn('aria-label="${t("moveUp")}"', self.html)
         self.assertIn('aria-label="${t("moveDown")}"', self.html)
 
-    def test_update_check_is_user_initiated(self):
+    def test_update_check_runs_once_per_launch_and_manual_on_request(self):
         self.assertIn('id="checkUpdatesButton" onclick="checkForUpdates()"', self.html)
-        self.assertIn("a.check_for_updates(lang())", self.html)
+        self.assertIn("setTimeout(backgroundCheckForUpdates,2500)", self.html)
+        self.assertIn("a.check_for_updates(lang(),false)", self.html)
+        self.assertIn("a.check_for_updates(lang(),true)", self.html)
+        self.assertIn('class="btn small update-action"', self.html)
+        self.assertIn('automaticUpdateChecks:INITIAL_SETTINGS.automaticUpdateChecks!==false', self.html)
+        self.assertIn('if(s.automaticUpdateChecks!==false) startBackgroundUpdateCheck()', self.html)
+        self.assertIn('onclick="setAutomaticUpdateChecks(false)"', self.html)
         self.assertNotIn("setInterval(checkForUpdates", self.html)
 
     def test_working_text_views_use_available_width(self):

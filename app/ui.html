@@ -53,6 +53,11 @@
   .tb-title:hover{color:var(--accent)}
   .stat{font-size:13px;color:var(--muted);white-space:nowrap}
   .stat b{color:var(--ink);font-weight:600}
+  .update-action{background:#1677ff!important;border-color:#1677ff!important;color:#fff!important;font-weight:700;
+    box-shadow:0 5px 16px rgba(22,119,255,.28);transition:transform .14s,background .14s,box-shadow .14s}
+  .update-action:hover{background:#368cff!important;border-color:#368cff!important;color:#fff!important;
+    transform:translateY(-1px);box-shadow:0 7px 20px rgba(22,119,255,.36)}
+  .update-action:focus-visible{outline:3px solid rgba(22,119,255,.3);outline-offset:2px}
 
   /* ===================== ДОМ (по центру) ===================== */
   #home{height:calc(100vh - 52px);overflow-y:auto;display:flex;flex-direction:column;align-items:center}
@@ -708,7 +713,7 @@ const TEXT={
   exportBook:["Экспорт книги","Export book"], docxExport:["Настоящий документ Word (.docx)","Real Word document (.docx)"], txtExport:["Текстовый файл (.txt)","Text file (.txt)"], wordSaved:["Книга сохранена в Word","Book saved to Word"], txtSaved:["Книга сохранена в .txt","Book saved as .txt"], failTitle:["Не получилось","Something went wrong"], wordFail:["Не удалось сохранить Word-файл.","Could not save the Word file."], txtFail:["Не удалось сохранить текстовый файл.","Could not save the text file."],
   chapterUpper:["ГЛАВА","CHAPTER"], emptyChapter:["(глава пока пустая)","(chapter is empty)"], backupSaved:["Копия сохранена","Backup saved"], backupFail:["Не удалось сохранить копию.","Could not save backup."], badBackup:["Файл не похож на копию Книжницы.","This file does not look like a Knizhnitsa backup."], replaceBooks:["Заменить книги?","Replace books?"], replaceBooksMsg:["Текущая библиотека заменится содержимым копии.","Current library will be replaced by the backup contents."], replace:["Заменить","Replace"], beforeImport:["перед импортом","before import"], oldBackupFail:["Не удалось сохранить старое состояние перед импортом.","Could not save the old state before import."], backupLoaded:["Копия загружена","Backup loaded"], understand:["Понятно","OK"], saveModuleMissing:["Не найден модуль сохранения.","Save module was not found."], saveLibraryFail:["Не удалось сохранить библиотеку.","Could not save library."],
   loadFailTitle:["Не удалось открыть библиотеку","Could not open the library"], loadFailMsg:["Книжница не стала показывать пустую библиотеку, чтобы не скрыть проблему. Можно восстановить последнюю исправную копию.","Knizhnitsa did not show an empty library, so the problem stays visible. You can restore the latest working backup."], recoverLatest:["Восстановить последнюю копию","Restore latest backup"], recoveryFail:["Не удалось восстановить библиотеку.","Could not restore the library."], recoveryDone:["Библиотека восстановлена","Library restored"], tryAgain:["Повторить","Try again"], recoveryOfferTitle:["Найдена более свежая копия","A newer copy was found"], recoveryOfferMsg:["После прошлого закрытия осталась более свежая исправная копия. Восстановить её?","A newer working copy remained after the previous close. Restore it?"],
-  about:["О программе","About"], version:["Версия","Version"], checkUpdates:["Проверить обновления","Check for updates"], checkingUpdates:["Проверяем…","Checking..."], currentVersion:["Установлена актуальная версия","You have the latest version"], updateAvailable:["Доступна версия","Version available"], downloadUpdate:["Скачать обновление","Download update"], updateCheckFail:["Не удалось проверить обновления.","Could not check for updates."], updatePrivacy:["Проверка выполняется только по этой кнопке. В фоне приложение в интернет не выходит.","Updates are checked only when you click this button. The app does not access the internet in the background."]
+  about:["О программе","About"], version:["Версия","Version"], checkUpdates:["Проверить обновления","Check for updates"], checkingUpdates:["Проверяем…","Checking..."], currentVersion:["Установлена актуальная версия","You have the latest version"], updateAvailable:["Доступна версия","Version available"], downloadUpdate:["Скачать обновление","Download update"], updateNow:["Обновить","Update"], automaticUpdateChecks:["Проверять обновления при каждом запуске","Check for updates at every launch"], updateCheckFail:["Не удалось проверить обновления.","Could not check for updates."], updatePrivacy:["Проверка занимает несколько килобайт; книги и другие данные не отправляются.","The check uses only a few kilobytes; books and other data are never sent."]
 };
 const ENUM_LABELS={
   roles:{"Главный герой":"Main character","Протагонист":"Protagonist","Антагонист":"Antagonist","Второстепенный персонаж":"Supporting character","Эпизодический персонаж":"Minor character","Наставник":"Mentor","Союзник":"Ally","Соперник":"Rival","Любовная линия":"Love interest","Рассказчик":"Narrator","Резонёр":"Reasoner"},
@@ -738,6 +743,7 @@ let state={ books:[], settings:{
   accent:INITIAL_SETTINGS.accent||DEFAULT_ACCENT,
   lang:INITIAL_SETTINGS.lang==="en"?"en":"ru",
   autoDialogueDash:INITIAL_SETTINGS.autoDialogueDash!==false,
+  automaticUpdateChecks:INITIAL_SETTINGS.automaticUpdateChecks!==false,
   defaultAuthor:String(INITIAL_SETTINGS.defaultAuthor||""),
   previewView:INITIAL_SETTINGS.previewView==="single"?"single":"spread",
   previewZoom:Number(INITIAL_SETTINGS.previewZoom)||1
@@ -961,6 +967,7 @@ async function boot(){
   if(!s.fontSize) s.fontSize=19;
   if(s.lang!=="en") s.lang="ru";
   if(s.autoDialogueDash!==false) s.autoDialogueDash=true;
+  if(s.automaticUpdateChecks!==false) s.automaticUpdateChecks=true;
   if(typeof s.defaultAuthor!=="string"){
     const known=[...new Set(state.books.map(book=>String(book.author||"").trim()).filter(Boolean))];
     s.defaultAuthor=known.length===1?known[0]:"";
@@ -972,6 +979,7 @@ async function boot(){
   editorFontSize=s.fontSize;
   lastSavedPayload=serializedState();
   applyTheme(); render();
+  if(s.automaticUpdateChecks!==false) startBackgroundUpdateCheck();
   if(recoveryOffer){
     const restore=await openConfirm({title:t("recoveryOfferTitle"),message:t("recoveryOfferMsg"),ok:t("recoverLatest"),danger:false});
     if(restore) recoverLatestLibrary();
@@ -1124,6 +1132,12 @@ function applyTheme(){
 function setTheme(t){ state.settings.theme=t; save(); applyTheme(); openSettings(); }
 function setAccent(h){ state.settings.accent=h; save(); applyTheme(); openSettings(); }
 function setAutoDialogueDash(on){ state.settings.autoDialogueDash=!!on; save(); openSettings(); }
+function setAutomaticUpdateChecks(on){
+  state.settings.automaticUpdateChecks=!!on;
+  save();
+  if(on) startBackgroundUpdateCheck();
+  openSettings();
+}
 function setDefaultAuthor(value){ state.settings.defaultAuthor=String(value||"").trimStart(); save(); }
 function toggleLang(){
   setLang(isEn()?"ru":"en");
@@ -2815,13 +2829,14 @@ function renderOverview(main,b){
 /* ============ ВЕРХНЯЯ ПАНЕЛЬ ============ */
 function renderTopbar(){
   const L=document.getElementById("tbLeft"),R=document.getElementById("tbRight");
+  const updateBtn=updateAvailable?`<button class="btn small update-action" onclick="openUpdateDownload()" title="${escapeAttr(`${t("updateAvailable")} ${latestUpdateVersion}`)}">${icon('download',15)} ${t("updateNow")}</button>`:"";
   const langBtn=`<button class="btn small ghost" title="${isEn()?t("switchToRussian"):t("switchToEnglish")}" onclick="toggleLang()">${icon('globe',16)} ${isEn()?"EN":"RU"}</button>`;
   const gear=`<button class="btn icon ghost" title="${t("settings")}" onclick="openSettings()">${icon('gear',18)}</button>`;
   const searchBtn=`<button class="btn icon ghost" title="${t("search")}" onclick="openSearch()">${icon('search',18)}</button>`;
   const trashBtn=`<button class="btn icon ghost" title="${t("trash")}${trashCount()?': '+trashCount():''}" onclick="openTrash()">${icon('trash',18)}</button>`;
   if(route.screen==="home"){
     L.innerHTML="";
-    R.innerHTML=`${searchBtn}${trashBtn}${langBtn}${gear}`;
+    R.innerHTML=`${updateBtn}${searchBtn}${trashBtn}${langBtn}${gear}`;
   } else {
     const b=curBook();
     L.innerHTML=`<button class="btn icon ghost" title="${t("allBooks")}" onclick="goHome()">${icon('back',18)}</button>
@@ -2831,7 +2846,7 @@ function renderTopbar(){
     const stat=route.view==="overview"?"":lore?
       `<span class="stat">${t("inNote")}: ${fmt(loreWordCount(lore))} ${t("words")}</span>`:
       `<span class="stat">${t("inBook")}: ${fmt(w)} ${t("words")} · ≈${fmt(pg)} ${t("pages")}</span>`;
-    R.innerHTML=`${stat}
+    R.innerHTML=`${updateBtn}${stat}
       ${searchBtn}
       ${trashBtn}
       <button class="btn small ghost" onclick="openExport()">${icon('download',16)} ${t("export")}</button>
@@ -2840,14 +2855,43 @@ function renderTopbar(){
 }
 
 /* ============ НАСТРОЙКИ ============ */
-let currentAppVersion="—",latestUpdateUrl="";
+let currentAppVersion="—",latestUpdateUrl="",latestUpdateVersion="",updateAvailable=false,backgroundUpdateStarted=false;
+function applyUpdateResult(result){
+  if(!apiOk(result)) return false;
+  currentAppVersion=String(result.current_version||currentAppVersion);
+  latestUpdateUrl=String(result.url||"");
+  latestUpdateVersion=String(result.latest_version||"");
+  updateAvailable=!!result.update_available&&!!latestUpdateUrl;
+  renderTopbar();
+  return true;
+}
+function syncUpdateSettingsUi(){
+  const version=document.getElementById("appVersionValue"),status=document.getElementById("updateStatus"),download=document.getElementById("downloadUpdateButton");
+  if(version) version.textContent=currentAppVersion;
+  if(updateAvailable){
+    if(status) status.textContent=`${t("updateAvailable")} ${latestUpdateVersion}`.trim();
+    if(download) download.hidden=false;
+  }
+}
+function startBackgroundUpdateCheck(){
+  if(backgroundUpdateStarted||state.settings.automaticUpdateChecks===false) return;
+  backgroundUpdateStarted=true;
+  setTimeout(backgroundCheckForUpdates,2500);
+}
+async function backgroundCheckForUpdates(){
+  const a=api(); if(!a||!a.check_for_updates) return;
+  try{
+    const result=await a.check_for_updates(lang(),false);
+    if(applyUpdateResult(result)) syncUpdateSettingsUi();
+  }catch(e){}
+}
 async function refreshAppInfo(){
   const el=document.getElementById("appVersionValue"),a=api();
   if(!el) return;
   if(a&&a.app_info){
     try{ const info=await a.app_info(); if(apiOk(info)&&info.version) currentAppVersion=String(info.version); }catch(e){}
   }
-  el.textContent=currentAppVersion;
+  el.textContent=currentAppVersion; syncUpdateSettingsUi();
 }
 async function checkForUpdates(){
   const a=api(),button=document.getElementById("checkUpdatesButton"),status=document.getElementById("updateStatus"),download=document.getElementById("downloadUpdateButton");
@@ -2855,14 +2899,11 @@ async function checkForUpdates(){
   button.disabled=true; status.textContent=t("checkingUpdates"); if(download) download.hidden=true;
   try{
     if(!a||!a.check_for_updates) throw new Error(t("updateCheckFail"));
-    const result=await a.check_for_updates(lang());
+    const result=await a.check_for_updates(lang(),true);
     if(!apiOk(result)) throw new Error(apiError(result,t("updateCheckFail")));
-    currentAppVersion=String(result.current_version||currentAppVersion); latestUpdateUrl=String(result.url||"");
-    const versionEl=document.getElementById("appVersionValue"); if(versionEl) versionEl.textContent=currentAppVersion;
-    if(result.update_available){
-      status.textContent=`${t("updateAvailable")} ${result.latest_version||""}`.trim();
-      if(download&&latestUpdateUrl) download.hidden=false;
-    }else status.textContent=t("currentVersion");
+    applyUpdateResult(result);
+    if(updateAvailable) syncUpdateSettingsUi();
+    else status.textContent=t("currentVersion");
   }catch(e){ status.textContent=e&&e.message?e.message:t("updateCheckFail"); }
   finally{ button.disabled=false; }
 }
@@ -2885,6 +2926,9 @@ function openSettings(){
   const dashSeg=`<div class="seg">
     <button class="${s.autoDialogueDash!==false?'on':''}" onclick="setAutoDialogueDash(true)">${t("enabled")}</button>
     <button class="${s.autoDialogueDash===false?'on':''}" onclick="setAutoDialogueDash(false)">${t("disabled")}</button></div>`;
+  const updateSeg=`<div class="seg">
+    <button class="${s.automaticUpdateChecks!==false?'on':''}" onclick="setAutomaticUpdateChecks(true)">${t("enabled")}</button>
+    <button class="${s.automaticUpdateChecks===false?'on':''}" onclick="setAutomaticUpdateChecks(false)">${t("disabled")}</button></div>`;
   const sw=ACCENTS.map(a=>`<div class="swatch ${s.accent===a.h?'on':''}" style="background:${a.h}" title="${labelEnum("accents",a.n)}" onclick="setAccent('${a.h}')"><span class="nm">${labelEnum("accents",a.n)}</span></div>`).join("");
   modal(`<h3>${t("settings")}</h3>
     <div class="mbody" style="padding:0">
@@ -2895,6 +2939,7 @@ function openSettings(){
       <div class="set-section"><div class="sh">${t("theme")}</div>${themeSeg}</div>
       <div class="set-section"><div class="sh">${t("language")}</div>${langSeg}</div>
       <div class="set-section"><div class="sh">${t("autoDash")}</div>${dashSeg}<div class="hint" style="margin-top:10px">${t("autoDashHint")}</div></div>
+      <div class="set-section"><div class="sh">${t("automaticUpdateChecks")}</div>${updateSeg}<div class="hint" style="margin-top:10px">${t("updatePrivacy")}</div></div>
       <div class="set-section"><div class="sh">${t("appColor")}</div><div class="swatches">${sw}</div></div>
       <div class="set-section"><div class="sh">${t("data")}</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -3260,6 +3305,7 @@ async function importBackup(){
   if(!state.settings.accent) state.settings.accent=DEFAULT_ACCENT;
   if(state.settings.lang!=="en") state.settings.lang="ru";
   if(state.settings.autoDialogueDash!==false) state.settings.autoDialogueDash=true;
+  if(state.settings.automaticUpdateChecks!==false) state.settings.automaticUpdateChecks=true;
   if(typeof state.settings.defaultAuthor!=="string"){
     const known=[...new Set(state.books.map(book=>String(book.author||"").trim()).filter(Boolean))];
     state.settings.defaultAuthor=known.length===1?known[0]:"";

@@ -98,6 +98,10 @@ samples only. Do not test with private manuscripts.
 
 ## Installer and update
 
+- [ ] Start twice and confirm each launch performs exactly one delayed background check, with no polling while the app stays open.
+- [ ] Disable automatic update checks in Settings and confirm the next launch makes no background request; confirm the manual check still works.
+- [ ] Simulate a newer release and confirm the bright blue `Обновить` button appears in the top bar and opens only the official GitHub release page.
+- [ ] Confirm a failed background check stays silent and does not delay the main window.
 - [ ] Run `app\build_release.ps1`; confirm syntax checks and all unit tests pass
   before packaging starts.
 - [ ] Confirm the output is named exactly `Knizhnitsa-Setup.exe`.

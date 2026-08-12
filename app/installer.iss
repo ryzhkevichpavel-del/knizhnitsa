@@ -4,7 +4,7 @@
 ; установка для текущего пользователя (без пароля администратора).
 
 #define AppName "Книжница"
-#define AppVersion "1.2.0"
+#define AppVersion "1.3.0"
 #define AppPublisher "Книжница"
 #define AppExe "Книжница.exe"
 #define AppUserModelId "Knizhnitsa.Desktop"
@@ -15,7 +15,7 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher={#AppPublisher}
-VersionInfoVersion=1.2.0.0
+VersionInfoVersion=1.3.0.0
 VersionInfoCompany={#AppPublisher}
 VersionInfoDescription=Установщик приложения «Книжница»
 VersionInfoProductName={#AppName}
